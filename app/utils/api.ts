@@ -71,26 +71,27 @@ export const api = {
       return NextResponse.json(err, { status: 500 });
     }
   },
-  // mergeWishlist: async (
-  //   wishlistToAdd: ProductCardProps[],
-  //   userId: string | undefined
-  // ) => {
-  //   try {
-  //     const response = await fetch(`${API_BASE_URL}/user/${userId}/wishlist`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         wishlistToAdd,
-  //       }),
-  //     });
-  //     console.log("Wishlist response:", response.json());
-  //     return response.json();
-  //   } catch (err) {
-  //     return NextResponse.json(err, { status: 401 });
-  //   }
-  // },
+  mergeWishlist: async (
+    wishlistToAdd: ProductCardProps[],
+    userId: string | undefined
+  ) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user/${userId}/wishlist`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          wishlistToAdd,
+        }),
+      });
+      const res = await response.json();
+      console.log("Wishlist response:", res);
+      return res;
+    } catch (err) {
+      return NextResponse.json(err, { status: 401 });
+    }
+  },
   getCart: async (userId: string) => {
     try {
       const response = await fetch(`${API_BASE_URL}/user/${userId}/cart`, {
