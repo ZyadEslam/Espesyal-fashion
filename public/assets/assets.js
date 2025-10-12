@@ -1,4 +1,5 @@
 import homeModelImage from "../espesyal/Minimalist Muslimah Outfit.jpg";
+import homeModelImage2 from "../espesyal/Selection.jpg";
 import espesialLogo from "../espesyal/متفرغ 2.png";
 import logo from "./logo.svg";
 import search_icon from "./search_icon.svg";
@@ -51,6 +52,7 @@ import product_details_page_apple_earphone_image5 from "./product_details_page_a
 
 export const assets = {
   homeModelImage,
+  homeModelImage2,
   espesialLogo,
   logo,
   search_icon,

@@ -5,9 +5,9 @@ import { assets } from "@/public/assets/assets";
 import { motion } from "framer-motion";
 import PrimaryBtn from "../PrimaryBtn";
 
-const AdvSlider = () => {
+const HeroSection = () => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center min-h-[350px] lg:min-h-[400px]">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center ">
       {/* Text Content - Left Side */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
@@ -59,11 +59,11 @@ const AdvSlider = () => {
         initial={{ opacity: 0, x: 30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative w-full h-[300px] lg:h-[350px] order-first lg:order-last"
+        className="relative w-full h-[300px] lg:h-[550px] order-first lg:order-last"
       >
         <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
           <Image
-            src={assets.girl_with_headphone_image}
+            src={assets.homeModelImage2}
             alt="Fashion Collection - Modern Style"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
@@ -72,11 +72,11 @@ const AdvSlider = () => {
             quality={85}
           />
           {/* Overlay gradient for better text readability if needed */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-gray-50/20" />
+          {/* <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-gray-50/20" /> */}
         </div>
 
         {/* Decorative elements */}
-        <motion.div
+        {/* <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
@@ -87,10 +87,10 @@ const AdvSlider = () => {
           animate={{ scale: 1, rotate: 0 }}
           transition={{ duration: 1, delay: 1, ease: "easeOut" }}
           className="absolute -bottom-4 -left-4 w-32 h-32 bg-secondary/10 rounded-full blur-xl"
-        />
+        /> */}
       </motion.div>
     </div>
   );
 };
 
-export default AdvSlider;
+export default HeroSection;

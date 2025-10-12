@@ -17,7 +17,7 @@ export { default as SubscriptionOffer } from "./homeComponents/SubscriptionOffer
 export const FeaturedProductsList = lazy(() =>
   import("./homeComponents/FeaturedProductsList")
 );
-export const AdvSlider = lazy(() => import("./homeComponents/AdvSlider"));
+export const AdvSlider = lazy(() => import("./homeComponents/HeroSection"));
 export const AdvBar = lazy(() => import("./homeComponents/AdvBar"));
 
 // About Components //////////////

@@ -10,7 +10,7 @@ const SubscriptionOffer = lazy(
 const FeaturedProductsList = lazy(
   () => import("./components/homeComponents/FeaturedProductsList")
 );
-const AdvSlider = lazy(() => import("./components/homeComponents/AdvSlider"));
+const HeroSection = lazy(() => import("./components/homeComponents/HeroSection"));
 
 export default function Home() {
   return (
@@ -25,7 +25,7 @@ export default function Home() {
               </div>
             }
           >
-            <AdvSlider />
+            <HeroSection />
           </Suspense>
         </div>
       </section>
@@ -67,9 +67,12 @@ export default function Home() {
         <div className="container mx-auto px-8 md:px-16 lg:px-24">
           <Suspense
             fallback={
-              <div className="relative w-full h-[250px] overflow-hidden rounded-2xl bg-gray-200 animate-pulse">
+              <div className="relative w-full h-[250px] sm:h-[300px] lg:h-[350px] overflow-hidden rounded-2xl bg-gradient-to-r from-secondary/20 to-primary/20">
                 <div className="flex items-center justify-center h-full">
-                  <LoadingSpinner />
+                  <LoadingSpinner
+                    size="lg"
+                    text="Loading Gaming Experience..."
+                  />
                 </div>
               </div>
             }
