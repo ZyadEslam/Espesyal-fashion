@@ -37,8 +37,8 @@ const SubscriptionOffer = () => {
           Thank You!
         </h1>
         <p className="text-gray-300 text-lg max-w-md mx-auto">
-          You've successfully subscribed to our newsletter. Check your email for
-          the discount code.
+          You&apos;ve successfully subscribed to our newsletter. Check your
+          email for the discount code.
         </p>
       </motion.div>
     );
