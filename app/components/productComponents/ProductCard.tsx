@@ -3,26 +3,30 @@ import React, { lazy, Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import { assets } from "@/public/assets/assets";
 import Link from "next/link";
-import { Heart } from "lucide-react";
+import { Heart, Plus, Minus } from "lucide-react";
 import { ProductCardProps } from "../../types/types";
 import { useWishlist } from "../../hooks/useWishlist";
+import { useCart } from "../../hooks/useCart";
 const Toast = lazy(() => import("../../UI/Toast"));
 const ProductImage = lazy(() => import("./ProductImage"));
 
 const ProductCard = ({ product }: { product: ProductCardProps }) => {
   const [inWishlist, setInWishlist] = useState(false);
+  const [inCart, setInCart] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageSrc, setImageSrc] = useState("");
   const [showToast, setShowToast] = useState({ show: false, message: "" });
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToCart, removeFromCart, isInCart: checkInCart } = useCart();
 
   useEffect(() => {
     setInWishlist(isInWishlist(product._id as string));
+    setInCart(checkInCart(product._id as string));
 
     if (product._id) {
       setImageSrc(`/api/product/image/${product._id}?index=0`);
     }
-  }, [product._id, isInWishlist]);
+  }, [product._id, isInWishlist, checkInCart]);
 
   const handleShowToast = (showState: boolean, message: string) => {
     setShowToast(() => {
@@ -53,6 +57,21 @@ const ProductCard = ({ product }: { product: ProductCardProps }) => {
     }
   };
 
+  const cartHandler = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation when clicking cart button
+    e.stopPropagation();
+
+    if (!inCart) {
+      addToCart(product);
+      handleShowToast(true, "Added to cart");
+      setInCart(true);
+    } else {
+      removeFromCart(product._id as string);
+      handleShowToast(true, "Removed from cart");
+      setInCart(false);
+    }
+  };
+
   const handleImageError = () => {
     console.error("Image failed to load");
     setImageError(true);
@@ -68,7 +87,7 @@ const ProductCard = ({ product }: { product: ProductCardProps }) => {
           className={`w-4 h-4 ${
             inWishlist ? " text-orange " : "text-gray-500"
           } hover:text-orange`}
-          fill={inWishlist ? "#B16F28" : "none"}
+          fill={inWishlist ? "#C4956C" : "none"}
         />
       </div>
       {showToast.show && (
@@ -129,12 +148,23 @@ const ProductCard = ({ product }: { product: ProductCardProps }) => {
             )}
           </span>
         </div>
-        {/* Price and Buy Now */}
+        {/* Price and Cart Button */}
         <div className="flex items-center justify-between mt-2">
           <span className="font-semibold ">${product.price}</span>
-          <span className="text-[12px] border border-gray-200 rounded-full px-4 py-1 text-gray-500">
-            Buy now
-          </span>
+          <button
+            onClick={cartHandler}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
+              inCart
+                ? "bg-orange text-white hover:bg-orange/90"
+                : "bg-gray-100 text-gray-600 hover:bg-orange hover:text-white"
+            }`}
+          >
+            {inCart ? (
+              <Minus className="w-4 h-4" />
+            ) : (
+              <Plus className="w-4 h-4" />
+            )}
+          </button>
         </div>
       </Link>
     </div>

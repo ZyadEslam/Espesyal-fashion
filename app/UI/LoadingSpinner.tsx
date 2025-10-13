@@ -26,7 +26,9 @@ const LoadingSpinner = ({
   };
 
   return (
-    <div className={`flex flex-col justify-center items-center ${className}`}>
+    <div
+      className={`flex flex-col justify-center my-5 items-center ${className}`}
+    >
       <motion.div
         className={`${sizeClasses[size]} relative`}
         animate={{ rotate: 360 }}

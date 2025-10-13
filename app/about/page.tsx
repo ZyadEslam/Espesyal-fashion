@@ -1,29 +1,29 @@
 "use client";
-import { lazy, Suspense } from "react";
-// import {
-//   HeroSection,
-//   MissionSection,
-//   ValuesSection,
-//   TeamSection,
-//   ContactUsSection,
-// } from "../components";
+import { Suspense, lazy } from "react";
+import {
+  // HeroSection,
+  MissionSection,
+  ValuesSection,
+  TeamSection,
+  ContactUsSection,
+} from "../components";
 import LoadingSpinner from "../UI/LoadingSpinner";
 
 const HeroSection = lazy(
   () => import("../components/aboutComponents/HeroSection")
 );
-const MissionSection = lazy(
-  () => import("../components/aboutComponents/MissionSection")
-);
-const ValuesSection = lazy(
-  () => import("../components/aboutComponents/ValuesSection")
-);
-const TeamSection = lazy(
-  () => import("../components/aboutComponents/TeamSection")
-);
-const ContactUsSection = lazy(
-  () => import("../components/aboutComponents/ContactUsSection")
-);
+// const MissionSection = lazy(
+//   () => import("../components/aboutComponents/MissionSection")
+// );
+// const ValuesSection = lazy(
+//   () => import("../components/aboutComponents/ValuesSection")
+// );
+// const TeamSection = lazy(
+//   () => import("../components/aboutComponents/TeamSection")
+// );
+// const ContactUsSection = lazy(
+//   () => import("../components/aboutComponents/ContactUsSection")
+// );
 
 const AboutPage = () => {
   return (
