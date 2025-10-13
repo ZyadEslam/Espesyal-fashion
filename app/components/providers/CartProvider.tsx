@@ -74,7 +74,7 @@ const CartProvider = ({ children }: CartProviderProps) => {
 
   useEffect(() => {
     calculateTotals();
-  }, [cart]);
+  }, [cart, calculateTotals]);
 
   // Manual sync function (call this on signout)
   const manualSync = async () => {
@@ -191,7 +191,7 @@ const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     syncCartWithServer();
-  }, []);
+  }, [session?.user?.id, error]);
 
   const contextValue = useMemo(
     () => ({
@@ -209,7 +209,17 @@ const CartProvider = ({ children }: CartProviderProps) => {
       manualSync,
       removeUserCart,
     }),
-    [cart, totalPrice]
+    [
+      cart,
+      totalPrice,
+      error,
+      calculateTotals,
+      getCartItemCount,
+      isInCart,
+      manualSync,
+      removeUserCart,
+      updateQuantity,
+    ]
   );
 
   return (

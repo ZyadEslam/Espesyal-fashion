@@ -5,7 +5,7 @@ import Image from "next/image";
 import Toast from "../../UI/Toast";
 import { useWishlist } from "@/app/hooks/useWishlist";
 import { useCart } from "@/app/hooks/useCart";
-import { Heart, ShoppingCart, Trash2, ExternalLink } from "lucide-react";
+import { ShoppingCart, Trash2, ExternalLink } from "lucide-react";
 
 interface WishlistTableProps {
   product: ProductCardProps;

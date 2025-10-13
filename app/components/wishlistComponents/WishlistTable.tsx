@@ -29,7 +29,7 @@ const WishlistTable = memo(() => {
           Your wishlist is empty
         </h3>
         <p className="text-gray-600 mb-6">
-          Save items you love to your wishlist and they'll appear here.
+          Save items you love to your wishlist and they&apos;ll appear here.
         </p>
         <a
           href="/shop"

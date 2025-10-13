@@ -161,7 +161,7 @@ const WishlistProvider = ({ children }: WishlistProviderProps) => {
       }
     };
     syncWishlistWithServer();
-  }, []);
+  }, [session?.user?.id]);
 
   const contextValue = useMemo(
     () => ({
@@ -175,7 +175,14 @@ const WishlistProvider = ({ children }: WishlistProviderProps) => {
       removeUserWishlist,
       getWishlistItemCount,
     }),
-    [wishlist]
+    [
+      wishlist,
+      getWishlistItemCount,
+      isInWishlist,
+      manualSync,
+      moveToCart,
+      removeUserWishlist,
+    ]
   );
 
   return (
