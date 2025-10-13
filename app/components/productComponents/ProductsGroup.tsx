@@ -38,7 +38,7 @@ const ProductsGroup = ({
 
   return (
     <section className={`${customClassName}`}>
-      <div className="flex flex-wrap md:gap-4 gap-0 justify-between mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-6">
         {productsToRender.map((product: ProductCardProps) => (
           <ProductCard key={product._id} product={product} />
         ))}

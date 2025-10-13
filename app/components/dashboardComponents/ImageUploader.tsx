@@ -52,6 +52,7 @@ const ImageUploaderComponent: React.FC<ImageUploaderProps> = React.memo(
                     X
                   </span>
                 )}
+
                 <Image
                   src={images[imageKey as keyof ImageState]}
                   alt={`Product image ${index + 1}`}
