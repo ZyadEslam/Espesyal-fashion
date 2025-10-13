@@ -4,7 +4,7 @@ import { TableRowProps } from "../../types/types";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/app/hooks/useCart";
-import { Minus, Plus, Trash2, ExternalLink } from "lucide-react";
+import { Minus, Plus, Trash2 } from "lucide-react";
 
 const CartTableRow = memo(({ product }: TableRowProps) => {
   const [productPrice, setProductPrice] = useState(product.price);
