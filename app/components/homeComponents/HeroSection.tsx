@@ -63,11 +63,11 @@ const HeroSection = () => {
       >
         <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
           <Image
-            src={assets.homeModelImage2}
+            src={assets.girl6}
             alt="Fashion Collection - Modern Style"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover object-center"
+            className="object-cover object-top"
             priority
             quality={85}
           />

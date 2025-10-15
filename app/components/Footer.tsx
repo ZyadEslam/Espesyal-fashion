@@ -11,37 +11,158 @@ const Footer = () => {
   return (
     <>
       {pathname !== "/dashboard" && (
-        <footer className="mt-18">
-          <div className="flex justify-between gap-0 text-[14px] sm:gap-8 md:flex-row sm:flex-col px-[8.5%]">
-            <div className="md:w-[42%] sm:w-[90%] flex flex-col gap-4">
-              <Image src={assets.logo} alt="logo"  />
-              <p className="text-gray-500">
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has been the industry&apos;s standard
-                dummy text ever since the 1500s, when an unknown printer took a
-                galley of type and scrambled it to make a type specimen book.
-              </p>
+        <footer className="bg-gradient-to-b from-secondaryLight to-secondary mt-20">
+          <div className="container mx-auto px-4 py-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+              {/* Brand Section */}
+              <div className="lg:col-span-2 space-y-6">
+                <Link href="/" className="inline-block group">
+                  <Image
+                    src={assets.espesialLogo}
+                    alt="Espesyal Shop Logo"
+                    width={200}
+                    height={60}
+                    className="object-contain h-12 lg:h-14 w-auto transition-transform duration-300 group-hover:scale-105 filter brightness-110 contrast-110"
+                    priority
+                    quality={95}
+                  />
+                </Link>
+                <p className="text-foreground/80 leading-relaxed text-base max-w-md">
+                  Discover our curated collection of timeless fashion pieces,
+                  designed for sophistication and comfort that lasts. Elevate
+                  your everyday style with Espesyal Shop&apos;s premium
+                  selection.
+                </p>
+                <div className="flex space-x-4">
+                  <a
+                    href="#"
+                    className="text-gray-600 hover:text-orange transition-colors duration-300"
+                  >
+                    <Image
+                      src={assets.facebook_icon}
+                      alt="Facebook"
+                      width={24}
+                      height={24}
+                    />
+                  </a>
+                  <a
+                    href="#"
+                    className="text-gray-600 hover:text-orange transition-colors duration-300"
+                  >
+                    <Image
+                      src={assets.instagram_icon}
+                      alt="Instagram"
+                      width={24}
+                      height={24}
+                    />
+                  </a>
+                  <a
+                    href="#"
+                    className="text-gray-600 hover:text-orange transition-colors duration-300"
+                  >
+                    <Image
+                      src={assets.twitter_icon}
+                      alt="Twitter"
+                      width={24}
+                      height={24}
+                    />
+                  </a>
+                </div>
+              </div>
+
+              {/* Company Links */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Company
+                </h3>
+                <ul className="space-y-3">
+                  <li>
+                    <Link
+                      href="/"
+                      className="text-foreground/70 hover:text-orange transition-colors duration-300"
+                    >
+                      Home
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/about"
+                      className="text-foreground/70 hover:text-orange transition-colors duration-300"
+                    >
+                      About us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/contact"
+                      className="text-foreground/70 hover:text-orange transition-colors duration-300"
+                    >
+                      Contact us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/shop"
+                      className="text-foreground/70 hover:text-orange transition-colors duration-300"
+                    >
+                      Shop
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Contact Info */}
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Get in touch
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-5 h-5 bg-orange/20 rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-orange rounded-full"></div>
+                    </div>
+                    <span className="text-foreground/70">+201040431147</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-5 h-5 bg-orange/20 rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-orange rounded-full"></div>
+                    </div>
+                    <span className="text-foreground/70">+201144094269</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-5 h-5 bg-orange/20 rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 bg-orange rounded-full"></div>
+                    </div>
+                    <span className="text-foreground/70">
+                      zyadelbehiry@gmail.com
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col gap-4">
-              <h3 className="normal-black">Company</h3>
-              <ul className="footer-listed-items">
-                <Link href="/">Home</Link>
-                <Link href="/about">About us</Link>
-                <Link href="/contact">Contact us</Link>
-                <Link href="/home">Privacy Policy</Link>
-              </ul>
+
+            {/* Bottom Section */}
+            <div className="border-t border-gray-300/50 mt-12 pt-8">
+              <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <p className="text-foreground/60 text-sm">
+                  Copyright 2025 © Zyad Elbehiry All Right Reserved.
+                </p>
+                <div className="flex space-x-6 text-sm">
+                  <Link
+                    href="#"
+                    className="text-foreground/60 hover:text-orange transition-colors duration-300"
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link
+                    href="#"
+                    className="text-foreground/60 hover:text-orange transition-colors duration-300"
+                  >
+                    Terms of Service
+                  </Link>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col gap-4">
-              <h3 className="normal-black">Get in touch</h3>
-              <ul className="footer-listed-items">
-                <li>+201040431147</li>
-                <li>+201144094269</li>
-                <li>Contact@ zyadelbehiry@gmail.com</li>
-              </ul>
-            </div>
-          </div>
-          <div className="text-gray-700 text-[13px] text-center border-t border-gray-300 py-4 mt-10">
-            Copyright 2025 © Zyad Elbehiry All Right Reserved.
           </div>
         </footer>
       )}

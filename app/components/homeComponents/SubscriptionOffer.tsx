@@ -1,48 +1,32 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
-import { Mail, CheckCircle } from "lucide-react";
+import { Instagram, Facebook, Twitter } from "lucide-react";
 
 const SubscriptionOffer = () => {
-  const [email, setEmail] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!email) return;
-
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitted(true);
-      setIsLoading(false);
-      setEmail("");
-    }, 1500);
-  };
-
-  if (isSubmitted) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="text-center"
-      >
-        <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-white" />
-          </div>
-        </div>
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
-          Thank You!
-        </h1>
-        <p className="text-gray-300 text-lg max-w-md mx-auto">
-          You&apos;ve successfully subscribed to our newsletter. Check your
-          email for the discount code.
-        </p>
-      </motion.div>
-    );
-  }
+  const socialLinks = [
+    {
+      name: "Instagram",
+      icon: Instagram,
+      href: "#",
+      followers: "25K+",
+      description: "Daily Fashion Inspiration",
+    },
+    {
+      name: "Facebook",
+      icon: Facebook,
+      href: "#",
+      followers: "15K+",
+      description: "Community & Updates",
+    },
+    {
+      name: "Twitter",
+      icon: Twitter,
+      href: "#",
+      followers: "8K+",
+      description: "Latest News & Trends",
+    },
+  ];
 
   return (
     <motion.section
@@ -50,91 +34,114 @@ const SubscriptionOffer = () => {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
       viewport={{ once: true }}
-      className="text-center px-4"
+      className="py-16 px-4"
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto text-center">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
-          className="mb-8"
+          className="mb-12"
         >
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
-            Subscribe Now & Get{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-              20% Off
-            </span>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            Follow Us for <span className="text-orange">Exclusive Offers</span>
           </h1>
-          <p className="text-gray-300 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            Join our community and be the first to know about exclusive deals,
-            new arrivals, and special offers. Plus, get instant access to your
-            discount!
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            Join our social media community and be the first to discover
+            exclusive products, special discounts, and behind-the-scenes
+            content.
           </p>
         </motion.div>
 
-        <motion.form
+        {/* Social Media Cards */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
-          onSubmit={handleSubmit}
-          className="max-w-lg mx-auto"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
         >
-          <div className="relative">
-            <div className="flex flex-col sm:flex-row gap-4 bg-white/10 backdrop-blur-sm rounded-2xl p-2 border border-white/20">
-              <div className="relative flex-1">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-transparent text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-xl"
-                  required
-                />
+          {socialLinks.map((social) => (
+            <motion.a
+              key={social.name}
+              href={social.href}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-orange/20"
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-orange/10 transition-colors duration-300">
+                  <social.icon className="w-8 h-8 text-gray-600 group-hover:text-orange transition-colors duration-300" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {social.name}
+                </h3>
+                <div className="text-2xl font-bold text-orange mb-2">
+                  {social.followers}
+                </div>
+                <p className="text-gray-600 text-sm">{social.description}</p>
               </div>
-              <motion.button
-                type="submit"
-                disabled={isLoading || !email}
-                className="px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  </div>
-                ) : (
-                  "Subscribe"
-                )}
-              </motion.button>
-            </div>
-          </div>
+            </motion.a>
+          ))}
+        </motion.div>
 
-          <p className="text-gray-400 text-sm mt-4">
-            No spam, unsubscribe at any time. We respect your privacy.
-          </p>
-        </motion.form>
-
+        {/* Benefits */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.6 }}
           viewport={{ once: true }}
-          className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center"
+          className="grid sm:grid-cols-1 md:grid-cols-3 gap-8 text-center"
         >
-          <div className="text-white">
-            <div className="text-2xl font-bold text-primary mb-2">10K+</div>
-            <div className="text-gray-300 text-sm">Happy Subscribers</div>
+          <div className="text-gray-900">
+            <div className="text-2xl font-bold text-orange mb-2">
+              Exclusive Access
+            </div>
+            <div className="text-gray-600 text-sm">
+              First access to new collections
+            </div>
           </div>
-          <div className="text-white">
-            <div className="text-2xl font-bold text-primary mb-2">24/7</div>
-            <div className="text-gray-300 text-sm">Customer Support</div>
+          <div className="text-gray-900">
+            <div className="text-2xl font-bold text-orange mb-2">
+              Special Discounts
+            </div>
+            <div className="text-gray-600 text-sm">
+              Up to 40% off for followers
+            </div>
           </div>
-          <div className="text-white">
-            <div className="text-2xl font-bold text-primary mb-2">100%</div>
-            <div className="text-gray-300 text-sm">Satisfaction Guaranteed</div>
+          <div className="text-gray-900">
+            <div className="text-2xl font-bold text-orange mb-2">Community</div>
+            <div className="text-gray-600 text-sm">
+              Join our fashion community
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Call to Action */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          viewport={{ once: true }}
+          className="mt-12"
+        >
+          <p className="text-gray-600 text-sm mb-6">
+            Follow us now and never miss an exclusive offer!
+          </p>
+          <div className="flex justify-center space-x-4">
+            {socialLinks.map((social) => (
+              <motion.a
+                key={social.name}
+                href={social.href}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-orange hover:text-white transition-all duration-300"
+              >
+                <social.icon className="w-5 h-5 text-gray-600 hover:text-white transition-colors duration-300" />
+              </motion.a>
+            ))}
           </div>
         </motion.div>
       </div>

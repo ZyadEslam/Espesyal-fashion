@@ -1,5 +1,15 @@
 import homeModelImage from "../espesyal/Minimalist Muslimah Outfit.jpg";
 import homeModelImage2 from "../espesyal/Selection.jpg";
+import girl1 from "../espesyal/product1.jpg";
+import girl2 from "../espesyal/product2.jpg";
+import girl3 from "../espesyal/product3.jpg";
+import girl4 from "../espesyal/product4.jpg";
+import girl5 from "../espesyal/product5.jpg";
+import girl6 from "../espesyal/product6.jpg";
+import girl7 from "../espesyal/product7.jpg";
+import girl8 from "../espesyal/product8.jpg";
+import girl9 from "../espesyal/product9.jpg";
+import girl10 from "../espesyal/product10.jpg";
 import espesialLogo from "../espesyal/متفرغ 2.png";
 import logo from "./logo.svg";
 import search_icon from "./search_icon.svg";
@@ -53,6 +63,16 @@ import product_details_page_apple_earphone_image5 from "./product_details_page_a
 export const assets = {
   homeModelImage,
   homeModelImage2,
+  girl1,
+  girl2,
+  girl3,
+  girl4,
+  girl5,
+  girl6,
+  girl7,
+  girl8,
+  girl9,
+  girl10,
   espesialLogo,
   logo,
   search_icon,

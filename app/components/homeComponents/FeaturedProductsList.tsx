@@ -14,19 +14,19 @@ const featuredProducts: FeaturedProductsProps[] = [
     id: "Featured Product 1",
     title: "Unparalleled Sound",
     description: "Experience crystal-clear audio with premium headphones.",
-    imageSrc: assets.girl_with_headphone_image,
+    imageSrc: assets.girl1,
   },
   {
     id: "Featured Product 2",
     title: "Stay Connected",
     description: "Compact and stylish earphones for every occasion.",
-    imageSrc: assets.girl_with_earphone_image,
+    imageSrc: assets.girl3,
   },
   {
     id: "Featured Product 3",
     title: "Power in Every Pixel",
     description: "Shop the latest laptops for work, gaming, and more.",
-    imageSrc: assets.boy_with_laptop_image,
+    imageSrc: assets.girl8,
   },
 ];
 const FeaturedProductsList = () => {
