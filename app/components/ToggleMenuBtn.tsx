@@ -9,7 +9,7 @@ const ToggleMenuBtn = ({
 }) => {
   return (
     <button
-      className="md:hidden sm:order-3 md:order-auto flex flex-col justify-center items-center w-8 h-8 space-y-1.5 z-50"
+      className="lg:hidden sm:order-3 md:order-auto flex flex-col justify-center items-center w-8 h-8 space-y-1.5 z-50"
       onClick={toggleMenu}
       suppressHydrationWarning
     >
