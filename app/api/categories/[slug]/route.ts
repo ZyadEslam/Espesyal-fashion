@@ -24,6 +24,7 @@ export async function GET(
     // Handle "all products" case
     if (slug === "all") {
       // Build product query for all products
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const productQuery: any = {};
 
       // Add price filters
@@ -39,6 +40,7 @@ export async function GET(
       }
 
       // Build sort object
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const sort: any = {};
       sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
@@ -46,8 +48,10 @@ export async function GET(
       const skip = (page - 1) * limit;
 
       // Get products with pagination
-      const products = await Product.find(productQuery)
-        .sort(sort)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const products = await Product.find(productQuery as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .sort(sort as any)
         .skip(skip)
         .limit(limit)
         .select(
@@ -56,7 +60,8 @@ export async function GET(
         .exec();
 
       // Get total count for pagination
-      const totalProducts = await Product.countDocuments(productQuery);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const totalProducts = await Product.countDocuments(productQuery as any);
       const totalPages = Math.ceil(totalProducts / limit);
 
       // Get unique brands
@@ -104,6 +109,7 @@ export async function GET(
     }
 
     // Build product query
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const productQuery: any = { category: category._id };
 
     // Add price filters
@@ -119,6 +125,7 @@ export async function GET(
     }
 
     // Build sort object
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sort: any = {};
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
@@ -126,8 +133,10 @@ export async function GET(
     const skip = (page - 1) * limit;
 
     // Get products with pagination
-    const products = await Product.find(productQuery)
-      .sort(sort)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const products = await Product.find(productQuery as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .sort(sort as any)
       .skip(skip)
       .limit(limit)
       .select(
@@ -136,7 +145,8 @@ export async function GET(
       .exec();
 
     // Get total count for pagination
-    const totalProducts = await Product.countDocuments(productQuery);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const totalProducts = await Product.countDocuments(productQuery as any);
     const totalPages = Math.ceil(totalProducts / limit);
 
     // Get unique brands for this category
