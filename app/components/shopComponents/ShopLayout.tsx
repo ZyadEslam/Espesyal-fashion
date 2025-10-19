@@ -43,7 +43,7 @@ const ShopLayout = memo(
       pagination,
       filters: availableFilters,
     } = useProductsByCategory({
-      categorySlug: selectedCategory,
+      categorySlug: selectedCategory || undefined,
       page: currentPage,
       limit: 12,
       ...filters,
@@ -54,6 +54,7 @@ const ShopLayout = memo(
       setCurrentPage(1); // Reset to first page when changing category
     }, []);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleFiltersChange = useCallback((newFilters: any) => {
       setFilters(newFilters);
       setCurrentPage(1); // Reset to first page when changing filters
