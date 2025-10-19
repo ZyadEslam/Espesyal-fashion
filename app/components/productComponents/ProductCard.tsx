@@ -7,10 +7,10 @@ import React, {
   memo,
   useCallback,
 } from "react";
-import Image from "next/image";
-import { assets } from "@/public/assets/assets";
+// import Image from "next/image";
+// import { assets } from "@/public/assets/assets";
 import Link from "next/link";
-import { Heart, Plus, Minus } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import { ProductCardProps } from "../../types/types";
 import { useWishlist } from "../../hooks/useWishlist";
 import { useCart } from "../../hooks/useCart";
@@ -158,38 +158,6 @@ const ProductCard = memo(({ product }: { product: ProductCardProps }) => {
             {product.description}
           </p>
 
-          {/* Rating */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.floor(product.rating) }).map(
-                (_, index) => (
-                  <Image
-                    key={`star-filled-${index}`}
-                    src={assets.star_icon}
-                    width={12}
-                    height={12}
-                    alt="star"
-                    className="transition-transform duration-200 hover:scale-110"
-                  />
-                )
-              )}
-              {Array.from({ length: Math.ceil(5 - product.rating) }).map(
-                (_, index) => (
-                  <Image
-                    key={`star-empty-${index}`}
-                    src={assets.star_dull_icon}
-                    width={12}
-                    height={12}
-                    alt="star"
-                  />
-                )
-              )}
-            </div>
-            <span className="text-xs text-gray-500 font-medium">
-              {product.rating}
-            </span>
-          </div>
-
           {/* Price and Cart Button */}
           <div className="flex items-center justify-between pt-2">
             <div className="flex flex-col">
@@ -204,15 +172,17 @@ const ProductCard = memo(({ product }: { product: ProductCardProps }) => {
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-105 active:scale-95 ${
                 inCart
                   ? "bg-orange text-white shadow-md hover:shadow-lg"
-                  : "bg-gray-100 text-gray-600 hover:bg-orange hover:text-white hover:shadow-md"
+                  : "bg-gray-100 text-gray-600 hover:bg-orange/10 hover:text-orange hover:shadow-md"
               }`}
               aria-label={inCart ? "Remove from cart" : "Add to cart"}
             >
-              {inCart ? (
-                <Minus className="w-4 h-4" />
-              ) : (
-                <Plus className="w-4 h-4" />
-              )}
+              {
+                <ShoppingCart
+                  className={`w-4 h-4 ${
+                    inCart ? "text-white" : "text-gray-500"
+                  }`}
+                />
+              }
             </button>
           </div>
         </div>

@@ -25,8 +25,13 @@ const productSchema = new mongoose.Schema({
     required: [false, "Product discount is not required"],
   },
   category: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
     required: [true, "Product category is required"],
+  },
+  categoryName: {
+    type: String,
+    required: [true, "Product category name is required"],
   },
   brand: {
     type: String,

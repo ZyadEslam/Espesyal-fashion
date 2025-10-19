@@ -7,12 +7,18 @@ import { AuthButtons, ToggleMenuBtn } from "./";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { Heart, ShoppingCart, User } from "lucide-react";
+import { useCart } from "@/app/hooks/useCart";
+import { useWishlist } from "@/app/hooks/useWishlist";
 
 const UserNav = memo(() => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { data: session } = useSession();
+  const { getCartItemCount } = useCart();
+  const cartItemCount = getCartItemCount();
+  const { getWishlistItemCount } = useWishlist();
+  const wishlistItemCount = getWishlistItemCount();
 
   const toggleMenu = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
@@ -126,7 +132,7 @@ const UserNav = memo(() => {
                   >
                     <Heart className="w-5 h-5" />
                     <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full text-xs text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      0
+                      {wishlistItemCount}
                     </span>
                   </Link>
                   <Link
@@ -135,7 +141,7 @@ const UserNav = memo(() => {
                   >
                     <ShoppingCart className="w-5 h-5" />
                     <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full text-xs text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      0
+                      {cartItemCount}
                     </span>
                   </Link>
 
@@ -172,7 +178,7 @@ const UserNav = memo(() => {
                 >
                   <ShoppingCart className="w-5 h-5" />
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full text-xs text-white flex items-center justify-center">
-                    0
+                    {cartItemCount}
                   </span>
                 </Link>
 

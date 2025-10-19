@@ -4,6 +4,12 @@ const nextConfig = {
   images: {
     domains: ["localhost"],
     unoptimized: true,
+    localPatterns: [
+      {
+        pathname: "/api/product/image/**",
+        search: "**",
+      },
+    ],
     remotePatterns: [
       {
         protocol: "http",

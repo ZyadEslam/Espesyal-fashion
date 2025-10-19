@@ -7,7 +7,7 @@ import { useCart } from "../hooks/useCart";
 import { useWishlist } from "../hooks/useWishlist";
 
 export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const { manualSync: syncCart } = useCart();
   const { manualSync: syncWishlist } = useWishlist();
   const handleSignIn = async () => {
@@ -20,23 +20,21 @@ export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
       console.log("✅ SignIn result:", result);
     } catch (error) {
       console.error("❌ SignIn error:", error);
-    } finally {
-    }
+    } 
   };
   const handleSignout = async () => {
     console.log("🚪 Sign out button clicked");
     try {
       await syncCart();
       await syncWishlist();
-      console.log("🔄 Cart and Wishlist synced successfully");
       await signOut({ callbackUrl: "/" });
     } catch (error) {
       console.error("❌ SignOut error:", error);
     }
   };
 
-  console.log("🔍 Session status:", status);
-  console.log("👤 Session data:", session);
+  // console.log("🔍 Session status:", status);
+  // console.log("👤 Session data:", session);
 
   if (session?.user) {
     if (screen.screen === "mobile") {

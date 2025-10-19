@@ -9,11 +9,26 @@ export interface ProductCardProps {
   oldPrice?: number;
   discount?: string;
   category?: string;
+  categoryName?: string;
   brand?: string;
   color?: string;
   quantity?: number;
   quantityInCart?: number;
   imgSrc: StaticImageData[];
+}
+
+export interface CategoryProps {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  image?: string;
+  isActive: boolean;
+  isFeatured: boolean;
+  sortOrder: number;
+  products: ProductCardProps[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface TableRowProps {
