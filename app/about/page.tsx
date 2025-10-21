@@ -1,58 +1,57 @@
-"use client";
-import { Suspense, lazy } from "react";
+import { Metadata } from "next";
+// import { Suspense, lazy } from "react";
 import {
-  // HeroSection,
+  HeroSection,
   MissionSection,
   ValuesSection,
   TeamSection,
   ContactUsSection,
 } from "../components";
-import LoadingSpinner from "../UI/LoadingSpinner";
+// import LoadingSpinner from "../UI/LoadingSpinner";
+import { generateMetadata as generateSEOMetadata } from "../utils/seo";
+import { Breadcrumb } from "../components/seo/SEOComponents";
 
-const HeroSection = lazy(
-  () => import("../components/aboutComponents/HeroSection")
-);
-// const MissionSection = lazy(
-//   () => import("../components/aboutComponents/MissionSection")
-// );
-// const ValuesSection = lazy(
-//   () => import("../components/aboutComponents/ValuesSection")
-// );
-// const TeamSection = lazy(
-//   () => import("../components/aboutComponents/TeamSection")
-// );
-// const ContactUsSection = lazy(
-//   () => import("../components/aboutComponents/ContactUsSection")
-// );
+export const metadata: Metadata = generateSEOMetadata({
+  title: "About Us - Espesyal Shop",
+  description:
+    "Learn about Espesyal Shop's mission, values, and team. We're committed to providing premium quality products and exceptional customer service.",
+  keywords: [
+    "about us",
+    "company",
+    "mission",
+    "values",
+    "team",
+    "story",
+    "e-commerce",
+    "premium products",
+  ],
+  canonical: "/about",
+});
 
 const AboutPage = () => {
+  const breadcrumbItems = [
+    { name: "Home", url: "/" },
+    { name: "About Us", url: "/about", current: true },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
+      <Breadcrumb items={breadcrumbItems} />
 
-      <Suspense fallback={<LoadingSpinner />}>
-        <HeroSection />
-      </Suspense>
+      {/* Hero Section */}
+      <HeroSection />
 
       {/* Mission Section */}
-      <Suspense fallback={<LoadingSpinner />}>
-        <MissionSection />
-      </Suspense>
+      <MissionSection />
 
       {/* Values Section */}
-      <Suspense fallback={<LoadingSpinner />}>
-        <ValuesSection />
-      </Suspense>
+      <ValuesSection />
 
       {/* Team Section */}
-      <Suspense fallback={<LoadingSpinner />}>
-        <TeamSection />
-      </Suspense>
+      <TeamSection />
 
       {/* Contact CTA */}
-      <Suspense fallback={<LoadingSpinner />}>
-        <ContactUsSection />
-      </Suspense>
+      <ContactUsSection />
     </div>
   );
 };

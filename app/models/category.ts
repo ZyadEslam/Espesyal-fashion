@@ -18,10 +18,6 @@ const categorySchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  image: {
-    type: String,
-    required: false,
-  },
   isActive: {
     type: Boolean,
     default: true,
@@ -56,7 +52,6 @@ categorySchema.pre("save", function (next) {
   next();
 });
 
-// Create indexes for better performance
 categorySchema.index({ slug: 1 });
 categorySchema.index({ isActive: 1, isFeatured: 1 });
 categorySchema.index({ sortOrder: 1 });

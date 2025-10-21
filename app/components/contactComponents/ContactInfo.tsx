@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "framer-motion";
 import React from "react";
 import LocationMap from "./LocationMap";
@@ -90,7 +91,7 @@ const ContactInfo = () => {
 
       {/* Map */}
       <div className="h-[300px] rounded-lg overflow-hidden">
-          <LocationMap />
+        <LocationMap />
       </div>
     </motion.div>
   );

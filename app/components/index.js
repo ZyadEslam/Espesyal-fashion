@@ -23,23 +23,14 @@ export const AdvBar = lazy(() => import("./homeComponents/AdvBar"));
 // About Components //////////////
 export { default as HeroSection } from "../components/aboutComponents/HeroSection";
 export { default as MissionSection } from "../components/aboutComponents/MissionSection";
-
-export const ValuesSection = lazy(() =>
-  import("../components/aboutComponents/ValuesSection")
-);
-export const TeamSection = lazy(() =>
-  import("../components/aboutComponents/TeamSection")
-);
-export const ContactUsSection = lazy(() =>
-  import("../components/aboutComponents/ContactUsSection")
-);
+export { default as ValuesSection } from "../components/aboutComponents/ValuesSection";
+export { default as TeamSection } from "../components/aboutComponents/TeamSection";
+export { default as ContactUsSection } from "../components/aboutComponents/ContactUsSection";
 
 //Contact Components //////////////////
 export { default as ContactHeroSection } from "./contactComponents/ContactHeroSection";
 export { default as ContactForm } from "./contactComponents/ContactForm";
-export const ContactInfo = lazy(() =>
-  import("./contactComponents/ContactInfo")
-);
+export { default as ContactInfo } from "./contactComponents/ContactInfo";
 
 // Wishlist Components ///////////////////
 export const WishlistTable = lazy(() =>
