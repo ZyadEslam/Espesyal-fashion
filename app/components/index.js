@@ -14,6 +14,8 @@ export { default as DashboardSideNav } from "./dashboardComponents/DashboardSide
 // Home Components ///////////////
 export { default as FeaturedProductCard } from "./homeComponents/FeaturedProductCard";
 export { default as SubscriptionOffer } from "./homeComponents/SubscriptionOffer";
+export { default as BestSellersSection } from "./homeComponents/BestSellersSection";
+export { default as NewCollectionsSection } from "./homeComponents/NewCollectionsSection";
 export const FeaturedProductsList = lazy(() =>
   import("./homeComponents/FeaturedProductsList")
 );

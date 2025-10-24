@@ -7,88 +7,125 @@ import PrimaryBtn from "../PrimaryBtn";
 
 const HeroSection = () => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center ">
-      {/* Text Content - Left Side */}
-      <motion.div
-        initial={{ opacity: 0, x: -30 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="flex flex-col justify-center space-y-6 lg:pr-8"
-      >
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight"
-        >
-          Elevate Your{" "}
-          <span className=" bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-            Everyday Style
-          </span>
-        </motion.h1>
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-background via-secondaryLight to-background shadow-lg border border-secondary">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/20 to-transparent"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-primary/30 to-transparent rounded-full blur-3xl"></div>
+      </div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-gray-600 text-base md:text-lg leading-relaxed max-w-lg"
-        >
-          Discover our curated collection of timeless fashion pieces, designed
-          for sophistication and comfort that lasts.
-        </motion.p>
-
+      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center p-6 lg:p-8">
+        {/* Text Content - Left Side */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="flex items-center space-x-4"
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="flex flex-col justify-center space-y-6 text-foreground"
         >
-          <PrimaryBtn
-            text="Shop Now"
-            href="/shop"
-            customClass="px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-          />
-          <button className="text-gray-600 hover:text-primary transition-colors duration-300 font-medium">
-            Learn More →
-          </button>
+          {/* Limited Time Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="inline-flex items-center"
+          >
+            <span className="bg-orange/10 text-orange px-4 py-2 rounded-full text-sm font-semibold border border-orange/20">
+              ✨ Special Offer
+            </span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
+          >
+            Elevate Your <span className="text-orange">Style Game</span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="text-foreground/70 text-base md:text-lg leading-relaxed max-w-lg"
+          >
+            Discover our exclusive collection of premium fashion pieces with up
+            to <span className="text-orange font-bold">30% OFF</span>. Limited
+            time offer - don&apos;t miss out!
+          </motion.p>
+
+         
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="flex lg:flex-row sm:flex-col sm:gap-8 items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4"
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <PrimaryBtn
+                text="Shop Now - Save 30%"
+                href="/shop"
+                customClass="px-6 py-3 rounded-full text-base font-semibold shadow-md hover:shadow-lg transition-all duration-300 bg-orange text-white hover:bg-primary border border-orange hover:border-primary"
+              />
+            </motion.div>
+            <button className="text-foreground/70 hover:text-orange transition-colors duration-300 font-medium text-base">
+              View Collection →
+            </button>
+          </motion.div>
+
+       
         </motion.div>
-      </motion.div>
 
-      {/* Image - Right Side */}
-      <motion.div
-        initial={{ opacity: 0, x: 30 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative w-full h-[300px] lg:h-[550px] order-first lg:order-last"
-      >
-        <div className="relative w-full h-full rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-          <Image
-            src={assets.girl6}
-            alt="Fashion Collection - Modern Style"
-            fill
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover object-top"
-            priority
-            quality={85}
-          />
-          {/* Overlay gradient for better text readability if needed */}
-          {/* <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-gray-50/20" /> */}
-        </div>
-
-        {/* Decorative elements */}
-        {/* <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
-          className="absolute -top-4 -right-4 w-24 h-24 bg-primary/10 rounded-full blur-xl"
-        />
+        {/* Image - Right Side */}
         <motion.div
-          initial={{ scale: 0, rotate: 180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ duration: 1, delay: 1, ease: "easeOut" }}
-          className="absolute -bottom-4 -left-4 w-32 h-32 bg-secondary/10 rounded-full blur-xl"
-        /> */}
-      </motion.div>
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative w-full h-[350px] lg:h-[500px] order-first lg:order-last"
+        >
+          <div className="relative w-full h-full rounded-2xl overflow-hidden">
+            <Image
+              src={assets.girl8}
+              alt="Fashion Collection - Special Offer"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover object-center"
+              priority
+              quality={90}
+            />
+            {/* Overlay for better contrast */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-background/20"></div>
+          </div>
+
+          {/* Simple Sale Badge */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="absolute top-4 right-4 bg-orange text-white px-3 py-2 rounded-lg shadow-md font-semibold text-sm"
+          >
+            -30% OFF
+          </motion.div>
+
+          {/* Subtle Floating Elements */}
+          <motion.div
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-8 left-8 w-3 h-3 bg-orange/40 rounded-full"
+          />
+          <motion.div
+            animate={{ y: [0, 5, 0] }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+            className="absolute bottom-8 right-8 w-2 h-2 bg-primary/40 rounded-full"
+          />
+        </motion.div>
+      </div>
     </div>
   );
 };

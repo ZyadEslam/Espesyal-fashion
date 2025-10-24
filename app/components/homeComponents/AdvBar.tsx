@@ -7,22 +7,13 @@ import { motion } from "framer-motion";
 import LoadingSpinner from "../../UI/LoadingSpinner";
 
 const AdvBar = () => {
-  // const [isMobile, setIsMobile] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // const handleResize = () => {
-    //   setIsMobile(window.innerWidth < 768);
-    // };
+
 
     setIsMounted(true);
-    // handleResize();
-
-    // if (typeof window !== "undefined") {
-    //   window.addEventListener("resize", handleResize);
-    //   return () => window.removeEventListener("resize", handleResize);
-    //   //   return () => window.removeEventListener("resize", handleResize);
-    // }
+   
   }, []);
 
   if (!isMounted) {

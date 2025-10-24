@@ -45,10 +45,10 @@ const SubscriptionOffer = () => {
           viewport={{ once: true }}
           className="mb-12"
         >
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl font-bold  mb-4">
             Follow Us for <span className="text-orange">Exclusive Offers</span>
           </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          <p className="text-lg max-w-2xl mx-auto">
             Join our social media community and be the first to discover
             exclusive products, special discounts, and behind-the-scenes
             content.
@@ -99,23 +99,17 @@ const SubscriptionOffer = () => {
             <div className="text-2xl font-bold text-orange mb-2">
               Exclusive Access
             </div>
-            <div className="text-gray-600 text-sm">
-              First access to new collections
-            </div>
+            <div className=" text-sm">First access to new collections</div>
           </div>
           <div className="text-gray-900">
             <div className="text-2xl font-bold text-orange mb-2">
               Special Discounts
             </div>
-            <div className="text-gray-600 text-sm">
-              Up to 40% off for followers
-            </div>
+            <div className="text-sm">Up to 40% off for followers</div>
           </div>
           <div className="text-gray-900">
             <div className="text-2xl font-bold text-orange mb-2">Community</div>
-            <div className="text-gray-600 text-sm">
-              Join our fashion community
-            </div>
+            <div className="text-sm">Join our fashion community</div>
           </div>
         </motion.div>
 
@@ -127,7 +121,7 @@ const SubscriptionOffer = () => {
           viewport={{ once: true }}
           className="mt-12"
         >
-          <p className="text-gray-600 text-sm mb-6">
+          <p className=" text-sm mb-6">
             Follow us now and never miss an exclusive offer!
           </p>
           <div className="flex justify-center space-x-4">
