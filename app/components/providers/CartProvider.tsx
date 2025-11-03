@@ -219,6 +219,7 @@ const CartProvider = ({ children }: CartProviderProps) => {
       manualSync,
       removeUserCart,
       updateQuantity,
+      removeFromCart,
     ]
   );
 

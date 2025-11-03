@@ -83,15 +83,15 @@ export default function GlobalError({
           If the problem persists, please contact support.
         </p>
         <div className="flex justify-center space-x-4">
-          <a
+          <Link
             href="mailto:support@yourapp.com"
             className="text-blue-600 hover:text-blue-800 text-sm"
           >
             Contact Support
-          </a>
-          <a href="/help" className="text-blue-600 hover:text-blue-800 text-sm">
+          </Link>
+          <Link href="/help" className="text-blue-600 hover:text-blue-800 text-sm">
             Help Center
-          </a>
+          </Link>
         </div>
       </div>
     </div>

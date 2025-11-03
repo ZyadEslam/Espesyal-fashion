@@ -183,6 +183,7 @@ const WishlistProvider = ({ children }: WishlistProviderProps) => {
       manualSync,
       moveToCart,
       removeUserWishlist,
+      removeFromWishlist,
     ]
   );
 

@@ -46,7 +46,7 @@ const OrderForm = () => {
       api.clearCart(session.data?.user.id as string);
     }
     setIsLoading(false);
-  }, [orderFormState.success]);
+  }, [orderFormState.success, session.data?.user.id]);
 
   const submitHandler = async () => {
     setIsLoading(true);

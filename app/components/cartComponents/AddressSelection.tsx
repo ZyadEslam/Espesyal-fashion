@@ -49,7 +49,7 @@ const AddressSelection = ({
       setLoading(false);
       setError("Please login to select address");
     }
-  }, []);
+  }, [session.status]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
