@@ -3,12 +3,12 @@ import { ArrowLeft, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import React, { lazy, Suspense } from "react";
-import LoadingSpinner from "../UI/LoadingSpinner";
-import { useCart } from "../hooks/useCart";
+import LoadingSpinner from "../../UI/LoadingSpinner";
+import { useCart } from "../../hooks/useCart";
 
-const CartTable = lazy(() => import("../components/cartComponents/CartTable"));
+const CartTable = lazy(() => import("../../components/cartComponents/CartTable"));
 const OrderSummary = lazy(
-  () => import("../components/cartComponents/OrderSummary")
+  () => import("../../components/cartComponents/OrderSummary")
 );
 
 const CartPage = () => {
