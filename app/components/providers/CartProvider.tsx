@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { ProductCardProps } from "@/app/types/types";
 import { CartContext } from "../../context/cartCtx";
 import { useSession } from "next-auth/react"; // If using NextAuth
@@ -65,19 +65,19 @@ const CartProvider = ({ children }: CartProviderProps) => {
   }, [cart, session?.user?.id]);
 
   // Calculate totals
-  const calculateTotals = () => {
+  const calculateTotals = useCallback(() => {
     const total = cart.reduce((sum, item) => {
       return sum + item.price * (item.quantityInCart || 1);
     }, 0);
     setTotalPrice(Number(total.toFixed(2)));
-  };
+  }, [cart]);
 
   useEffect(() => {
     calculateTotals();
-  }, [cart, calculateTotals]);
+  }, [calculateTotals]);
 
   // Manual sync function (call this on signout)
-  const manualSync = async () => {
+  const manualSync = useCallback(async () => {
     if (session?.user?.id) {
       try {
         const storageKey = getCartStorageKey(session.user.id);
@@ -88,7 +88,7 @@ const CartProvider = ({ children }: CartProviderProps) => {
         console.error("Error syncing cart with server:", error);
       }
     }
-  };
+  }, [session?.user?.id]);
   // Add to cart
   const addToCart = (product: ProductCardProps) => {
     setCart((prevCart) => {
@@ -110,14 +110,14 @@ const CartProvider = ({ children }: CartProviderProps) => {
   };
 
   // Remove from cart
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = useCallback((productId: string) => {
     setCart((prevCart) => prevCart.filter((item) => item._id !== productId));
-  };
+  }, []);
 
   // Update quantity
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      setCart((prevCart) => prevCart.filter((item) => item._id !== productId));
       return;
     }
 
@@ -126,31 +126,31 @@ const CartProvider = ({ children }: CartProviderProps) => {
         item._id === productId ? { ...item, quantityInCart: quantity } : item
       )
     );
-  };
+  }, []);
 
   // Clear cart
   const clearCart = () => {
     setCart([]);
   };
 
-  const removeUserCart = () => {
+  const removeUserCart = useCallback(() => {
     if (typeof window === "undefined") return;
     if (session?.user?.id) {
       const storageKey = getCartStorageKey(session.user.id);
       localStorage.removeItem(storageKey);
       setCart([]);
     }
-  };
+  }, [session?.user?.id]);
 
   // Get cart item count
-  const getCartItemCount = () => {
+  const getCartItemCount = useCallback(() => {
     return cart.reduce((total, item) => total + (item.quantityInCart || 1), 0);
-  };
+  }, [cart]);
 
   // Check if product is in cart
-  const isInCart = (productId: string) => {
+  const isInCart = useCallback((productId: string) => {
     return cart.some((item) => item._id === productId);
-  };
+  }, [cart]);
 
   // Sync with server database on component mount
   useEffect(() => {

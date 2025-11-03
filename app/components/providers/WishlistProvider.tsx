@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { ProductCardProps } from "@/app/types/types";
 import { useSession } from "next-auth/react";
 import { WishlistContext } from "@/app/context/wishlistCtx";
@@ -49,7 +49,7 @@ const WishlistProvider = ({ children }: WishlistProviderProps) => {
     }
   }, [wishlist, session?.user?.id]);
 
-  const manualSync = async () => {
+  const manualSync = useCallback(async () => {
     if (session?.user?.id) {
       try {
         const storageKey = getWishlistStorageKey(session.user.id);
@@ -60,7 +60,7 @@ const WishlistProvider = ({ children }: WishlistProviderProps) => {
         console.error("Error syncing wishlist with server:", error);
       }
     }
-  };
+  }, [session?.user?.id]);
 
   // Add product to wishlist
   const addToWishlist = (product: ProductCardProps) => {
@@ -75,45 +75,46 @@ const WishlistProvider = ({ children }: WishlistProviderProps) => {
   };
 
   // Remove product from wishlist
-  const removeFromWishlist = (productId: string) => {
+  const removeFromWishlist = useCallback((productId: string) => {
     setWishlist((prevWishlist) =>
       prevWishlist.filter((item) => item._id !== productId)
     );
-  };
+  }, []);
 
   // Check if product is in wishlist
-  const isInWishlist = (productId: string) => {
+  const isInWishlist = useCallback((productId: string) => {
     return wishlist.some((item) => item._id === productId);
-  };
+  }, [wishlist]);
 
   // Clear entire wishlist
   const clearWishlist = () => {
     setWishlist([]);
   };
 
-  const removeUserWishlist = () => {
+  const removeUserWishlist = useCallback(() => {
     if (typeof window === "undefined") return;
     if (session?.user?.id) {
       const storageKey = getWishlistStorageKey(session.user.id);
       localStorage.removeItem(storageKey);
       setWishlist([]);
     }
-  };
+  }, [session?.user?.id]);
 
   // Move product from wishlist to cart (optional integration)
-  const moveToCart = (productId: string, cartContext: CartContextProps) => {
+  const moveToCart = useCallback((productId: string, cartContext: CartContextProps) => {
     const product = wishlist.find((item) => item._id === productId);
     if (product && cartContext?.addToCart) {
       cartContext.addToCart(product);
       removeFromWishlist(productId);
     }
-  };
-  const getWishlistItemCount = () => {
+  }, [wishlist, removeFromWishlist]);
+  
+  const getWishlistItemCount = useCallback(() => {
     return wishlist.reduce(
       (total, item) => total + (item.quantityInCart || 1),
       0
     );
-  };
+  }, [wishlist]);
 
   // Migrate anonymous wishlist to user wishlist when user logs in
   useEffect(() => {
