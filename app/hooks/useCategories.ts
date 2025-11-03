@@ -84,6 +84,7 @@ interface UseProductsByCategoryProps {
   minPrice?: number;
   maxPrice?: number;
   brand?: string;
+  enabled?: boolean; // Add enabled flag for conditional fetching
 }
 
 export const useProductsByCategory = ({
@@ -95,6 +96,7 @@ export const useProductsByCategory = ({
   minPrice,
   maxPrice,
   brand,
+  enabled = true,
 }: UseProductsByCategoryProps): UseProductsByCategoryReturn => {
   const [products, setProducts] = useState<ProductCardProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -150,8 +152,10 @@ export const useProductsByCategory = ({
   }, [categorySlug, page, limit, sortBy, sortOrder, minPrice, maxPrice, brand]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    if (enabled) {
+      fetchProducts();
+    }
+  }, [enabled, fetchProducts]);
 
   return {
     products,

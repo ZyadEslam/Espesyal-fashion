@@ -2,8 +2,10 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Instagram, Facebook, Twitter } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const SubscriptionOffer = () => {
+  const t = useTranslations("home");
   const socialLinks = [
     {
       name: "Instagram",
@@ -46,12 +48,10 @@ const SubscriptionOffer = () => {
           className="mb-12"
         >
           <h1 className="text-3xl sm:text-4xl font-bold  mb-4">
-            Follow Us for <span className="text-orange">Exclusive Offers</span>
+            {t("followUsForOffers")} <span className="text-orange">{t("exclusiveOffers")}</span>
           </h1>
           <p className="text-lg max-w-2xl mx-auto">
-            Join our social media community and be the first to discover
-            exclusive products, special discounts, and behind-the-scenes
-            content.
+            {t("joinSocialMedia")}
           </p>
         </motion.div>
 
@@ -97,19 +97,19 @@ const SubscriptionOffer = () => {
         >
           <div className="text-gray-900">
             <div className="text-2xl font-bold text-orange mb-2">
-              Exclusive Access
+              {t("exclusiveAccess")}
             </div>
-            <div className=" text-sm">First access to new collections</div>
+            <div className=" text-sm">{t("firstAccess")}</div>
           </div>
           <div className="text-gray-900">
             <div className="text-2xl font-bold text-orange mb-2">
-              Special Discounts
+              {t("specialDiscounts")}
             </div>
-            <div className="text-sm">Up to 40% off for followers</div>
+            <div className="text-sm">{t("upToOff")}</div>
           </div>
           <div className="text-gray-900">
-            <div className="text-2xl font-bold text-orange mb-2">Community</div>
-            <div className="text-sm">Join our fashion community</div>
+            <div className="text-2xl font-bold text-orange mb-2">{t("community")}</div>
+            <div className="text-sm">{t("joinFashionCommunity")}</div>
           </div>
         </motion.div>
 
@@ -122,7 +122,7 @@ const SubscriptionOffer = () => {
           className="mt-12"
         >
           <p className=" text-sm mb-6">
-            Follow us now and never miss an exclusive offer!
+            {t("followUsNow")}
           </p>
           <div className="flex justify-center space-x-4">
             {socialLinks.map((social) => (

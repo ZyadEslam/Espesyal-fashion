@@ -1,6 +1,7 @@
 "use client";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import React, { lazy, Suspense } from "react";
 import LoadingSpinner from "../UI/LoadingSpinner";
 import { useCart } from "../hooks/useCart";
@@ -11,6 +12,8 @@ const OrderSummary = lazy(
 );
 
 const CartPage = () => {
+  const locale = useLocale();
+  const t = useTranslations("cart");
   const { getCartItemCount, error, cart } = useCart();
 
   if (cart.length === 0) {
@@ -24,9 +27,9 @@ const CartPage = () => {
                 <ShoppingCart className="w-6 h-6 text-orange" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Your Cart</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{t("yourCart")}</h1>
                 <p className="text-gray-600 mt-1">
-                  Your shopping cart is empty
+                  {t("shoppingCartEmpty")}
                 </p>
               </div>
             </div>
@@ -39,16 +42,16 @@ const CartPage = () => {
                 <ShoppingCart className="w-12 h-12 text-gray-400" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Your cart is empty
+                {t("empty")}
               </h3>
               <p className="text-gray-600 mb-6">
-                Add some items to your cart and they&apos;ll appear here.
+                {t("addItemsToCart")}
               </p>
               <Link
-                href="/shop"
+                href={`/${locale}/shop`}
                 className="inline-flex items-center px-6 py-3 bg-orange text-white rounded-lg hover:bg-orange/90 transition-colors duration-200 font-medium"
               >
-                Start Shopping
+                {t("startShopping")}
               </Link>
             </div>
           </div>
@@ -56,11 +59,11 @@ const CartPage = () => {
           {/* Continue Shopping */}
           <div className="mt-8">
             <Link
-              href="/shop"
+              href={`/${locale}/shop`}
               className="inline-flex items-center gap-2 text-orange hover:text-orange/80 transition-colors duration-200 font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
-              Continue Shopping
+              {t("continueShopping")}
             </Link>
           </div>
         </div>
@@ -78,9 +81,9 @@ const CartPage = () => {
               <ShoppingCart className="w-6 h-6 text-orange" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Your Cart</h1>
+              <h1 className="text-3xl font-bold text-gray-900">{t("yourCart")}</h1>
               <p className="text-gray-600 mt-1">
-                {getCartItemCount()} items in your cart
+                {getCartItemCount()} {t("itemsInCart")}
               </p>
             </div>
           </div>
@@ -126,11 +129,11 @@ const CartPage = () => {
         {/* Continue Shopping */}
         <div className="mt-8">
           <Link
-            href="/shop"
+            href={`/${locale}/shop`}
             className="inline-flex items-center gap-2 text-orange hover:text-orange/80 transition-colors duration-200 font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            Continue Shopping
+            {t("continueShopping")}
           </Link>
         </div>
       </div>

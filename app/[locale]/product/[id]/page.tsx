@@ -10,10 +10,10 @@ import {
 import { ProductSchema, Breadcrumb } from "@/app/components/seo/SEOComponents";
 
 const ProductImagesSlider = lazy(
-  () => import("../../components/productComponents/ProductImagesSlider")
+  () => import("../../../components/productComponents/ProductImagesSlider")
 );
 const ProductDetails = lazy(
-  () => import("../../components/productComponents/ProductDetails")
+  () => import("../../../components/productComponents/ProductDetails")
 );
 
 type Props = {

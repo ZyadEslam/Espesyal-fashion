@@ -3,10 +3,10 @@ import React, {
   Suspense,
   //  lazy
 } from "react";
-import LoadingSpinner from "../UI/LoadingSpinner";
-import { ContactForm, ContactHeroSection, ContactInfo } from "../components";
-import { generateMetadata as generateSEOMetadata } from "../utils/seo";
-import { Breadcrumb } from "../components/seo/SEOComponents";
+import LoadingSpinner from "../../UI/LoadingSpinner";
+import { ContactForm, ContactHeroSection, ContactInfo } from "../../components";
+import { generateMetadata as generateSEOMetadata } from "../../utils/seo";
+import { Breadcrumb } from "../../components/seo/SEOComponents";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Contact Us - Espesyal Shop",

@@ -4,9 +4,12 @@ import Image from "next/image";
 import { assets } from "@/public/assets/assets";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const Footer = () => {
   const pathname = usePathname();
+  const t = useTranslations("footer");
+  const tNav = useTranslations("nav");
 
   return (
     <>
@@ -28,10 +31,7 @@ const Footer = () => {
                   />
                 </Link>
                 <p className="text-foreground/80 leading-relaxed text-base max-w-md">
-                  Discover our curated collection of timeless fashion pieces,
-                  designed for sophistication and comfort that lasts. Elevate
-                  your everyday style with Espesyal Shop&apos;s premium
-                  selection.
+                  {t("discoverCurated")}
                 </p>
                 <div className="flex space-x-4">
                   <a
@@ -73,7 +73,7 @@ const Footer = () => {
               {/* Company Links */}
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-foreground">
-                  Company
+                  {t("company")}
                 </h3>
                 <ul className="space-y-3">
                   <li>
@@ -81,7 +81,7 @@ const Footer = () => {
                       href="/"
                       className="text-foreground/70 hover:text-orange transition-colors duration-300"
                     >
-                      Home
+                      {tNav("home")}
                     </Link>
                   </li>
                   <li>
@@ -89,7 +89,7 @@ const Footer = () => {
                       href="/about"
                       className="text-foreground/70 hover:text-orange transition-colors duration-300"
                     >
-                      About us
+                      {t("aboutUs")}
                     </Link>
                   </li>
                   <li>
@@ -97,7 +97,7 @@ const Footer = () => {
                       href="/contact"
                       className="text-foreground/70 hover:text-orange transition-colors duration-300"
                     >
-                      Contact us
+                      {t("contact")}
                     </Link>
                   </li>
                   <li>
@@ -105,7 +105,7 @@ const Footer = () => {
                       href="/shop"
                       className="text-foreground/70 hover:text-orange transition-colors duration-300"
                     >
-                      Shop
+                      {tNav("shop")}
                     </Link>
                   </li>
                 </ul>
@@ -114,7 +114,7 @@ const Footer = () => {
               {/* Contact Info */}
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-foreground">
-                  Get in touch
+                  {t("getInTouch")}
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
@@ -145,20 +145,20 @@ const Footer = () => {
             <div className="border-t border-gray-300/50 mt-12 pt-8">
               <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                 <p className="text-foreground/60 text-sm">
-                  Copyright 2025 © Zyad Elbehiry All Right Reserved.
+                  {t("copyright")}
                 </p>
                 <div className="flex space-x-6 text-sm">
                   <Link
                     href="#"
                     className="text-foreground/60 hover:text-orange transition-colors duration-300"
                   >
-                    Privacy Policy
+                    {t("privacyPolicy")}
                   </Link>
                   <Link
                     href="#"
                     className="text-foreground/60 hover:text-orange transition-colors duration-300"
                   >
-                    Terms of Service
+                    {t("termsOfService")}
                   </Link>
                 </div>
               </div>

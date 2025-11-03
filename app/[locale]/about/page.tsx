@@ -6,10 +6,10 @@ import {
   ValuesSection,
   TeamSection,
   ContactUsSection,
-} from "../components";
+} from "../../components";
 // import LoadingSpinner from "../UI/LoadingSpinner";
-import { generateMetadata as generateSEOMetadata } from "../utils/seo";
-import { Breadcrumb } from "../components/seo/SEOComponents";
+import { generateMetadata as generateSEOMetadata } from "../../utils/seo";
+import { Breadcrumb } from "../../components/seo/SEOComponents";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "About Us - Espesyal Shop",

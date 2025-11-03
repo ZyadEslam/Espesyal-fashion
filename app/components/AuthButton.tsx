@@ -2,6 +2,7 @@
 import { assets } from "@/public/assets/assets";
 import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 import { useCart } from "../hooks/useCart";
 import { useWishlist } from "../hooks/useWishlist";
@@ -10,6 +11,7 @@ export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
   const { data: session } = useSession();
   const { manualSync: syncCart } = useCart();
   const { manualSync: syncWishlist } = useWishlist();
+  const t = useTranslations("nav");
   const handleSignIn = async () => {
     try {
       console.log("🚀 Starting Google sign in...");
@@ -20,7 +22,7 @@ export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
       console.log("✅ SignIn result:", result);
     } catch (error) {
       console.error("❌ SignIn error:", error);
-    } 
+    }
   };
   const handleSignout = async () => {
     console.log("🚪 Sign out button clicked");
@@ -45,7 +47,7 @@ export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
             handleSignout();
           }}
         >
-          Sign out
+          {t("signOut")}
         </span>
       );
     }
@@ -58,7 +60,7 @@ export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
             handleSignout();
           }}
         >
-          Sign out
+          {t("signOut")}
         </span>
       </div>
     );
@@ -68,7 +70,7 @@ export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
     <>
       <div className="flex items-center gap-2 cursor-pointer sm:order-2 md:order-auto">
         <Image src={assets.user_icon} alt="User" />
-        <p onClick={handleSignIn}>Account</p>
+        <p onClick={handleSignIn}>{t("myAccount")}</p>
       </div>
     </>
   );

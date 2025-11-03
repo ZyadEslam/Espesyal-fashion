@@ -3,9 +3,11 @@ import React from "react";
 import Image from "next/image";
 import { assets } from "@/public/assets/assets";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import PrimaryBtn from "../PrimaryBtn";
 
 const HeroSection = () => {
+  const t = useTranslations("home");
   return (
     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-background via-secondaryLight to-background shadow-lg border border-secondary">
       {/* Background Pattern */}
@@ -30,7 +32,7 @@ const HeroSection = () => {
             className="inline-flex items-center"
           >
             <span className="bg-orange/10 text-orange px-4 py-2 rounded-full text-sm font-semibold border border-orange/20">
-              ✨ Special Offer
+              {t("specialOffer")}
             </span>
           </motion.div>
 
@@ -40,7 +42,7 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
           >
-            Elevate Your <span className="text-orange">Style Game</span>
+            {t("elevateYourStyle")} <span className="text-orange">{t("styleGame")}</span>
           </motion.h1>
 
           <motion.p
@@ -49,9 +51,7 @@ const HeroSection = () => {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="text-foreground/70 text-base md:text-lg leading-relaxed max-w-lg"
           >
-            Discover our exclusive collection of premium fashion pieces with up
-            to <span className="text-orange font-bold">30% OFF</span>. Limited
-            time offer - don&apos;t miss out!
+            {t("discoverExclusive")} <span className="text-orange font-bold">30% {t("off")}</span>. {t("limitedTimeOffer")}
           </motion.p>
 
          
@@ -64,13 +64,13 @@ const HeroSection = () => {
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <PrimaryBtn
-                text="Shop Now - Save 30%"
+                text={t("shopNow")}
                 href="/shop"
                 customClass="px-6 py-3 rounded-full text-base font-semibold shadow-md hover:shadow-lg transition-all duration-300 bg-orange text-white hover:bg-primary border border-orange hover:border-primary"
               />
             </motion.div>
             <button className="text-foreground/70 hover:text-orange transition-colors duration-300 font-medium text-base">
-              View Collection →
+              {t("viewCollection")}
             </button>
           </motion.div>
 

@@ -30,14 +30,7 @@ const ProductsGrid = memo(
     }
 
     if (!products || products.length === 0) {
-      return (
-        <div className="text-center py-12">
-          <div className="text-gray-400 text-lg mb-2">No products found</div>
-          <p className="text-gray-500">
-            Try adjusting your filters or browse other categories
-          </p>
-        </div>
-      );
+      return null; // ProductsGrid doesn't handle empty state, let the parent handle it
     }
 
     const gridClass = {
@@ -49,7 +42,7 @@ const ProductsGrid = memo(
     }[gridCols];
 
     return (
-      <div className={`grid ${gridClass} gap-3 md:gap-6 ${className}`}>
+      <div className={`grid ${gridClass} gap-4 sm:gap-6 ${className}`}>
         {products.map((product: ProductCardProps) => (
           <ProductCard key={product._id} product={product} />
         ))}

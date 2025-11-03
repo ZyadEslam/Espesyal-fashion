@@ -8,10 +8,15 @@ import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { Heart, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/app/hooks/useCart";
+import { useTranslations } from "next-intl";
 import { useWishlist } from "@/app/hooks/useWishlist";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useLocale } from "next-intl";
 
 const UserNav = memo(() => {
   const pathname = usePathname();
+  const locale = useLocale();
+  const t = useTranslations("nav");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { data: session } = useSession();
@@ -19,6 +24,11 @@ const UserNav = memo(() => {
   const cartItemCount = getCartItemCount();
   const { getWishlistItemCount } = useWishlist();
   const wishlistItemCount = getWishlistItemCount();
+
+  // Helper to add locale to paths
+  const getLocalizedPath = (path: string) => {
+    return `/${locale}${path}`;
+  };
 
   const toggleMenu = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
@@ -75,7 +85,10 @@ const UserNav = memo(() => {
       <div className={`container mx-auto px-4 max-w-7xl`}>
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
+          <Link
+            href={getLocalizedPath("/")}
+            className="flex items-center space-x-2 group"
+          >
             <div className="relative">
               <Image
                 src={assets.espesialLogo}
@@ -95,39 +108,40 @@ const UserNav = memo(() => {
               <div className="hidden lg:flex items-center space-x-8">
                 <div className="flex items-center space-x-8">
                   <Link
-                    href="/"
+                    href={getLocalizedPath("/")}
                     className="relative text-gray-700 hover:text-primary transition-colors duration-300 font-medium group"
                   >
-                    Home
+                    {t("home")}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                   </Link>
                   <Link
-                    href="/shop"
+                    href={getLocalizedPath("/shop")}
                     className="relative text-gray-700 hover:text-primary transition-colors duration-300 font-medium group"
                   >
-                    Shop
+                    {t("shop")}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                   </Link>
                   <Link
-                    href="/about"
+                    href={getLocalizedPath("/about")}
                     className="relative text-gray-700 hover:text-primary transition-colors duration-300 font-medium group"
                   >
-                    About Us
+                    {t("about")}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                   </Link>
                   <Link
-                    href="/contact"
+                    href={getLocalizedPath("/contact")}
                     className="relative text-gray-700 hover:text-primary transition-colors duration-300 font-medium group"
                   >
-                    Contact
+                    {t("contact")}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
                   </Link>
                 </div>
 
                 {/* Action Items */}
                 <div className="flex items-center space-x-4 ml-6 pl-6 border-l border-gray-200">
+                  <LanguageSwitcher />
                   <Link
-                    href="/wishlist"
+                    href={getLocalizedPath("/wishlist")}
                     className="relative p-2 text-gray-600 hover:text-primary transition-colors duration-300 group"
                   >
                     <Heart className="w-5 h-5" />
@@ -136,7 +150,7 @@ const UserNav = memo(() => {
                     </span>
                   </Link>
                   <Link
-                    href="/cart"
+                    href={getLocalizedPath("/cart")}
                     className="relative p-2 text-gray-600 hover:text-primary transition-colors duration-300 group"
                   >
                     <ShoppingCart className="w-5 h-5" />
@@ -158,10 +172,10 @@ const UserNav = memo(() => {
 
                   {session?.user?.isAdmin && (
                     <Link
-                      href="/dashboard"
+                      href={getLocalizedPath("/dashboard")}
                       className="px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white text-sm font-medium rounded-full hover:shadow-lg transition-all duration-300 hover:scale-105"
                     >
-                      Dashboard
+                      {t("dashboard")}
                     </Link>
                   )}
 
@@ -171,9 +185,11 @@ const UserNav = memo(() => {
 
               {/* Mobile/Tablet cart icon*/}
               <div className="flex items-center space-x-3 lg:hidden">
+                {/* Language Switcher for Mobile */}
+                <LanguageSwitcher />
                 {/* Cart Icon for Small Screens */}
                 <Link
-                  href="/cart"
+                  href={getLocalizedPath("/cart")}
                   className="relative p-2 text-gray-600 hover:text-primary transition-colors duration-300 group"
                 >
                   <ShoppingCart className="w-5 h-5" />
@@ -218,38 +234,38 @@ const UserNav = memo(() => {
                     {/* Navigation Links */}
                     <div className="flex-1 px-6 py-8 space-y-6">
                       <Link
-                        href="/"
+                        href={getLocalizedPath("/")}
                         className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300"
                         onClick={closeMenu}
                       >
-                        Home
+                        {t("home")}
                       </Link>
                       <Link
-                        href="/shop"
+                        href={getLocalizedPath("/shop")}
                         className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300"
                         onClick={closeMenu}
                       >
-                        Shop
+                        {t("shop")}
                       </Link>
                       <Link
-                        href="/about"
+                        href={getLocalizedPath("/about")}
                         className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300"
                         onClick={closeMenu}
                       >
-                        About Us
+                        {t("about")}
                       </Link>
                       <Link
-                        href="/contact"
+                        href={getLocalizedPath("/contact")}
                         className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300"
                         onClick={closeMenu}
                       >
-                        Contact
+                        {t("contact")}
                       </Link>
 
                       {/* Mobile Action Items */}
                       <div className="flex items-center space-x-4 pt-6 border-t border-gray-200">
                         <Link
-                          href="/wishlist"
+                          href={getLocalizedPath("/wishlist")}
                           className="flex items-center space-x-2 text-gray-600 hover:text-primary transition-colors duration-300"
                           onClick={closeMenu}
                         >
@@ -257,18 +273,18 @@ const UserNav = memo(() => {
                           <span>Wishlist</span>
                         </Link>
                         <Link
-                          href="/cart"
+                          href={getLocalizedPath("/cart")}
                           className="flex items-center space-x-2 text-gray-600 hover:text-primary transition-colors duration-300"
                           onClick={closeMenu}
                         >
                           <ShoppingCart className="w-5 h-5" />
-                          <span>Cart</span>
+                          <span>{t("cart")}</span>
                         </Link>
                       </div>
 
                       {session?.user?.isAdmin && (
                         <Link
-                          href="/dashboard"
+                          href={getLocalizedPath("/dashboard")}
                           className="block w-full px-4 py-3 bg-gradient-to-r from-primary to-secondary text-white text-center font-medium rounded-lg hover:shadow-lg transition-all duration-300"
                           onClick={closeMenu}
                         >
@@ -286,7 +302,7 @@ const UserNav = memo(() => {
             </>
           ) : (
             <Link
-              href="/"
+              href={getLocalizedPath("/")}
               className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-medium rounded-full hover:shadow-lg transition-all duration-300 hover:scale-105"
             >
               Exit Admin Mode

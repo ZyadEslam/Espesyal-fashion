@@ -2,11 +2,11 @@
 import { ArrowLeft, Heart } from "lucide-react";
 import Link from "next/link";
 import React, { lazy, Suspense } from "react";
-import LoadingSpinner from "../UI/LoadingSpinner";
+import LoadingSpinner from "../../UI/LoadingSpinner";
 
 // import { WishlistTable } from "../components";
 const WishlistTable = lazy(
-  () => import("../components/wishlistComponents/WishlistTable")
+  () => import("../../components/wishlistComponents/WishlistTable")
 );
 
 const WishListPage = () => {

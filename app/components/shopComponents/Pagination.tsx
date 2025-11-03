@@ -58,13 +58,13 @@ const Pagination = memo(
 
     return (
       <div
-        className={`flex items-center justify-center space-x-2 ${className}`}
+        className={`flex items-center justify-center space-x-1 ${className}`}
       >
         {/* Previous Button */}
         <button
           onClick={() => handlePageClick(currentPage - 1)}
           disabled={currentPage === 1}
-          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             currentPage === 1
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
@@ -77,13 +77,13 @@ const Pagination = memo(
         {getVisiblePages().map((page, index) => (
           <React.Fragment key={index}>
             {page === "..." ? (
-              <span className="px-3 py-2 text-gray-500">...</span>
+              <span className="px-3 text-gray-400">...</span>
             ) : (
               <button
                 onClick={() => handlePageClick(page as number)}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`w-10 h-10 rounded-lg text-sm font-medium transition-all ${
                   currentPage === page
-                    ? "bg-orange text-white"
+                    ? "bg-orange text-white shadow-sm"
                     : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
                 }`}
               >
@@ -97,7 +97,7 @@ const Pagination = memo(
         <button
           onClick={() => handlePageClick(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             currentPage === totalPages
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"

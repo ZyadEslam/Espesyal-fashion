@@ -3,9 +3,12 @@ import React from "react";
 import { motion } from "framer-motion";
 import { assets } from "@/public/assets/assets";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import PrimaryBtn from "../PrimaryBtn";
 
 const BestSellersSection = () => {
+  const t = useTranslations("home");
+  const tProduct = useTranslations("product");
   const bestSellers = [
     {
       id: 1,
@@ -15,7 +18,7 @@ const BestSellersSection = () => {
       image: assets.girl1,
       rating: 4.9,
       sales: 2500,
-      badge: "Best Seller",
+      badge: "bestSeller",
     },
     {
       id: 2,
@@ -25,7 +28,7 @@ const BestSellersSection = () => {
       image: assets.girl3,
       rating: 4.8,
       sales: 1800,
-      badge: "Trending",
+      badge: "trending",
     },
     {
       id: 3,
@@ -35,7 +38,7 @@ const BestSellersSection = () => {
       image: assets.girl8,
       rating: 4.7,
       sales: 2200,
-      badge: "Popular",
+      badge: "popular",
     },
     {
       id: 4,
@@ -45,7 +48,7 @@ const BestSellersSection = () => {
       image: assets.girl6,
       rating: 4.9,
       sales: 1500,
-      badge: "Hot",
+      badge: "hot",
     },
   ];
 
@@ -61,13 +64,13 @@ const BestSellersSection = () => {
           className="text-center mb-12"
         >
           <div className="inline-flex items-center bg-orange/10 text-orange px-4 py-2 rounded-full text-sm font-semibold mb-4">
-            🔥 BEST SELLERS
+            {t("bestSellers")}
           </div>
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            Customer <span className="text-orange">Favorites</span>
+            {t("customerFavorites")} <span className="text-orange">{t("favorites")}</span>
           </h2>
           <p className="text-foreground/70 text-base max-w-2xl mx-auto">
-            Discover our most loved products that customers can&apos;t get enough of
+            {t("discoverMostLoved")}
           </p>
         </motion.div>
 
@@ -94,7 +97,7 @@ const BestSellersSection = () => {
                 {/* Badge */}
                 <div className="absolute top-3 left-3">
                   <span className="bg-gradient-to-r from-orange to-primary text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                    {product.badge}
+                    {t(product.badge)}
                   </span>
                 </div>
 
@@ -114,7 +117,7 @@ const BestSellersSection = () => {
                 {/* Quick View Overlay */}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <PrimaryBtn
-                    text="Quick View"
+                    text={t("quickView")}
                     href={`/product/${product.id}`}
                     customClass="px-6 py-2 rounded-full text-sm font-semibold bg-orange text-gray-900  hover:text-white"
                   />
@@ -158,7 +161,7 @@ const BestSellersSection = () => {
 
                 {/* Add to Cart Button */}
                 <PrimaryBtn
-                  text="Add to Cart"
+                  text={tProduct("addToCart")}
                   href={`/product/${product.id}`}
                   customClass="w-full p-2 rounded-xl text-sm font-semibold bg-primary text-white hover:bg-orange transition-colors duration-300"
                 />
@@ -176,7 +179,7 @@ const BestSellersSection = () => {
           className="text-center"
         >
           <PrimaryBtn
-            text="View All Best Sellers"
+            text={t("viewAllBestSellers")}
             href="/shop?filter=bestsellers"
             customClass="px-8 py-4 rounded-full text-lg font-semibold bg-gradient-to-r from-orange to-primary text-white hover:from-orange hover:to-orange shadow-lg hover:shadow-xl transition-all duration-300"
           />

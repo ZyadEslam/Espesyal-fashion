@@ -4,7 +4,7 @@ import {
   AddressHeroSection,
   ImageSection,
   ShippingFormSection,
-} from "../components/shippingComponents";
+} from "../../components/shippingComponents";
 
 const ShippingPage = () => {
   return (

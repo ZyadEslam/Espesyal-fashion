@@ -3,11 +3,11 @@ import React, { useState, useCallback, memo } from "react";
 import { assets } from "@/public/assets/assets";
 import ImageUploader, {
   ImageState,
-} from "../components/dashboardComponents/ImageUploader";
-import FormInput from "../components/dashboardComponents/FormInput";
-import PriceInputs from "../components/dashboardComponents/PriceInputs";
-import SubmitButton from "../components/dashboardComponents/SubmitBtn";
-import ProductForm from "../components/dashboardComponents/ProductForm";
+} from "../../components/dashboardComponents/ImageUploader";
+import FormInput from "../../components/dashboardComponents/FormInput";
+import PriceInputs from "../../components/dashboardComponents/PriceInputs";
+import SubmitButton from "../../components/dashboardComponents/SubmitBtn";
+import ProductForm from "../../components/dashboardComponents/ProductForm";
 import { Plus } from "lucide-react";
 
 // Main Dashboard Page Component

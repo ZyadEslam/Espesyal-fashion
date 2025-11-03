@@ -1,9 +1,11 @@
 "use client";
-import React, { memo, useState, useCallback, Suspense } from "react";
+import React, { memo, useState, useCallback, Suspense, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   useCategories,
   useProductsByCategory,
 } from "../../hooks/useCategories";
+import { useShopProducts } from "../../hooks/useShopProducts";
 import CategoryFilter from "./CategoryFilter";
 import ProductFilters from "./ProductFilters";
 import ProductsGrid from "./ProductsGrid";
@@ -18,11 +20,18 @@ interface ShopLayoutProps {
 
 const ShopLayout = memo(
   ({ initialCategory, className = "" }: ShopLayoutProps) => {
+    const t = useTranslations("shop");
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
       initialCategory || null
     );
     const [currentPage, setCurrentPage] = useState(1);
-    const [filters, setFilters] = useState({
+    const [filters, setFilters] = useState<{
+      sortBy: string;
+      sortOrder: string;
+      minPrice?: number;
+      maxPrice?: number;
+      brand?: string;
+    }>({
       sortBy: "createdAt",
       sortOrder: "desc",
       minPrice: undefined,
@@ -36,33 +45,86 @@ const ShopLayout = memo(
       isLoading: categoriesLoading,
     } = useCategories();
 
+    // Get prefetched data from context
     const {
-      products,
-      isLoading: productsLoading,
-      error,
-      pagination,
-      filters: availableFilters,
+      initialProducts,
+      initialPagination,
+      initialFilters,
+      setCurrentProducts,
+      setCurrentPagination,
+      setCurrentFilters,
+    } = useShopProducts();
+
+    // Check if we need to fetch (if filters changed from initial state)
+    const needsFetch =
+      currentPage !== 1 ||
+      filters.minPrice !== undefined ||
+      filters.maxPrice !== undefined ||
+      filters.brand !== undefined ||
+      filters.sortBy !== "createdAt" ||
+      filters.sortOrder !== "desc" ||
+      selectedCategory !== initialCategory;
+
+    // Use conditional fetching hook
+    const {
+      products: fetchedProducts,
+      isLoading: isFetching,
+      error: fetchError,
+      pagination: fetchedPagination,
+      filters: fetchedFilters,
     } = useProductsByCategory({
       categorySlug: selectedCategory || undefined,
       page: currentPage,
       limit: 12,
       ...filters,
+      enabled: needsFetch,
     });
+
+    // Update context state when we fetch new data
+    useEffect(() => {
+      if (needsFetch && !isFetching && fetchedProducts.length > 0) {
+        setCurrentProducts(fetchedProducts);
+        setCurrentPagination(fetchedPagination);
+        setCurrentFilters(fetchedFilters);
+      }
+    }, [
+      needsFetch,
+      isFetching,
+      fetchedProducts,
+      fetchedPagination,
+      fetchedFilters,
+      setCurrentProducts,
+      setCurrentPagination,
+      setCurrentFilters,
+    ]);
+
+    const products = needsFetch ? fetchedProducts : initialProducts;
+    const pagination = needsFetch ? fetchedPagination : initialPagination;
+    const availableFilters = initialFilters;
+    const productsLoading = needsFetch ? isFetching : false;
+    const error = needsFetch ? fetchError : null;
 
     const handleCategoryChange = useCallback((categorySlug: string | null) => {
       setSelectedCategory(categorySlug);
-      setCurrentPage(1); // Reset to first page when changing category
+      setCurrentPage(1);
     }, []);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleFiltersChange = useCallback((newFilters: any) => {
-      setFilters(newFilters);
-      setCurrentPage(1); // Reset to first page when changing filters
-    }, []);
+    const handleFiltersChange = useCallback(
+      (newFilters: {
+        sortBy: string;
+        sortOrder: string;
+        minPrice?: number;
+        maxPrice?: number;
+        brand?: string;
+      }) => {
+        setFilters(newFilters);
+        setCurrentPage(1);
+      },
+      []
+    );
 
     const handlePageChange = useCallback((page: number) => {
       setCurrentPage(page);
-      // Scroll to top when changing pages
       window.scrollTo({ top: 0, behavior: "smooth" });
     }, []);
 
@@ -71,63 +133,77 @@ const ShopLayout = memo(
     }
 
     return (
-      <div className={`space-y-8 ${className}`}>
-        {/* Featured Categories Section */}
+      <div className={`max-w-7xl mx-auto ${className}`}>
+        {/* Featured Categories */}
         {featuredCategories.length > 0 && (
-          <CategorySection
-            categories={featuredCategories}
-            title="Featured Collections"
-          />
+          <section className="mb-12">
+            <CategorySection
+              categories={featuredCategories}
+              title={t("featuredCollections")}
+            />
+          </section>
         )}
 
-        {/* Category Filter */}
-        <div className="bg-white rounded-lg shadow-sm border p-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
-            Browse Categories
-          </h3>
+        {/* Category Tabs */}
+        <section className="mb-8">
           <CategoryFilter
             categories={categories}
             selectedCategory={selectedCategory}
             onCategoryChange={handleCategoryChange}
           />
-        </div>
+        </section>
 
-        {/* Filters and Products */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Main Content Area */}
+        <div className="grid grid-cols-12 gap-8">
           {/* Sidebar Filters */}
-          <div className="lg:col-span-1">
-            <ProductFilters
-              brands={availableFilters.brands}
-              onFiltersChange={handleFiltersChange}
-            />
-          </div>
+          <aside className="col-span-12 lg:col-span-3">
+            <div className="lg:sticky lg:top-24 space-y-6 bg-white rounded-lg p-6 shadow-sm">
+              <ProductFilters
+                brands={availableFilters.brands}
+                onFiltersChange={handleFiltersChange}
+              />
+            </div>
+          </aside>
 
-          {/* Products Grid */}
-          <div className="lg:col-span-3">
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">
-                {selectedCategory
-                  ? categories.find((c) => c.slug === selectedCategory)?.name ||
-                    "Products"
-                  : "All Products"}
-              </h2>
-              <p className="text-gray-600">
-                {pagination.totalProducts} products found
-              </p>
+          {/* Products Section */}
+          <main className="col-span-12 lg:col-span-9">
+            {/* Header */}
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  {selectedCategory
+                    ? categories.find((c) => c.slug === selectedCategory)
+                        ?.name || t("title")
+                    : t("allProducts")}
+                </h1>
+                <p className="text-gray-500 mt-1.5">
+                  {pagination.totalProducts} {t("productCount")}
+                </p>
+              </div>
             </div>
 
+            {/* Products Grid */}
             <Suspense fallback={<ProductSkeletonGroup />}>
-              <ProductsGrid
-                products={products}
-                isLoading={productsLoading}
-                error={error}
-                gridCols="4"
-              />
+              {products.length === 0 && !productsLoading ? (
+                <div className="text-center py-12">
+                  <div className="text-gray-400 text-lg mb-2">
+                    {t("noProducts")}
+                  </div>
+                  <p className="text-gray-500">{t("tryAdjusting")}</p>
+                </div>
+              ) : (
+                <ProductsGrid
+                  products={products}
+                  isLoading={productsLoading}
+                  error={error}
+                  gridCols="4"
+                />
+              )}
             </Suspense>
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="mt-8">
+              <div className="mt-12 flex justify-center">
                 <Pagination
                   currentPage={pagination.currentPage}
                   totalPages={pagination.totalPages}
@@ -135,7 +211,7 @@ const ShopLayout = memo(
                 />
               </div>
             )}
-          </div>
+          </main>
         </div>
       </div>
     );
