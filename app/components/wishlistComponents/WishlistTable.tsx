@@ -1,10 +1,13 @@
 "use client";
 import React, { memo } from "react";
+import Link from "next/link";
+import { useLocale } from "next-intl";
 import { ProductCardProps } from "@/app/types/types";
 import WishlistTableRow from "./WishlistTableRow";
 import { useWishlist } from "@/app/hooks/useWishlist";
 
 const WishlistTable = memo(() => {
+  const locale = useLocale();
   const { wishlist } = useWishlist();
 
   if (wishlist.length === 0) {
@@ -31,12 +34,12 @@ const WishlistTable = memo(() => {
         <p className="text-gray-600 mb-6">
           Save items you love to your wishlist and they&apos;ll appear here.
         </p>
-        <a
-          href="/shop"
+        <Link
+          href={`/${locale}/shop`}
           className="inline-flex items-center px-6 py-3 bg-orange text-white rounded-lg hover:bg-orange/90 transition-colors duration-200 font-medium"
         >
           Start Shopping
-        </a>
+        </Link>
       </div>
     );
   }
