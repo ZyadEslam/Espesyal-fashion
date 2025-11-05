@@ -1,7 +1,25 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Model } from "mongoose";
 import { PromoCodeState } from "@/app/types/types";
 
-const promoCodeSchema = new mongoose.Schema({
+// Interface for PromoCode document
+export interface IPromoCode extends Document {
+  code: string;
+  state: PromoCodeState;
+  discountPercentage: number;
+  author: mongoose.Types.ObjectId;
+  startDate: Date;
+  endDate: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  isValid(): boolean;
+}
+
+// Interface for PromoCode model with static methods
+export interface IPromoCodeModel extends Model<IPromoCode> {
+  updateExpiredCodes(): Promise<void>;
+}
+
+const promoCodeSchema = new mongoose.Schema<IPromoCode, IPromoCodeModel>({
   code: {
     type: String,
     required: [true, "Code is required"],
@@ -79,6 +97,7 @@ promoCodeSchema.pre("save", function (next) {
   next();
 });
 
-const PromoCode =
-  mongoose.models.PromoCode || mongoose.model("PromoCode", promoCodeSchema);
+const PromoCode: IPromoCodeModel =
+  (mongoose.models.PromoCode as IPromoCodeModel) ||
+  mongoose.model<IPromoCode, IPromoCodeModel>("PromoCode", promoCodeSchema);
 export default PromoCode;
