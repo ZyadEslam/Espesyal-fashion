@@ -14,23 +14,25 @@ const ProductsGroup = ({
   customClassName?: string;
 }) => {
   const context = useContext(ProductsContext);
-  
+  const [filteredProducts, setFilteredProducts] = useState<ProductCardProps[]>(
+    []
+  );
+
+  const products = context?.products || [];
+  const isLoading = context?.isLoading || false;
+  const error = context?.error || null;
+
+  useEffect(() => {
+    if (numOfProducts && products.length > 0) {
+      setFilteredProducts(products.slice(0, numOfProducts));
+    }
+  }, [numOfProducts, products]);
+
   if (!context) {
     return (
       <ErrorBox errorMessage="Products context is not available. Please ensure ProductsProvider is set up." />
     );
   }
-
-  const { products, isLoading, error } = context;
-  const [filteredProducts, setFilteredProducts] = useState<ProductCardProps[]>(
-    []
-  );
-
-  useEffect(() => {
-    if (numOfProducts && products) {
-      setFilteredProducts(products.slice(0, numOfProducts));
-    }
-  }, [numOfProducts, products]);
 
   if (isLoading) {
     return <ProductSkeletonGroup />;
