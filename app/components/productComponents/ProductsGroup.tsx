@@ -12,7 +12,7 @@ const ProductsGroup = ({
   numOfProducts?: number;
   customClassName?: string;
 }) => {
-  const { products, isLoading, error } = useProducts();
+  const { products, loading, error } = useProducts();
   const [filteredProducts, setFilteredProducts] = useState<ProductCardProps[]>(
     []
   );
@@ -23,7 +23,7 @@ const ProductsGroup = ({
     }
   }, [numOfProducts, products]);
 
-  if (isLoading) {
+  if (loading) {
     return <ProductSkeletonGroup />;
   }
 
