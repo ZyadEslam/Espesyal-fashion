@@ -1,10 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import ProductCard from "./ProductCard";
 import { ProductCardProps } from "../../types/types";
 import ErrorBox from "../../UI/ErrorBox";
 import { ProductSkeletonGroup } from "./LoadingSkeleton";
-import { useProducts } from "@/app/hooks/useProducts";
+import { ProductsContext } from "@/app/context/productsCtx";
+
 const ProductsGroup = ({
   numOfProducts,
   customClassName,
@@ -12,25 +13,32 @@ const ProductsGroup = ({
   numOfProducts?: number;
   customClassName?: string;
 }) => {
-  const { products, loading, error } = useProducts();
+  const context = useContext(ProductsContext);
+  
+  if (!context) {
+    return (
+      <ErrorBox errorMessage="Products context is not available. Please ensure ProductsProvider is set up." />
+    );
+  }
+
+  const { products, isLoading, error } = context;
   const [filteredProducts, setFilteredProducts] = useState<ProductCardProps[]>(
     []
   );
 
   useEffect(() => {
-    if (numOfProducts) {
-      setFilteredProducts(products ? products.slice(0, numOfProducts) : []);
+    if (numOfProducts && products) {
+      setFilteredProducts(products.slice(0, numOfProducts));
     }
   }, [numOfProducts, products]);
 
-  if (loading) {
+  if (isLoading) {
     return <ProductSkeletonGroup />;
   }
 
-  if (!products) {
-    console.log(error);
+  if (error || !products || products.length === 0) {
     return (
-      <ErrorBox errorMessage="Error loading products: Please Wait and try again" />
+      <ErrorBox errorMessage={error || "Error loading products: Please Wait and try again"} />
     );
   }
 
