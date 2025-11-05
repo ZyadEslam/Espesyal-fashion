@@ -4,7 +4,7 @@ import User from "@/app/models/user";
 import { requireAdmin } from "@/lib/adminAuth";
 
 // GET: Fetch all admin users
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Check admin access
     const session = await requireAdmin();
@@ -16,16 +16,13 @@ export async function GET(req: NextRequest) {
     }
 
     await dbConnect();
-    
+
     // Find all users with isAdmin = true
     const admins = await User.find({ isAdmin: true })
       .select("_id name email isAdmin")
       .lean();
 
-    return NextResponse.json(
-      { admins },
-      { status: 200 }
-    );
+    return NextResponse.json({ admins }, { status: 200 });
   } catch (error) {
     console.error("Error fetching admins:", error);
     return NextResponse.json(
@@ -71,10 +68,13 @@ export async function POST(req: NextRequest) {
 
     // Check if user exists
     const user = await User.findOne({ email: email.toLowerCase() });
-    
+
     if (!user) {
       return NextResponse.json(
-        { error: "User not found. User must sign in first before being granted admin access." },
+        {
+          error:
+            "User not found. User must sign in first before being granted admin access.",
+        },
         { status: 404 }
       );
     }
@@ -92,23 +92,20 @@ export async function POST(req: NextRequest) {
     await user.save();
 
     return NextResponse.json(
-      { 
+      {
         message: "Admin access granted successfully",
         admin: {
           _id: user._id,
           name: user.name,
           email: user.email,
           isAdmin: user.isAdmin,
-        }
+        },
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("Error adding admin:", error);
-    return NextResponse.json(
-      { error: "Failed to add admin" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to add admin" }, { status: 500 });
   }
 }
 
@@ -138,12 +135,9 @@ export async function DELETE(req: NextRequest) {
 
     // Find user
     const user = await User.findOne({ email: email.toLowerCase() });
-    
+
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if already not admin
@@ -167,14 +161,14 @@ export async function DELETE(req: NextRequest) {
     await user.save();
 
     return NextResponse.json(
-      { 
+      {
         message: "Admin access removed successfully",
         user: {
           _id: user._id,
           name: user.name,
           email: user.email,
           isAdmin: user.isAdmin,
-        }
+        },
       },
       { status: 200 }
     );
@@ -186,4 +180,3 @@ export async function DELETE(req: NextRequest) {
     );
   }
 }
-
