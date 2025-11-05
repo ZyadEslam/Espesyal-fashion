@@ -2,8 +2,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 const HeroSection = () => {
+  const t = useTranslations("about.hero");
+
   return (
     <section className="relative h-[60vh] flex items-center justify-center bg-gradient-to-r from-gray-50 to-gray-100 overflow-hidden">
       <motion.div
@@ -13,10 +16,10 @@ const HeroSection = () => {
         className="container mx-auto px-4 text-center relative z-10"
       >
         <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
-          <motion.span className="text-orange">Our</motion.span> Story
+          <motion.span className="text-orange">{t("title")}</motion.span>
         </h1>
         <p className="text-lg md:text-xl text-gray-100 max-w-2xl mx-auto">
-          Crafting exceptional shopping experiences since 2025
+          {t("subtitle")}
         </p>
       </motion.div>
       <motion.div
@@ -26,10 +29,10 @@ const HeroSection = () => {
         className="absolute inset-0"
       >
         <Image
-          src="/downloaded/d5.jpg"
-          alt="Background"
+          src="/espesyal/product5.jpg"
+          alt="About Us - Background"
           fill
-          className="object-cover"
+          className="w-full h-full object-cover"
           priority
         />
       </motion.div>

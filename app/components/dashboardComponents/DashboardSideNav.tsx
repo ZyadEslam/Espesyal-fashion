@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { memo } from "react";
 import { usePathname } from "next/navigation";
-import { Plus, List, ShoppingBag, Settings } from "lucide-react";
+import { Plus, List, ShoppingBag, Settings, Users } from "lucide-react";
 
 const sideNavLinks = [
   {
@@ -19,6 +19,11 @@ const sideNavLinks = [
     href: "/dashboard/orders",
     icon: ShoppingBag,
     label: "Orders",
+  },
+  {
+    href: "/dashboard/admin-management",
+    icon: Users,
+    label: "Admin Management",
   },
 ];
 
@@ -42,7 +47,7 @@ const DashboardSideNav = memo(() => {
         <div className="space-y-2">
           {sideNavLinks.map((link) => {
             const IconComponent = link.icon;
-            const isActive = pathname === link.href;
+            const isActive = pathname === link.href || pathname.endsWith(link.href);
 
             return (
               <Link

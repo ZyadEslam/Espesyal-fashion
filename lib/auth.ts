@@ -27,10 +27,15 @@ export const authOptions: NextAuthOptions = {
           
           // If th user does not exist Create a new user in your database
           if (!dbUser) {
+            // Check if this email should be granted admin access on first sign-in
+            const firstAdminEmail = process.env.FIRST_ADMIN_EMAIL?.toLowerCase().trim();
+            const userEmail = user.email?.toLowerCase().trim();
+            const shouldBeAdmin = firstAdminEmail && userEmail === firstAdminEmail;
+
             const newUser = {
               email: user.email,
               name: user.name,
-              isAdmin: false,
+              isAdmin: shouldBeAdmin || false,
               cart:[],
               wishlist:[],
               addresses:[],
@@ -41,6 +46,10 @@ export const authOptions: NextAuthOptions = {
 
             const result = await User.insertOne(newUser);
             dbUser = { ...newUser, _id: result.insertedId };
+            
+            if (shouldBeAdmin) {
+              console.log(`✅ Admin access automatically granted to ${user.email}`);
+            }
           }
 
           // Store the database user ID in the user object

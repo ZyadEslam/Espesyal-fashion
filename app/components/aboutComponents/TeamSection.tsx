@@ -3,6 +3,8 @@ import { team } from "@/app/utils/staticData";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import React from "react";
+import { useTranslations } from "next-intl";
+
 const staggerContainer = {
   animate: {
     transition: {
@@ -17,6 +19,8 @@ const fadeIn = {
 };
 
 const TeamSection = () => {
+  const t = useTranslations("about.team");
+
   return (
     <section className="py-20 bg-white">
       <div className="container mx-auto px-4">
@@ -26,7 +30,7 @@ const TeamSection = () => {
           viewport={{ once: true }}
           className="text-3xl font-bold text-center mb-12 underlined-header after:mx-auto"
         >
-          Meet Our Team
+          {t("title")}
         </motion.h2>
         <motion.div
           variants={staggerContainer}

@@ -6,10 +6,10 @@ import {
   useProductsByCategory,
 } from "../../hooks/useCategories";
 import { useShopProducts } from "../../hooks/useShopProducts";
-import CategoryFilter from "./CategoryFilter";
+// import CategoryFilter from "./CategoryFilter";
 import ProductFilters from "./ProductFilters";
 import ProductsGrid from "./ProductsGrid";
-import CategorySection from "./CategorySection";
+// import CategorySection from "./CategorySection";
 import Pagination from "./Pagination";
 import { ProductSkeletonGroup } from "../productComponents/LoadingSkeleton";
 
@@ -24,6 +24,18 @@ const ShopLayout = memo(
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
       initialCategory || null
     );
+    useEffect(() => {
+      setSelectedCategory(initialCategory || null);
+    }, [initialCategory]);
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [selectedCategory]);
+    useEffect(() => {
+      setFilters({
+        sortBy: "createdAt",
+        sortOrder: "desc",
+      });
+    }, [selectedCategory]);
     const [currentPage, setCurrentPage] = useState(1);
     const [filters, setFilters] = useState<{
       sortBy: string;
@@ -41,7 +53,7 @@ const ShopLayout = memo(
 
     const {
       categories,
-      featuredCategories,
+      // featuredCategories,
       isLoading: categoriesLoading,
     } = useCategories();
 
@@ -49,7 +61,6 @@ const ShopLayout = memo(
     const {
       initialProducts,
       initialPagination,
-      initialFilters,
       setCurrentProducts,
       setCurrentPagination,
       setCurrentFilters,
@@ -100,14 +111,13 @@ const ShopLayout = memo(
 
     const products = needsFetch ? fetchedProducts : initialProducts;
     const pagination = needsFetch ? fetchedPagination : initialPagination;
-    const availableFilters = initialFilters;
     const productsLoading = needsFetch ? isFetching : false;
     const error = needsFetch ? fetchError : null;
 
-    const handleCategoryChange = useCallback((categorySlug: string | null) => {
-      setSelectedCategory(categorySlug);
-      setCurrentPage(1);
-    }, []);
+    // const handleCategoryChange = useCallback((categorySlug: string | null) => {
+    //   setSelectedCategory(categorySlug);
+    //   setCurrentPage(1);
+    // }, []);
 
     const handleFiltersChange = useCallback(
       (newFilters: {
@@ -134,24 +144,6 @@ const ShopLayout = memo(
 
     return (
       <div className={`max-w-7xl mx-auto ${className}`}>
-        {/* Featured Categories */}
-        {featuredCategories.length > 0 && (
-          <section className="mb-12">
-            <CategorySection
-              categories={featuredCategories}
-              title={t("featuredCollections")}
-            />
-          </section>
-        )}
-
-        {/* Category Tabs */}
-        <section className="mb-8">
-          <CategoryFilter
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onCategoryChange={handleCategoryChange}
-          />
-        </section>
 
         {/* Main Content Area */}
         <div className="grid grid-cols-12 gap-8">
@@ -159,7 +151,6 @@ const ShopLayout = memo(
           <aside className="col-span-12 lg:col-span-3">
             <div className="lg:sticky lg:top-24 space-y-6 bg-white rounded-lg p-6 shadow-sm">
               <ProductFilters
-                brands={availableFilters.brands}
                 onFiltersChange={handleFiltersChange}
               />
             </div>

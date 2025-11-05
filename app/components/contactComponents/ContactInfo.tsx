@@ -1,9 +1,12 @@
 "use client";
 import { motion } from "framer-motion";
 import React from "react";
+import { useTranslations } from "next-intl";
 import LocationMap from "./LocationMap";
 
 const ContactInfo = () => {
+  const t = useTranslations("contact.info");
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
@@ -13,7 +16,7 @@ const ContactInfo = () => {
     >
       <div>
         <h2 className="text-2xl font-semibold mb-6 underlined-header">
-          Contact Information
+          {t("title")}
         </h2>
         <div className="space-y-4">
           <div className="flex items-start space-x-4">
@@ -33,7 +36,7 @@ const ContactInfo = () => {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium text-gray-900">Phone</h3>
+              <h3 className="font-medium text-gray-900">{t("phone")}</h3>
               <p className="text-gray-600">+201040431147</p>
               <p className="text-gray-600">+201144094269</p>
             </div>
@@ -55,7 +58,7 @@ const ContactInfo = () => {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium text-gray-900">Email</h3>
+              <h3 className="font-medium text-gray-900">{t("email")}</h3>
               <p className="text-gray-600">Contact@zyadelbehiry@gmail.com</p>
             </div>
           </div>
@@ -82,8 +85,8 @@ const ContactInfo = () => {
               </svg>
             </div>
             <div>
-              <h3 className="font-medium text-gray-900">Location</h3>
-              <p className="text-gray-600">Cairo, Egypt</p>
+              <h3 className="font-medium text-gray-900">{t("location")}</h3>
+              <p className="text-gray-600">{t("address")}</p>
             </div>
           </div>
         </div>

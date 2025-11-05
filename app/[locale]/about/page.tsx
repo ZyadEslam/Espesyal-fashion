@@ -1,7 +1,8 @@
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 // import { Suspense, lazy } from "react";
 import {
-  HeroSection,
+  // HeroSection,
   MissionSection,
   ValuesSection,
   TeamSection,
@@ -11,44 +12,60 @@ import {
 import { generateMetadata as generateSEOMetadata } from "../../utils/seo";
 import { Breadcrumb } from "../../components/seo/SEOComponents";
 
-export const metadata: Metadata = generateSEOMetadata({
-  title: "About Us - Espesyal Shop",
-  description:
-    "Learn about Espesyal Shop's mission, values, and team. We're committed to providing premium quality products and exceptional customer service.",
-  keywords: [
-    "about us",
-    "company",
-    "mission",
-    "values",
-    "team",
-    "story",
-    "e-commerce",
-    "premium products",
-  ],
-  canonical: "/about",
-});
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "about" });
 
-const AboutPage = () => {
+  return generateSEOMetadata({
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    keywords: [
+      "about us",
+      "company",
+      "mission",
+      "values",
+      "team",
+      "story",
+      "e-commerce",
+      "premium products",
+    ],
+    canonical: `/${locale}/about`,
+  });
+}
+
+const AboutPage = async ({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) => {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "about" });
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+
   const breadcrumbItems = [
-    { name: "Home", url: "/" },
-    { name: "About Us", url: "/about", current: true },
+    { name: tNav("home"), url: `/${locale}` },
+    { name: t("breadcrumb"), url: `/${locale}/about`, current: true },
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white mx-auto lg:max-w-7xl sm:w-[95%]">
       <Breadcrumb items={breadcrumbItems} />
 
       {/* Hero Section */}
-      <HeroSection />
+      {/* <HeroSection /> */}
+
+      {/* Team Section */}
+      <TeamSection />
 
       {/* Mission Section */}
       <MissionSection />
 
       {/* Values Section */}
       <ValuesSection />
-
-      {/* Team Section */}
-      <TeamSection />
 
       {/* Contact CTA */}
       <ContactUsSection />

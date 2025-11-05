@@ -1,7 +1,16 @@
 import React from "react";
+import { redirect } from "next/navigation";
 import DashboardSideNav from "../../components/dashboardComponents/DashboardSideNav";
+import { checkAdminAccess } from "@/lib/adminAuth";
 
-const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
+  // Check admin access
+  const { isAdmin } = await checkAdminAccess();
+  
+  if (!isAdmin) {
+    redirect("/");
+  }
+
   return (
     <div className="min-h-screen bg-gray-50/50">
       <div className="flex">

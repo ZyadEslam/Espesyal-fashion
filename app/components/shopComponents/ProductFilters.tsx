@@ -11,13 +11,12 @@ interface FilterOptions {
 }
 
 interface ProductFiltersProps {
-  brands: string[];
   onFiltersChange: (filters: FilterOptions) => void;
   className?: string;
 }
 
 const ProductFilters = memo(
-  ({ brands, onFiltersChange, className = "" }: ProductFiltersProps) => {
+  ({ onFiltersChange, className = "" }: ProductFiltersProps) => {
     const t = useTranslations("common");
     const [filters, setFilters] = useState<FilterOptions>({
       sortBy: "createdAt",
@@ -69,7 +68,7 @@ const ProductFilters = memo(
             </select>
           </div>
 
-          {/* Sort Order */}
+          {/* Sort Order
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               {t("order")}
@@ -84,7 +83,7 @@ const ProductFilters = memo(
               <option value="desc">{t("highToLow")}</option>
               <option value="asc">{t("lowToHigh")}</option>
             </select>
-          </div>
+          </div> */}
 
           {/* Price Range */}
           <div>
@@ -121,7 +120,7 @@ const ProductFilters = memo(
             </div>
           </div>
 
-          {/* Brand Filter */}
+          {/* Brand Filter
           {brands.length > 0 && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -144,7 +143,7 @@ const ProductFilters = memo(
                 ))}
               </select>
             </div>
-          )}
+          )} */}
 
           {/* Clear Filters */}
           {hasActiveFilters && (

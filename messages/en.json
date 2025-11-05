@@ -12,6 +12,8 @@
     "filter": "Filter",
     "sort": "Sort",
     "price": "Price",
+    "rating": "Rating",
+    "priceRange": "Price Range",
     "brand": "Brand",
     "category": "Category",
     "products": "Products",
@@ -117,7 +119,7 @@
     "handpickedSelections": "Handpicked",
     "selections": "Selections",
     "discoverDescription": "Discover our carefully curated selection of premium products designed to enhance your lifestyle",
-    "specialOffer": "✨ Special Offer",
+    "specialOffer": "Special Offer",
     "elevateYourStyle": "Elevate Your",
     "styleGame": "Style Game",
     "discoverExclusive": "Discover our exclusive collection of premium fashion pieces with up to",
@@ -125,19 +127,19 @@
     "limitedTimeOffer": "Limited time offer - don't miss out!",
     "shopNow": "Shop Now - Save 30%",
     "viewCollection": "View Collection →",
-    "bestSellers": "🔥 BEST SELLERS",
+    "bestSellers": "BEST SELLERS",
     "customerFavorites": "Customer",
     "favorites": "Favorites",
     "discoverMostLoved": "Discover our most loved products that customers can't get enough of",
     "quickView": "Quick View",
     "viewAllBestSellers": "View All Best Sellers",
-    "newCollections": "✨ NEW COLLECTIONS",
+    "newCollections": "NEW COLLECTIONS",
     "freshArrivals": "Fresh",
     "arrivals": "Arrivals",
     "beFirstToDiscover": "Be the first to discover our latest collections and stay ahead of the fashion curve",
     "itemsAvailable": "items available",
     "exploreCollection": "Explore Collection",
-    "featuredCollection": "🌟 FEATURED COLLECTION",
+    "featuredCollection": "FEATURED COLLECTION",
     "premiumLuxuryLine": "Premium",
     "luxuryLine": "Luxury Line",
     "experienceFinest": "Experience the finest in fashion with our exclusive luxury collection. Handcrafted pieces that define elegance and sophistication.",
@@ -160,5 +162,69 @@
     "new": "NEW",
     "limited": "LIMITED",
     "exclusive": "EXCLUSIVE"
+  },
+  "about": {
+    "title": "About Us",
+    "breadcrumb": "About Us",
+    "metaTitle": "About Us - Espesyal Shop",
+    "metaDescription": "Learn about Espesyal Shop's mission, values, and team. We're committed to providing premium quality products and exceptional customer service.",
+    "hero": {
+      "title": "Our Story",
+      "subtitle": "Crafting exceptional shopping experiences since 2025"
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description": "Espesyal Shop is more than just a brand, it's a movement. Dedicated to those who live and breathe an exceptional shopping experience. Our collection is designed with both performance and style in mind. Each piece is crafted from high-quality, breathable materials that provide comfort and flexibility, allowing you to push your limits without compromising on looks—it's designed to take you from the gym to the streets with ease. Sleek designs, bold colors, and innovative fabrics ensure that Espesyal Shop pieces fit seamlessly into your everyday wardrobe, while still delivering the functionality you need for your exceptional shopping experience."
+    },
+    "values": {
+      "title": "Our Values",
+      "innovation": {
+        "title": "Innovation",
+        "description": "Constantly pushing boundaries to deliver better shopping experiences"
+      },
+      "quality": {
+        "title": "Quality",
+        "description": "Uncompromising commitment to excellence in everything we do"
+      },
+      "customerFirst": {
+        "title": "Customer First",
+        "description": "Putting our customers at the heart of every decision"
+      }
+    },
+    "team": {
+      "title": "Meet Our Team"
+    },
+    "contactUs": {
+      "title": "Join Our Journey",
+      "description": "We're always looking for passionate individuals to join our team and help shape the future of e-commerce.",
+      "button": "Contact Us"
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "breadcrumb": "Contact Us",
+    "metaTitle": "Contact Us - Espesyal Shop",
+    "metaDescription": "Get in touch with Espesyal Shop. We're here to help with any questions about our products, orders, or services. Contact us today!",
+    "hero": {
+      "title": "Contact Us",
+      "subtitle": "We'd love to hear from you. Send us a message and we'll respond as soon as possible."
+    },
+    "form": {
+      "title": "Send us a Message",
+      "nameLabel": "Your Name",
+      "namePlaceholder": "John Doe",
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "john@example.com",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Your message here...",
+      "submitButton": "Send Message"
+    },
+    "info": {
+      "title": "Contact Information",
+      "phone": "Phone",
+      "email": "Email",
+      "location": "Location",
+      "address": "Cairo, Egypt"
+    }
   }
 }
