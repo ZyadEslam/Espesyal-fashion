@@ -34,7 +34,7 @@ export const api = {
         cacheStrategies.products()
       );
       return data.product;
-    } catch (error) {
+    } catch {
       throw new NextResponse(`Failed to fetch Products`, {
         status: 500,
       });

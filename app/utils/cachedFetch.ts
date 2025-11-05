@@ -13,7 +13,7 @@ interface CachedFetchOptions extends RequestInit {
 }
 
 interface CacheEntry {
-  data: any;
+  data: unknown;
   timestamp: number;
   expiresAt: number;
 }
@@ -55,7 +55,7 @@ function isCacheValid(entry: CacheEntry): boolean {
 /**
  * Get cached data if available and valid
  */
-function getCachedData(key: string): any | null {
+function getCachedData(key: string): unknown | null {
   const entry = memoryCache.get(key);
   if (entry && isCacheValid(entry)) {
     return entry.data;
@@ -72,7 +72,7 @@ function getCachedData(key: string): any | null {
 /**
  * Set data in cache
  */
-function setCachedData(key: string, data: any, ttl: number): void {
+function setCachedData(key: string, data: unknown, ttl: number): void {
   const now = Date.now();
   memoryCache.set(key, {
     data,
@@ -139,7 +139,7 @@ export function clearCache(): void {
 /**
  * Cached fetch function with automatic cache management
  */
-export async function cachedFetch<T = any>(
+export async function cachedFetch(
   url: string,
   options?: CachedFetchOptions
 ): Promise<Response> {
@@ -196,11 +196,11 @@ export async function cachedFetch<T = any>(
 /**
  * Helper function to fetch JSON with caching
  */
-export async function cachedFetchJson<T = any>(
+export async function cachedFetchJson<T = unknown>(
   url: string,
   options?: CachedFetchOptions
 ): Promise<T> {
-  const response = await cachedFetch<T>(url, options);
+  const response = await cachedFetch(url, options);
   
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'Unknown error' }));
