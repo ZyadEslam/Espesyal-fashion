@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useMemo } from "react";
 import ProductCard from "./ProductCard";
 import { ProductCardProps } from "../../types/types";
 import ErrorBox from "../../UI/ErrorBox";
@@ -18,7 +18,8 @@ const ProductsGroup = ({
     []
   );
 
-  const products = context?.products || [];
+  // Memoize products to avoid dependency issues
+  const products = useMemo(() => context?.products || [], [context?.products]);
   const isLoading = context?.isLoading || false;
   const error = context?.error || null;
 

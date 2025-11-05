@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { api } from "./utils/api";
+import { ProductCardProps } from "./types/types";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
@@ -44,17 +45,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     ];
 
-    // Product pages
-    const productPages = products.map(
-      (product: { _id: string; updatedAt?: string; createdAt?: string }) => ({
+    // Product pages - filter out products without _id
+    const productPages = products
+      .filter((product): product is ProductCardProps & { _id: string } => !!product._id)
+      .map((product) => ({
         url: `${baseUrl}/product/${product._id}`,
-        lastModified: new Date(
-          product.updatedAt || product.createdAt || new Date().toISOString()
-        ),
+        lastModified: new Date(),
         changeFrequency: "weekly" as const,
         priority: 0.8,
-      })
-    );
+      }));
 
     // Category pages
     const categoryPages = categories.map((category) => ({

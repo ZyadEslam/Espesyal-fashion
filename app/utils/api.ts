@@ -11,7 +11,7 @@ export function getBaseUrl() {
 const API_BASE_URL = `${getBaseUrl()}/api`;
 
 export const api = {
-  getProducts: async () => {
+  getProducts: async (): Promise<ProductCardProps[]> => {
     console.log("API_BASE_URL:", API_BASE_URL);
 
     try {
@@ -24,7 +24,8 @@ export const api = {
       return data.products || [];
     } catch (error) {
       console.log("Error fetching products:", error);
-      return error;
+      // Return empty array on error instead of the error object
+      return [];
     }
   },
   getProduct: async (id: string) => {
@@ -52,16 +53,18 @@ export const api = {
       return null;
     }
   },
-  getWishlist: async (userId: string) => {
+  getWishlist: async (userId: string): Promise<{ wishlist: ProductCardProps[] }> => {
     try {
-      const res = await cachedFetchJson(
+      const res = await cachedFetchJson<{ wishlist: ProductCardProps[] }>(
         `${API_BASE_URL}/user/${userId}/wishlist`,
         cacheStrategies.userData()
       );
       console.log("Wishlist response:", res);
       return res;
     } catch (err) {
-      return NextResponse.json(err, { status: 500 });
+      console.error("Error fetching wishlist:", err);
+      // Return empty wishlist on error instead of NextResponse
+      return { wishlist: [] };
     }
   },
   mergeWishlist: async (
@@ -85,16 +88,18 @@ export const api = {
       return NextResponse.json(err, { status: 401 });
     }
   },
-  getCart: async (userId: string) => {
+  getCart: async (userId: string): Promise<{ cart: ProductCardProps[] }> => {
     try {
-      const res = await cachedFetchJson(
+      const res = await cachedFetchJson<{ cart: ProductCardProps[] }>(
         `${API_BASE_URL}/user/${userId}/cart`,
         cacheStrategies.userData()
       );
       console.log("Cart response:", res);
       return res;
     } catch (err) {
-      return NextResponse.json(err, { status: 500 });
+      console.error("Error fetching cart:", err);
+      // Return empty cart on error instead of NextResponse
+      return { cart: [] };
     }
   },
   mergeCart: async (
