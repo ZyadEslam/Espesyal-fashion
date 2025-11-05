@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { CategoryProps, ProductCardProps } from "../types/types";
+import { cachedFetchJson, cacheStrategies } from "@/app/utils/cachedFetch";
 
 interface UseCategoriesReturn {
   categories: CategoryProps[];
@@ -20,10 +21,10 @@ export const useCategories = (): UseCategoriesReturn => {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(
-        "/api/categories?includeProducts=true&active=true"
+      const data = await cachedFetchJson<{ data: CategoryProps[]; success: boolean; message?: string }>(
+        "/api/categories?includeProducts=true&active=true",
+        cacheStrategies.categories()
       );
-      const data = await response.json();
 
       if (data.success) {
         setCategories(data.data);

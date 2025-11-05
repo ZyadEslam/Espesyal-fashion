@@ -29,6 +29,19 @@ const orderSchema = new mongoose.Schema({
     required: [true, "Order State is required"],
     default: "Pending"
   },
+  promoCode: {
+    type: String,
+    required: false,
+  },
+  discountAmount: {
+    type: Number,
+    required: false,
+    default: 0,
+  },
+  discountPercentage: {
+    type: Number,
+    required: false,
+  },
 });
 
 const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);

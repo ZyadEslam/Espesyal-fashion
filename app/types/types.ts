@@ -45,6 +45,12 @@ export interface AddressProps {
   state: string;
 }
 
+export enum PromoCodeState {
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  EXPIRED = "expired",
+}
+
 // export interface ShippingFromProps {
 //   handleInputChange(e: React.ChangeEvent<HTMLInputElement>): void;
 //   formData: {

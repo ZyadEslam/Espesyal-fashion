@@ -43,16 +43,16 @@ const DashboardPage = memo(() => {
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-orange/10 rounded-lg flex items-center justify-center">
-            <Plus className="w-5 h-5 text-orange" />
+      <div className="mb-6 sm:mb-8">
+        <div className="flex items-center gap-2 sm:gap-3 mb-4">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange/10 rounded-lg flex items-center justify-center">
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-orange" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
               Add New Product
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-sm sm:text-base text-gray-600 mt-1">
               Create a new product listing for your store
             </p>
           </div>
@@ -60,8 +60,8 @@ const DashboardPage = memo(() => {
       </div>
 
       {/* Form Container */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-8">
+      <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 sm:p-6 lg:p-8">
           <ProductForm>
             <ImageUploader
               images={images}

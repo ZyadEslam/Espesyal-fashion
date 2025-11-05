@@ -8,11 +8,13 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: #eda14e;
+  --color-primary: #b16e27;
+  --color-olive: #ad9452;
   --color-primary-dark: #8b6f47;
   --color-secondary: #f5ebe0;
   --color-secondaryLight: #faf6f1;
   --color-orange: #cb8130;
+  /* --color-orange: #b16e27; */
 
   --breakpoint-sm: 350px;
   --breakpoint-md: 768px;

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ProductCardProps } from "../types/types";
+import { cachedFetchJson, cacheStrategies } from "./cachedFetch";
 
 export function getBaseUrl() {
   if (typeof window !== "undefined") return ""; // browser should use relative url
@@ -14,14 +15,11 @@ export const api = {
     console.log("API_BASE_URL:", API_BASE_URL);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/product`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await res.json();
-      console.log("fetche products:", data);
+      const data = await cachedFetchJson<{ products: ProductCardProps[] }>(
+        `${API_BASE_URL}/product`,
+        cacheStrategies.products()
+      );
+      console.log("fetched products:", data);
 
       return data.products || [];
     } catch (error) {
@@ -30,26 +28,24 @@ export const api = {
     }
   },
   getProduct: async (id: string) => {
-    const response = await fetch(`/api/product/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new NextResponse(`Failed to fetch Products ${response.status}`, {
+    try {
+      const data = await cachedFetchJson<{ product: ProductCardProps }>(
+        `/api/product/${id}`,
+        cacheStrategies.products()
+      );
+      return data.product;
+    } catch (error) {
+      throw new NextResponse(`Failed to fetch Products`, {
         status: 500,
       });
     }
-
-    const { product: data } = await response.json();
-    return data;
   },
   getUser: async (id: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/${id}`);
-      const user = await response.json();
+      const user = await cachedFetchJson(
+        `${API_BASE_URL}/user/${id}`,
+        cacheStrategies.userData()
+      );
       return user;
     } catch (err) {
       console.log(err);
@@ -58,13 +54,10 @@ export const api = {
   },
   getWishlist: async (userId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/${userId}/wishlist`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const res = await response.json();
+      const res = await cachedFetchJson(
+        `${API_BASE_URL}/user/${userId}/wishlist`,
+        cacheStrategies.userData()
+      );
       console.log("Wishlist response:", res);
       return res;
     } catch (err) {
@@ -94,13 +87,10 @@ export const api = {
   },
   getCart: async (userId: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/${userId}/cart`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const res = await response.json();
+      const res = await cachedFetchJson(
+        `${API_BASE_URL}/user/${userId}/cart`,
+        cacheStrategies.userData()
+      );
       console.log("Cart response:", res);
       return res;
     } catch (err) {

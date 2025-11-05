@@ -44,11 +44,18 @@ export async function GET(request: NextRequest) {
 
     const categories = await categoriesQuery.exec();
 
-    return NextResponse.json({
-      success: true,
-      data: categories,
-      count: categories.length,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        data: categories,
+        count: categories.length,
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        }
+      }
+    );
   } catch (error) {
     console.error("Error fetching categories:", error);
     return NextResponse.json(

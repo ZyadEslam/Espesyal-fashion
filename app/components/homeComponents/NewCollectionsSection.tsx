@@ -53,7 +53,8 @@ const NewCollectionsSection = () => {
             {t("newCollections")}
           </div>
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            {t("freshArrivals")} <span className="text-primary">{t("arrivals")}</span>
+            {t("freshArrivals")}{" "}
+            <span className="text-primary">{t("arrivals")}</span>
           </h2>
           <p className="text-foreground/70 text-base max-w-2xl mx-auto">
             {t("beFirstToDiscover")}
@@ -139,11 +140,12 @@ const NewCollectionsSection = () => {
           <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 items-center  p-6 lg:p-8">
             {/* Content */}
             <div className="text-secondary ">
-              <div className="inline-flex items-center bg-gradient-to-r from-orange to-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              <div className="inline-flex items-center bg-gradient-to-r from-orange to-orange/70 px-4 py-2 rounded-full text-sm font-semibold mb-4">
                 {t("featuredCollection")}
               </div>
               <h3 className="text-2xl lg:text-3xl font-bold mb-4  ">
-                {t("premiumLuxuryLine")} <span className="text-orange">{t("luxuryLine")}</span>
+                {t("premiumLuxuryLine")}{" "}
+                <span className="text-gray-300">{t("luxuryLine")}</span>
               </h3>
               <p className="text-secondaryLight text-base max-w-100 mb-6">
                 {t("experienceFinest")}
@@ -168,7 +170,7 @@ const NewCollectionsSection = () => {
                 fill
                 className="object-cover rounded-2xl"
               />
-              <div className="absolute -top-4 -right-4 bg-gradient-to-r from-orange to-primary text-white px-6 py-3 rounded-xl shadow-2xl font-bold text-lg transform -rotate-12">
+              <div className="absolute -top-4 -right-4 bg-gradient-to-r from-olive to-olive/80 text-white px-6 py-3 rounded-xl shadow-2xl font-bold text-lg transform -rotate-12">
                 {t("exclusive")}
               </div>
             </div>

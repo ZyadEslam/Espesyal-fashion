@@ -126,11 +126,18 @@ export const placeOrderAction = async (
 ) => {
   const session = await getSession();
   try {
+    const promoCode = formData.get("promoCode") as string;
+    const discountAmount = formData.get("discountAmount") as string;
+    const discountPercentage = formData.get("discountPercentage") as string;
+
     const orderData = {
       addressId: formData.get("addressId") as string,
       userId: session?.user.id as string,
       products: JSON.parse(formData.get("products") as string),
       totalPrice: Number(formData.get("totalPrice")),
+      ...(promoCode && { promoCode }),
+      ...(discountAmount && { discountAmount: Number(discountAmount) }),
+      ...(discountPercentage && { discountPercentage: Number(discountPercentage) }),
     };
     if (!orderData.addressId) {
       return { success: false, message: "Please select a shipping address." };

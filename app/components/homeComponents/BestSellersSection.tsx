@@ -67,7 +67,8 @@ const BestSellersSection = () => {
             {t("bestSellers")}
           </div>
           <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-            {t("customerFavorites")} <span className="text-orange">{t("favorites")}</span>
+            {t("customerFavorites")}{" "}
+            <span className="text-orange">{t("favorites")}</span>
           </h2>
           <p className="text-foreground/70 text-base max-w-2xl mx-auto">
             {t("discoverMostLoved")}
@@ -103,7 +104,7 @@ const BestSellersSection = () => {
 
                 {/* Discount Badge */}
                 <div className="absolute top-3 right-3">
-                  <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                  <span className="bg-[#AD9452] text-white px-2 py-1 rounded-full text-xs font-bold">
                     -
                     {Math.round(
                       ((product.originalPrice - product.price) /
@@ -129,20 +130,6 @@ const BestSellersSection = () => {
                 <h3 className="font-bold text-base text-foreground mb-2 group-hover:text-orange transition-colors">
                   {product.name}
                 </h3>
-
-                {/* Rating */}
-                {/* <div className="flex items-center mb-3">
-                  <div className="flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className="text-sm">
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                  <span className="text-sm text-foreground/60 ml-2">
-                    ({product.rating})
-                  </span>
-                </div> */}
 
                 {/* Price */}
                 <div className="flex items-center justify-between mb-3">
