@@ -1,28 +1,18 @@
 "use client";
 import { AddressProps } from "@/app/types/types";
-import { placeOrderAction } from "@/app/utils/actions";
 import { useSession } from "next-auth/react";
-import React, { useActionState, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import AddressSelection from "./AddressSelection";
-import ActionNotification from "@/app/UI/ActionNotification";
-import { api } from "@/app/utils/api";
-import LoadingOverlay from "../LoadingOverlay";
-import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/app/hooks/useCart";
-const initialState = {
-  success: false,
-  message: "",
-};
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 const OrderForm = () => {
   const [taxes, setTaxes] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<AddressProps>();
   const session = useSession();
-  const [orderFormState, formAction] = useActionState(
-    placeOrderAction,
-    initialState
-  );
+  const router = useRouter();
+  const locale = useLocale();
   const { cart, totalPrice } = useCart();
 
   // Promo code state
@@ -61,20 +51,6 @@ const OrderForm = () => {
     }
   }, [totalPrice, discountPercentage]);
 
-  useEffect(() => {
-    console.log("Order Form Handler");
-    if (orderFormState.success) {
-      setSelectedAddress(undefined);
-      setPromoCode("");
-      setAppliedPromoCode(null);
-      setDiscountPercentage(0);
-      setDiscountAmount(0);
-      setPromoError("");
-      localStorage.setItem("cart", JSON.stringify([]));
-      api.clearCart(session.data?.user.id as string);
-    }
-    setIsLoading(false);
-  }, [orderFormState.success, session.data?.user.id]);
 
   const handleApplyPromoCode = async () => {
     if (!promoCode.trim()) {
@@ -129,72 +105,42 @@ const OrderForm = () => {
     setPromoError("");
   };
 
-  const submitHandler = async () => {
-    setIsLoading(true);
+  const submitHandler = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!isOrderValidToPlace) {
+      return;
+    }
+
+    // Store order data in sessionStorage to pass to checkout page
+    const orderData = {
+      addressId: selectedAddress?._id,
+      products: cart,
+      totalPrice: finalPrice,
+      promoCode: appliedPromoCode || null,
+      discountAmount: discountAmount,
+      discountPercentage: discountPercentage,
+      taxes: taxes,
+      subtotal: totalPrice,
+    };
+
+    sessionStorage.setItem("checkoutData", JSON.stringify(orderData));
+    
+    // Redirect to checkout page
+    router.push(`/${locale}/checkout`);
   };
 
   return (
-    <>
-      <LoadingOverlay
-        isVisible={isLoading}
-        message="Processing Your Order..."
-        icon={<ShoppingCart />}
-      />
-      <form
-        onSubmit={submitHandler}
-        action={formAction}
-        className="flex flex-col gap-4"
-      >
-        <div className="order-summary-pair">
-          <ActionNotification {...orderFormState} />
-          <label className="font-medium text-gray-600">SELECT ADDRESS</label>
+    <form
+      onSubmit={submitHandler}
+      className="flex flex-col gap-4"
+    >
+      <div className="order-summary-pair">
+        <label className="font-medium text-gray-600">SELECT ADDRESS</label>
           <AddressSelection
             setSelectedAddress={setSelectedAddress}
             selectedAddress={selectedAddress as AddressProps}
           />
-        </div>
-        <div className="hidden">
-          <input
-            type="text"
-            name="addressId"
-            value={selectedAddress?._id || ""}
-            readOnly={true}
-          />
-          <input
-            type="text"
-            name="totalPrice"
-            value={finalPrice.toFixed(2)}
-            readOnly={true}
-          />
-
-          <input
-            type="text"
-            name="products"
-            value={JSON.stringify(cart)}
-            readOnly={true}
-          />
-          {appliedPromoCode && (
-            <>
-              <input
-                type="text"
-                name="promoCode"
-                value={appliedPromoCode}
-                readOnly={true}
-              />
-              <input
-                type="text"
-                name="discountAmount"
-                value={discountAmount.toFixed(2)}
-                readOnly={true}
-              />
-              <input
-                type="text"
-                name="discountPercentage"
-                value={discountPercentage}
-                readOnly={true}
-              />
-            </>
-          )}
         </div>
         <div className="order-summary-pair">
           <label className="font-medium text-gray-600">PROMO CODE</label>
@@ -272,19 +218,18 @@ const OrderForm = () => {
           <p>${finalPrice.toFixed(2)}</p>
         </div>
 
-        <button
-          type="submit"
-          className="bg-orange py-3 text-white cursor-pointer hover:bg-orange/90 disabled:cursor-not-allowed disabled:bg-gray-400"
-          disabled={!isOrderValidToPlace}
-        >
-          {session.status === "unauthenticated"
-            ? "Please Login to add orders "
-            : cart.length === 0
-            ? "Cart is empty"
-            : "Place Order"}
-        </button>
-      </form>
-    </>
+      <button
+        type="submit"
+        className="bg-orange py-3 text-white cursor-pointer hover:bg-orange/90 disabled:cursor-not-allowed disabled:bg-gray-400"
+        disabled={!isOrderValidToPlace}
+      >
+        {session.status === "unauthenticated"
+          ? "Please Login to add orders "
+          : cart.length === 0
+          ? "Cart is empty"
+          : "Proceed to Checkout"}
+      </button>
+    </form>
   );
 };
 

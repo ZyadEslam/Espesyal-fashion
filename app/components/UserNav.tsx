@@ -6,7 +6,7 @@ import { assets } from "@/public/assets/assets";
 import { AuthButtons, ToggleMenuBtn } from "./";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { Heart, ShoppingCart, User } from "lucide-react";
+import { Heart, ShoppingCart, User, Package } from "lucide-react";
 import { useCart } from "@/app/hooks/useCart";
 import { useTranslations } from "next-intl";
 import { useWishlist } from "@/app/hooks/useWishlist";
@@ -17,6 +17,7 @@ const UserNav = memo(() => {
   const pathname = usePathname();
   const locale = useLocale();
   const t = useTranslations("nav");
+  const tOrders = useTranslations("orders");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { data: session } = useSession();
@@ -160,6 +161,16 @@ const UserNav = memo(() => {
                   </Link>
 
                   {session?.user && (
+                    <Link
+                      href={getLocalizedPath("/my-orders")}
+                      className="p-2 text-gray-600 hover:text-primary transition-colors duration-300"
+                      title={tOrders("myOrders")}
+                    >
+                      <Package className="w-5 h-5" />
+                    </Link>
+                  )}
+
+                  {session?.user && (
                     <div className="flex items-center space-x-2">
                       <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
                         <User className="w-4 h-4 text-white" />
@@ -280,6 +291,16 @@ const UserNav = memo(() => {
                           <ShoppingCart className="w-5 h-5" />
                           <span>{t("cart")}</span>
                         </Link>
+                        {session?.user && (
+                          <Link
+                            href={getLocalizedPath("/my-orders")}
+                            className="flex items-center space-x-2 text-gray-600 hover:text-primary transition-colors duration-300"
+                            onClick={closeMenu}
+                          >
+                            <Package className="w-5 h-5" />
+                            <span>{tOrders("myOrders")}</span>
+                          </Link>
+                        )}
                       </div>
 
                       {session?.user?.isAdmin && (

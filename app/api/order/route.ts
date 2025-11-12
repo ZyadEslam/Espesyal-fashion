@@ -4,7 +4,17 @@ import dbConnect from "@/lib/mongoose";
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const { userId, addressId, products, totalPrice, promoCode, discountAmount, discountPercentage } = await req.json();
+    const {
+      userId,
+      addressId,
+      products,
+      totalPrice,
+      promoCode,
+      discountAmount,
+      discountPercentage,
+      paymentMethod,
+      stripePaymentIntentId,
+    } = await req.json();
     if (
       !userId ||
       !addressId ||
@@ -27,9 +37,15 @@ export async function POST(req: Request) {
       totalPrice: +totalPrice,
       date: new Date().toISOString(),
       orderState: "Pending",
+      paymentMethod: paymentMethod || "cash_on_delivery",
+      paymentStatus:
+        paymentMethod === "stripe" && stripePaymentIntentId
+          ? "paid"
+          : "pending",
       ...(promoCode && { promoCode }),
       ...(discountAmount !== undefined && { discountAmount: +discountAmount }),
       ...(discountPercentage !== undefined && { discountPercentage: +discountPercentage }),
+      ...(stripePaymentIntentId && { stripePaymentIntentId }),
     });
     await newOrder.save();
 

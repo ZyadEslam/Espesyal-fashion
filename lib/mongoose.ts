@@ -41,6 +41,8 @@ const cachedMongoose = cached!;
 
 async function dbConnect(): Promise<typeof mongoose> {
   if (cachedMongoose.conn) {
+    // Ensure models are registered even if connection is cached
+    await registerModels();
     return cachedMongoose.conn;
   }
   
