@@ -53,7 +53,7 @@ const PaymentFormContent = ({
         } else {
           setClientSecret(data.clientSecret);
         }
-      } catch (err) {
+      } catch {
         const errorMessage = "Failed to initialize payment. Please try again.";
         setError(errorMessage);
         onPaymentError(errorMessage);
@@ -98,7 +98,7 @@ const PaymentFormContent = ({
       } else if (paymentIntent && paymentIntent.status === "succeeded") {
         onPaymentSuccess(paymentIntent.id);
       }
-    } catch (err) {
+    } catch {
       const errorMessage = "An error occurred during payment. Please try again.";
       setError(errorMessage);
       onPaymentError(errorMessage);

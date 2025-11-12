@@ -4,15 +4,23 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { CreditCard, Wallet, ArrowLeft, CheckCircle } from "lucide-react";
+import { CreditCard, Wallet, ArrowLeft } from "lucide-react";
 import LoadingOverlay from "@/app/components/LoadingOverlay";
 import ActionNotification from "@/app/UI/ActionNotification";
 import StripePaymentForm from "@/app/components/checkoutComponents/StripePaymentForm";
 import { api } from "@/app/utils/api";
 
+interface Product {
+  _id?: string;
+  name?: string;
+  price?: number;
+  quantityInCart?: number;
+  quantity?: number;
+}
+
 interface CheckoutData {
   addressId: string;
-  products: any[];
+  products: Product[];
   totalPrice: number;
   promoCode: string | null;
   discountAmount: number;

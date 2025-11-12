@@ -4,6 +4,14 @@ import Link from "next/link";
 import { useLocale } from "next-intl";
 import { Package, Calendar, DollarSign, ArrowRight } from "lucide-react";
 
+interface Product {
+  _id?: string;
+  name?: string;
+  price?: number;
+  quantityInCart?: number;
+  quantity?: number;
+}
+
 interface OrderCardProps {
   order: {
     _id: string;
@@ -12,7 +20,7 @@ interface OrderCardProps {
     totalPrice: number;
     orderState: string;
     paymentStatus: string;
-    products: any[];
+    products: Product[];
   };
 }
 
@@ -46,7 +54,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
   };
 
   const totalItems = order.products?.reduce(
-    (total: number, product: any) =>
+    (total: number, product: Product) =>
       total + (product.quantityInCart || product.quantity || 1),
     0
   ) || 0;

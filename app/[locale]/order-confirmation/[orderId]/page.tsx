@@ -1,10 +1,27 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Package, ShoppingBag, ArrowRight } from "lucide-react";
 import LoadingSpinner from "@/app/UI/LoadingSpinner";
+
+interface Product {
+  _id?: string;
+  name?: string;
+  price?: number;
+  quantityInCart?: number;
+  quantity?: number;
+}
+
+interface Address {
+  name?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  pinCode?: string;
+  phone?: string;
+}
 
 interface Order {
   _id: string;
@@ -13,14 +30,13 @@ interface Order {
   totalPrice: number;
   orderState: string;
   paymentStatus: string;
-  products: any[];
-  address: any;
+  products: Product[];
+  address: Address;
 }
 
 const OrderConfirmationPage = () => {
   const t = useTranslations("orders");
   const locale = useLocale();
-  const router = useRouter();
   const params = useParams();
   const orderId = params?.orderId as string;
   const [order, setOrder] = useState<Order | null>(null);
@@ -81,7 +97,7 @@ const OrderConfirmationPage = () => {
   }
 
   const totalItems = order.products?.reduce(
-    (total: number, product: any) =>
+    (total: number, product: Product) =>
       total + (product.quantityInCart || product.quantity || 1),
     0
   ) || 0;

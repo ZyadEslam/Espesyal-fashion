@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   Package,
@@ -15,6 +15,23 @@ import OrderStatusTimeline from "@/app/components/orderComponents/OrderStatusTim
 import LoadingSpinner from "@/app/UI/LoadingSpinner";
 import Image from "next/image";
 
+interface Product {
+  _id?: string;
+  name?: string;
+  price?: number;
+  quantityInCart?: number;
+  quantity?: number;
+}
+
+interface Address {
+  name?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  pinCode?: string;
+  phone?: string;
+}
+
 interface Order {
   _id: string;
   orderNumber: string;
@@ -23,8 +40,8 @@ interface Order {
   orderState: string;
   paymentStatus: string;
   paymentMethod: string;
-  products: any[];
-  address: any;
+  products: Product[];
+  address: Address;
   trackingNumber?: string;
   estimatedDeliveryDate?: Date | string;
   shippedDate?: Date | string;
@@ -37,7 +54,6 @@ interface Order {
 const OrderDetailPage = () => {
   const t = useTranslations("orders");
   const locale = useLocale();
-  const router = useRouter();
   const params = useParams();
   const orderId = params?.orderId as string;
   const [order, setOrder] = useState<Order | null>(null);
@@ -126,7 +142,7 @@ const OrderDetailPage = () => {
   };
 
   const totalItems = order.products?.reduce(
-    (total: number, product: any) =>
+    (total: number, product: Product) =>
       total + (product.quantityInCart || product.quantity || 1),
     0
   ) || 0;
@@ -170,7 +186,7 @@ const OrderDetailPage = () => {
               </div>
               <div className="p-6">
                 <OrderStatusTimeline
-                  status={order.orderState as any}
+                  status={order.orderState as "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled"}
                   shippedDate={order.shippedDate}
                   deliveredDate={order.deliveredDate}
                   estimatedDeliveryDate={order.estimatedDeliveryDate}
@@ -186,7 +202,7 @@ const OrderDetailPage = () => {
                 </h2>
               </div>
               <div className="divide-y divide-gray-200">
-                {order.products?.map((product: any, index: number) => (
+                {order.products?.map((product: Product, index: number) => (
                   <div key={index} className="p-6 flex gap-4">
                     <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                       {product._id ? (

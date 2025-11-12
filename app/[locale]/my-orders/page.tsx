@@ -7,6 +7,14 @@ import { Package, ShoppingBag, ArrowLeft } from "lucide-react";
 import OrderCard from "@/app/components/orderComponents/OrderCard";
 import LoadingSpinner from "@/app/UI/LoadingSpinner";
 
+interface Product {
+  _id?: string;
+  name?: string;
+  price?: number;
+  quantityInCart?: number;
+  quantity?: number;
+}
+
 interface Order {
   _id: string;
   orderNumber: string;
@@ -14,7 +22,7 @@ interface Order {
   totalPrice: number;
   orderState: string;
   paymentStatus: string;
-  products: any[];
+  products: Product[];
 }
 
 const MyOrdersPage = () => {

@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
 import Order from "@/app/models/order";
-import Address from "@/app/models/address";
-import Product from "@/app/models/product";
 import dbConnect from "@/lib/mongoose";
 
 
@@ -22,11 +19,26 @@ export async function GET(
     }
 
     // Models are registered by dbConnect() - proceed with query
-    const orders = await Order.find({ userId })
+    const orders = (await Order.find({ userId })
       .populate("products")
       .populate("addressId")
       .sort({ date: -1 }) // Newest first
-      .lean();
+      .lean()) as unknown as Array<{
+      _id: { toString: () => string };
+      date: Date | string;
+      totalPrice: number;
+      orderState: string;
+      paymentStatus: string;
+      paymentMethod: string;
+      products: unknown;
+      addressId: unknown;
+      trackingNumber?: string;
+      estimatedDeliveryDate?: Date | string;
+      shippedDate?: Date | string;
+      deliveredDate?: Date | string;
+      promoCode?: string;
+      discountAmount?: number;
+    }>;
 
     return NextResponse.json(
       {

@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import Order from "@/app/models/order";
-import Address from "@/app/models/address";
-import Product from "@/app/models/product";
 import dbConnect from "@/lib/mongoose";
 
 export async function GET(
@@ -23,7 +21,25 @@ export async function GET(
       .populate("products")
       .populate("addressId")
       .populate("userId")
-      .lean();
+      .lean() as {
+        _id: { toString: () => string };
+        date: Date | string;
+        totalPrice: number;
+        orderState: string;
+        paymentStatus: string;
+        paymentMethod: string;
+        products: unknown;
+        addressId: unknown;
+        userId?: unknown;
+        trackingNumber?: string;
+        estimatedDeliveryDate?: Date | string;
+        shippedDate?: Date | string;
+        deliveredDate?: Date | string;
+        promoCode?: string;
+        discountAmount?: number;
+        discountPercentage?: number;
+        stripePaymentIntentId?: string;
+      } | null;
 
     if (!order) {
       return NextResponse.json(
