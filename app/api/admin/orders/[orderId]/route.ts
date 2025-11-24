@@ -3,9 +3,46 @@ import dbConnect from "@/lib/mongoose";
 import Order from "@/app/models/order";
 import { requireAdmin } from "@/lib/adminAuth";
 import { sseManager } from "@/lib/sse";
+import { Types } from "mongoose";
 
 interface Params {
   params: Promise<{ orderId: string }>;
+}
+
+// Type for populated order from Mongoose lean()
+interface PopulatedOrder {
+  _id: Types.ObjectId;
+  date: Date;
+  totalPrice: number;
+  orderState: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  userId?: {
+    _id: Types.ObjectId;
+    name?: string;
+    email?: string;
+  };
+  addressId?: {
+    _id: Types.ObjectId;
+    name?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+  };
+  products?: Array<{
+    _id: Types.ObjectId;
+    name?: string;
+    price?: number;
+    images?: string[];
+  }>;
+  trackingNumber?: string;
+  estimatedDeliveryDate?: Date;
+  shippedDate?: Date;
+  deliveredDate?: Date;
+  promoCode?: string;
+  discountAmount?: number;
+  discountPercentage?: number;
 }
 
 /**
@@ -50,26 +87,27 @@ export async function GET(
     }
 
     // Format order response to match expected structure
+    const populatedOrder = order as unknown as PopulatedOrder;
     const formattedOrder = {
-      _id: (order as any)._id.toString(),
-      orderNumber: (order as any)._id.toString().slice(-8).toUpperCase(),
-      date: (order as any).date,
-      totalPrice: (order as any).totalPrice,
-      orderState: (order as any).orderState,
-      paymentStatus: (order as any).paymentStatus,
-      paymentMethod: (order as any).paymentMethod,
-      userId: (order as any).userId?._id?.toString(),
-      userName: (order as any).userId?.name || "Unknown",
-      userEmail: (order as any).userId?.email || "Unknown",
-      address: (order as any).addressId, // Map addressId to address
-      products: (order as any).products || [],
-      trackingNumber: (order as any).trackingNumber,
-      estimatedDeliveryDate: (order as any).estimatedDeliveryDate,
-      shippedDate: (order as any).shippedDate,
-      deliveredDate: (order as any).deliveredDate,
-      promoCode: (order as any).promoCode,
-      discountAmount: (order as any).discountAmount || 0,
-      discountPercentage: (order as any).discountPercentage,
+      _id: populatedOrder._id.toString(),
+      orderNumber: populatedOrder._id.toString().slice(-8).toUpperCase(),
+      date: populatedOrder.date,
+      totalPrice: populatedOrder.totalPrice,
+      orderState: populatedOrder.orderState,
+      paymentStatus: populatedOrder.paymentStatus,
+      paymentMethod: populatedOrder.paymentMethod,
+      userId: populatedOrder.userId?._id?.toString(),
+      userName: populatedOrder.userId?.name || "Unknown",
+      userEmail: populatedOrder.userId?.email || "Unknown",
+      address: populatedOrder.addressId, // Map addressId to address
+      products: populatedOrder.products || [],
+      trackingNumber: populatedOrder.trackingNumber,
+      estimatedDeliveryDate: populatedOrder.estimatedDeliveryDate,
+      shippedDate: populatedOrder.shippedDate,
+      deliveredDate: populatedOrder.deliveredDate,
+      promoCode: populatedOrder.promoCode,
+      discountAmount: populatedOrder.discountAmount || 0,
+      discountPercentage: populatedOrder.discountPercentage,
     };
 
     return NextResponse.json(
@@ -172,34 +210,35 @@ export async function PATCH(
     }
 
     // Broadcast update via SSE
+    const populatedOrder = order as unknown as PopulatedOrder;
     sseManager.broadcast("order-updated", {
-      orderId: (order as any)._id.toString(),
-      orderNumber: (order as any)._id.toString().slice(-8).toUpperCase(),
-      orderState: (order as any).orderState,
+      orderId: populatedOrder._id.toString(),
+      orderNumber: populatedOrder._id.toString().slice(-8).toUpperCase(),
+      orderState: populatedOrder.orderState,
       updatedAt: new Date().toISOString(),
     });
 
     // Format order response to match expected structure
     const formattedOrder = {
-      _id: (order as any)._id.toString(),
-      orderNumber: (order as any)._id.toString().slice(-8).toUpperCase(),
-      date: (order as any).date,
-      totalPrice: (order as any).totalPrice,
-      orderState: (order as any).orderState,
-      paymentStatus: (order as any).paymentStatus,
-      paymentMethod: (order as any).paymentMethod,
-      userId: (order as any).userId?._id?.toString(),
-      userName: (order as any).userId?.name || "Unknown",
-      userEmail: (order as any).userId?.email || "Unknown",
-      address: (order as any).addressId, // Map addressId to address
-      products: (order as any).products || [],
-      trackingNumber: (order as any).trackingNumber,
-      estimatedDeliveryDate: (order as any).estimatedDeliveryDate,
-      shippedDate: (order as any).shippedDate,
-      deliveredDate: (order as any).deliveredDate,
-      promoCode: (order as any).promoCode,
-      discountAmount: (order as any).discountAmount || 0,
-      discountPercentage: (order as any).discountPercentage,
+      _id: populatedOrder._id.toString(),
+      orderNumber: populatedOrder._id.toString().slice(-8).toUpperCase(),
+      date: populatedOrder.date,
+      totalPrice: populatedOrder.totalPrice,
+      orderState: populatedOrder.orderState,
+      paymentStatus: populatedOrder.paymentStatus,
+      paymentMethod: populatedOrder.paymentMethod,
+      userId: populatedOrder.userId?._id?.toString(),
+      userName: populatedOrder.userId?.name || "Unknown",
+      userEmail: populatedOrder.userId?.email || "Unknown",
+      address: populatedOrder.addressId, // Map addressId to address
+      products: populatedOrder.products || [],
+      trackingNumber: populatedOrder.trackingNumber,
+      estimatedDeliveryDate: populatedOrder.estimatedDeliveryDate,
+      shippedDate: populatedOrder.shippedDate,
+      deliveredDate: populatedOrder.deliveredDate,
+      promoCode: populatedOrder.promoCode,
+      discountAmount: populatedOrder.discountAmount || 0,
+      discountPercentage: populatedOrder.discountPercentage,
     };
 
     return NextResponse.json(

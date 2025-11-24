@@ -3,6 +3,14 @@ import Order from "../../models/order";
 import dbConnect from "@/lib/mongoose";
 import { sseManager } from "@/lib/sse";
 import User from "@/app/models/user";
+import { Types } from "mongoose";
+
+// Type for user from Mongoose lean()
+interface UserLean {
+  _id: Types.ObjectId;
+  name?: string;
+  email?: string;
+}
 
 export async function POST(req: Request) {
   try {
@@ -53,7 +61,7 @@ export async function POST(req: Request) {
     await newOrder.save();
 
     // Get user info for broadcast
-    const user = await User.findById(userId).select("name email").lean();
+    const user = await User.findById(userId).select("name email").lean() as unknown as UserLean | null;
 
     // Broadcast new order via SSE to all connected admin clients
     sseManager.broadcast("new-order", {

@@ -3,6 +3,43 @@ import dbConnect from "@/lib/mongoose";
 import Order from "@/app/models/order";
 import User from "@/app/models/user";
 import { requireAdmin } from "@/lib/adminAuth";
+import { Types } from "mongoose";
+
+// Type for populated order from Mongoose lean()
+interface PopulatedOrder {
+  _id: Types.ObjectId;
+  date: Date;
+  totalPrice: number;
+  orderState: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  userId?: {
+    _id: Types.ObjectId;
+    name?: string;
+    email?: string;
+  };
+  addressId?: {
+    _id: Types.ObjectId;
+    name?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+  };
+  products?: Array<{
+    _id: Types.ObjectId;
+    name?: string;
+    price?: number;
+    images?: string[];
+  }>;
+  trackingNumber?: string;
+  estimatedDeliveryDate?: Date;
+  shippedDate?: Date;
+  deliveredDate?: Date;
+  promoCode?: string;
+  discountAmount?: number;
+  discountPercentage?: number;
+}
 
 /**
  * GET: Fetch all orders with filtering and pagination
@@ -44,7 +81,6 @@ export async function GET(req: NextRequest) {
     }
 
     // Filter by username (user name or email)
-    let userFilter: Record<string, unknown> | null = null;
     if (username) {
       const users = await User.find({
         $or: [
@@ -92,7 +128,7 @@ export async function GET(req: NextRequest) {
       .lean();
 
     // Format orders for response
-    const formattedOrders = orders.map((order: any) => ({
+    const formattedOrders = (orders as unknown as PopulatedOrder[]).map((order) => ({
       _id: order._id.toString(),
       orderNumber: order._id.toString().slice(-8).toUpperCase(),
       date: order.date,
