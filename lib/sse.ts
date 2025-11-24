@@ -110,7 +110,7 @@ export function createSSEStream(clientId: string): Response {
         try {
           const heartbeat = `event: heartbeat\ndata: ${JSON.stringify({ timestamp: Date.now() })}\n\n`;
           controller.enqueue(new TextEncoder().encode(heartbeat));
-        } catch (error) {
+        } catch {
           clearInterval(heartbeatInterval);
           sseManager.removeClient(clientId);
         }

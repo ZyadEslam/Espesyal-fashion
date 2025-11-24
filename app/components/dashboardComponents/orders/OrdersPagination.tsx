@@ -18,8 +18,6 @@ export const OrdersPagination: React.FC<OrdersPaginationProps> = ({
   const locale = useLocale();
   const isArabic = locale.startsWith("ar");
 
-  if (totalPages <= 1) return null;
-
   const pageNumbers = useMemo(() => {
     const pages: (number | string)[] = [];
     const maxVisible = 5;
@@ -51,6 +49,8 @@ export const OrdersPagination: React.FC<OrdersPaginationProps> = ({
 
     return pages;
   }, [page, totalPages]);
+
+  if (totalPages <= 1) return null;
 
   return (
     <div className="bg-white border-t border-gray-200 px-4 py-4">

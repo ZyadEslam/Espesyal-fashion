@@ -58,7 +58,7 @@ export const OrdersFilters: React.FC<OrdersFiltersProps> = ({
             <span className="text-sm font-medium text-gray-700">
               {statusFilter === "all"
                 ? t("allStatus")
-                : t(`statuses.${statusFilter}` as any)}
+                : t(`statuses.${statusFilter}` as "statuses.Pending" | "statuses.Processing" | "statuses.Shipped" | "statuses.Delivered" | "statuses.Cancelled")}
             </span>
             {isStatusFilterOpen ? (
               <ChevronUp className="w-4 h-4 text-gray-600" />
@@ -90,7 +90,7 @@ export const OrdersFilters: React.FC<OrdersFiltersProps> = ({
                     statusFilter === status ? "bg-orange/10 text-orange" : ""
                   }`}
                 >
-                  {t(`statuses.${status}` as any)}
+                  {t(`statuses.${status}` as "statuses.Pending" | "statuses.Processing" | "statuses.Shipped" | "statuses.Delivered" | "statuses.Cancelled")}
                 </button>
               ))}
             </div>

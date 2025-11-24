@@ -12,7 +12,7 @@ interface Params {
  * GET: Fetch a single order by ID
  */
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: Params
 ) {
   try {

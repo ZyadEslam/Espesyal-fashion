@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { Loader2, CheckCircle2, X } from "lucide-react";
 import { Order, OrderFormData } from "@/app/types/orders";
 import { formatOrderFullDate, formatPrice } from "@/app/utils/orderUtils";
@@ -215,9 +216,11 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                         className="flex items-center gap-4 bg-gray-50 rounded-lg p-4"
                       >
                         {product.images && product.images[0] && (
-                          <img
+                          <Image
                             src={product.images[0]}
                             alt={product.name}
+                            width={64}
+                            height={64}
                             className="w-16 h-16 object-cover rounded"
                           />
                         )}
