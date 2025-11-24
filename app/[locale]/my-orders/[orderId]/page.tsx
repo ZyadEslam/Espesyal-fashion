@@ -28,7 +28,6 @@ interface Address {
   address?: string;
   city?: string;
   state?: string;
-  pinCode?: string;
   phone?: string;
 }
 
@@ -317,8 +316,7 @@ const OrderDetailPage = () => {
                     </p>
                     <p>{order.address.address}</p>
                     <p>
-                      {order.address.city}, {order.address.state}{" "}
-                      {order.address.pinCode}
+                      {order.address.city}, {order.address.state}
                     </p>
                     <p>{order.address.phone}</p>
                   </div>

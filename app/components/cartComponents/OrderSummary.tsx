@@ -2,9 +2,12 @@
 import React, { memo } from "react";
 import OrderForm from "./OrderForm";
 import { useCart } from "@/app/hooks/useCart";
+import { useTranslations } from "next-intl";
 
 const OrderSummary = memo(() => {
   const { totalPrice, cart } = useCart();
+  const tCart = useTranslations("cart");
+  const tCheckout = useTranslations("checkout");
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-8">
@@ -25,13 +28,15 @@ const OrderSummary = memo(() => {
               />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900">Order Summary</h2>
+          <h2 className="text-xl font-bold text-gray-900">
+            {tCheckout("orderSummary")}
+          </h2>
         </div>
 
         <div className="space-y-4 mb-6">
           <div className="flex justify-between items-center py-2">
             <span className="text-gray-600">
-              Subtotal ({cart.length} items)
+              {tCart("subtotalItems", { count: cart.length })}
             </span>
             <span className="font-semibold text-gray-900">
               ${totalPrice.toFixed(2)}
@@ -39,23 +44,20 @@ const OrderSummary = memo(() => {
           </div>
 
           <div className="flex justify-between items-center py-2">
-            <span className="text-gray-600">Shipping</span>
-            <span className="font-semibold text-green-600">Free</span>
-          </div>
-
-          <div className="flex justify-between items-center py-2">
-            <span className="text-gray-600">Tax</span>
-            <span className="font-semibold text-gray-900">
-              ${(totalPrice * 0.08).toFixed(2)}
+            <span className="text-gray-600">{tCheckout("shipping")}</span>
+            <span className="font-semibold text-green-600">
+              {tCart("freeShipping")}
             </span>
           </div>
 
           <hr className="border-gray-200" />
 
           <div className="flex justify-between items-center py-2">
-            <span className="text-lg font-bold text-gray-900">Total</span>
+            <span className="text-lg font-bold text-gray-900">
+              {tCart("total")}
+            </span>
             <span className="text-xl font-bold text-gray-900">
-              ${(totalPrice * 1.08).toFixed(2)}
+              ${totalPrice.toFixed(2)}
             </span>
           </div>
         </div>

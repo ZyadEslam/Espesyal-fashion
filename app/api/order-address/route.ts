@@ -171,14 +171,7 @@ export async function POST(req: Request) {
     }
 
     // Validate required fields
-    const requiredFields = [
-      "name",
-      "phone",
-      "pinCode",
-      "address",
-      "city",
-      "state",
-    ];
+    const requiredFields = ["name", "phone", "address", "city", "state"];
     const missingFields = requiredFields.filter((field) => !addressData[field]);
 
     if (missingFields.length > 0) {
@@ -337,7 +330,7 @@ export async function DELETE(req: Request) {
       );
     }
 
-    // const deletedAddress = await Address.findByIdAndDelete(id);
+    await Address.findByIdAndDelete(id);
 
     // Optional: Remove address reference from user
     await User.findByIdAndUpdate(user._id, {

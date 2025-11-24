@@ -11,7 +11,7 @@ import PromoCodeHeader from "./PromoCodeHeader";
 import MessageBanner from "./MessageBanner";
 import PromoCodeTable from "./PromoCodeTable";
 import PromoCodeModal from "./PromoCodeModal";
-
+import { useTranslations } from "next-intl";
 const PromoCodeManagement = React.memo(() => {
   const {
     promoCodes,
@@ -22,7 +22,7 @@ const PromoCodeManagement = React.memo(() => {
     updatePromoCode,
     deletePromoCode,
   } = usePromoCodes();
-
+  const t = useTranslations("dashboard.promoCodes");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCode, setEditingCode] = useState<PromoCode | null>(null);
   const [formData, setFormData] = useState<PromoCodeFormData>({
@@ -120,12 +120,12 @@ const PromoCodeManagement = React.memo(() => {
         {promoCodes.length === 0 ? (
           <div className="p-12 text-center">
             <Tag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No promo codes found</p>
+            <p className="text-gray-600">{t("table.noPromoCodes")}</p>
             <button
               onClick={handleOpenModal}
               className="mt-4 text-orange hover:text-orange/80"
             >
-              Create your first promo code
+              {t("createFirstPromoCode")}
             </button>
           </div>
         ) : (

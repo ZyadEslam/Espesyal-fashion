@@ -1,46 +1,55 @@
 import React from "react";
+import { useTranslations, useLocale } from "next-intl";
 
 import FormInput from "./FormInput";
 const PriceInputs = React.memo(() => {
+  const t = useTranslations("dashboard.addProduct");
+  const locale = useLocale();
+  const direction = locale.startsWith("ar") ? "rtl" : "ltr";
+
   return (
     <div className="flex flex-col md:flex-row gap-4">
       <FormInput
         id="price"
         name="price"
-        label="Product Price"
+        label={t("priceLabel")}
         type="number"
-        placeholder="0.00"
+        placeholder={t("pricePlaceholder")}
         min="0"
         step="0.01"
         required
+        direction={direction as "ltr" | "rtl"}
       />
       <FormInput
         id="oldPrice"
         name="oldPrice"
-        label="Old Price"
+        label={t("oldPriceLabel")}
         type="number"
-        placeholder="0.00"
+        placeholder={t("pricePlaceholder")}
         min="0"
         step="0.01"
+        direction={direction as "ltr" | "rtl"}
       />
       <FormInput
         id="discount"
         name="discount"
-        label="Discount"
+        label={t("discountLabel")}
         type="number"
-        placeholder="0.00"
+        placeholder={t("pricePlaceholder")}
         min="0"
         step="0.01"
+        direction={direction as "ltr" | "rtl"}
       />
       <FormInput
         id="rating"
         name="rating"
-        label="Rating"
+        label={t("ratingLabel")}
         type="number"
-        placeholder="0.00"
+        placeholder={t("pricePlaceholder")}
         min="0"
         step="0.01"
         required
+        direction={direction as "ltr" | "rtl"}
       />
     </div>
   );

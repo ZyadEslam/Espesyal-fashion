@@ -5,14 +5,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import AddressSelection from "./AddressSelection";
 import { useCart } from "@/app/hooks/useCart";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 const OrderForm = () => {
-  const [taxes, setTaxes] = useState(0);
   const [selectedAddress, setSelectedAddress] = useState<AddressProps>();
   const session = useSession();
   const router = useRouter();
   const locale = useLocale();
+  const tCart = useTranslations("cart");
   const { cart, totalPrice } = useCart();
 
   // Promo code state
@@ -35,26 +35,21 @@ const OrderForm = () => {
   // Calculate final price with discount
   const finalPrice = useMemo(() => {
     const subtotal = totalPrice;
-    const tax = (subtotal * 2) / 100;
-    const discount = discountAmount;
-    return subtotal + tax - discount;
+    return Math.max(subtotal - discountAmount, 0);
   }, [totalPrice, discountAmount]);
 
   useEffect(() => {
-    setTaxes((totalPrice * 2) / 100);
-    // Recalculate discount when total price changes
+    // Recalculate discount when total price or percentage changes
     if (discountPercentage > 0) {
       const subtotal = totalPrice;
-      const tax = (subtotal * 2) / 100;
-      const newDiscount = ((subtotal + tax) * discountPercentage) / 100;
+      const newDiscount = (subtotal * discountPercentage) / 100;
       setDiscountAmount(newDiscount);
     }
   }, [totalPrice, discountPercentage]);
 
-
   const handleApplyPromoCode = async () => {
     if (!promoCode.trim()) {
-      setPromoError("Please enter a promo code");
+      setPromoError(tCart("promoRequired"));
       return;
     }
 
@@ -73,22 +68,22 @@ const OrderForm = () => {
       const result = await response.json();
 
       if (result.valid) {
-        setAppliedPromoCode(promoCode.toUpperCase().trim());
+        const normalizedCode = promoCode.toUpperCase().trim();
+        setAppliedPromoCode(normalizedCode);
         setDiscountPercentage(result.discountPercentage);
         const subtotal = totalPrice;
-        const tax = (subtotal * 2) / 100;
-        const discount = ((subtotal + tax) * result.discountPercentage) / 100;
+        const discount = (subtotal * result.discountPercentage) / 100;
         setDiscountAmount(discount);
         setPromoError("");
       } else {
-        setPromoError(result.error || "Invalid promo code");
+        setPromoError(result.error || tCart("promoInvalid"));
         setAppliedPromoCode(null);
         setDiscountPercentage(0);
         setDiscountAmount(0);
       }
     } catch (error) {
       console.error("Error validating promo code:", error);
-      setPromoError("Failed to validate promo code. Please try again.");
+      setPromoError(tCart("promoValidateError"));
       setAppliedPromoCode(null);
       setDiscountPercentage(0);
       setDiscountAmount(0);
@@ -107,7 +102,7 @@ const OrderForm = () => {
 
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isOrderValidToPlace) {
       return;
     }
@@ -120,103 +115,107 @@ const OrderForm = () => {
       promoCode: appliedPromoCode || null,
       discountAmount: discountAmount,
       discountPercentage: discountPercentage,
-      taxes: taxes,
       subtotal: totalPrice,
     };
 
     sessionStorage.setItem("checkoutData", JSON.stringify(orderData));
-    
+
     // Redirect to checkout page
     router.push(`/${locale}/checkout`);
   };
 
   return (
-    <form
-      onSubmit={submitHandler}
-      className="flex flex-col gap-4"
-    >
+    <form onSubmit={submitHandler} className="flex flex-col gap-4">
       <div className="order-summary-pair">
-        <label className="font-medium text-gray-600">SELECT ADDRESS</label>
-          <AddressSelection
-            setSelectedAddress={setSelectedAddress}
-            selectedAddress={selectedAddress as AddressProps}
-          />
-        </div>
-        <div className="order-summary-pair">
-          <label className="font-medium text-gray-600">PROMO CODE</label>
-          {appliedPromoCode ? (
-            <div className="flex items-center gap-2">
-              <div className="flex-1 bg-green-50 border border-green-200 rounded px-3 py-2 flex items-center justify-between">
-                <span className="text-green-700 font-medium">
-                  {appliedPromoCode} - {discountPercentage}% OFF
-                </span>
-                <button
-                  type="button"
-                  onClick={handleRemovePromoCode}
-                  className="text-green-700 hover:text-green-900 ml-2"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Enter promo code"
-                value={promoCode}
-                onChange={(e) => {
-                  setPromoCode(e.target.value);
-                  setPromoError("");
-                }}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleApplyPromoCode();
-                  }
-                }}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange"
-              />
+        <label className="font-medium text-gray-600">
+          {tCart("selectAddress")}
+        </label>
+        <AddressSelection
+          setSelectedAddress={setSelectedAddress}
+          selectedAddress={selectedAddress as AddressProps}
+        />
+      </div>
+      <div className="order-summary-pair">
+        <label className="font-medium text-gray-600">
+          {tCart("promoCode")}
+        </label>
+        {appliedPromoCode ? (
+          <div className="flex items-center gap-2">
+            <div className="flex-1 bg-green-50 border border-green-200 rounded px-3 py-2 flex items-center justify-between">
+              <span className="text-green-700 font-medium">
+                {tCart("promoApplied", {
+                  code: appliedPromoCode,
+                  discount: discountPercentage,
+                })}
+              </span>
               <button
                 type="button"
-                onClick={handleApplyPromoCode}
-                disabled={validatingPromo}
-                className="bg-orange text-white w-fit py-2 px-10 rounded hover:bg-orange/90 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                onClick={handleRemovePromoCode}
+                className="text-green-700 hover:text-green-900 ml-2"
+                aria-label={tCart("promoRemove")}
               >
-                {validatingPromo ? "..." : "Apply"}
+                ✕
               </button>
             </div>
-          )}
-          {promoError && (
-            <p className="text-red-600 text-sm mt-1">{promoError}</p>
-          )}
-        </div>
-        <hr />
-        <div className="order-summary-pair font-medium">
-          <div className="flex justify-between">
-            <p className="text-gray-500">ITEMS {totalItems}</p>
-            <p>${totalPrice.toFixed(2)}</p>
           </div>
-          <div className="flex justify-between">
-            <p className="text-gray-500">Shipping Fee</p>
-            <p>Free</p>
+        ) : (
+          <div className="flex flex-col gap-2 md:flex-row">
+            <input
+              type="text"
+              placeholder={tCart("promoPlaceholder")}
+              value={promoCode}
+              onChange={(e) => {
+                setPromoCode(e.target.value);
+                setPromoError("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleApplyPromoCode();
+                }
+              }}
+              className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-orange"
+            />
+            <button
+              type="button"
+              onClick={handleApplyPromoCode}
+              disabled={validatingPromo}
+              className="bg-orange text-white w-full sm:w-auto py-2 px-10 rounded hover:bg-orange/90 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {validatingPromo ? tCart("applying") : tCart("apply")}
+            </button>
           </div>
-          <div className="flex justify-between">
-            <p className="text-gray-500">Tax (2%)</p>
-            <p>${taxes.toFixed(2)}</p>
+        )}
+        {promoError && (
+          <p className="text-red-600 text-sm mt-1">{promoError}</p>
+        )}
+      </div>
+      <hr />
+      <div className="order-summary-pair font-medium">
+        <div className="flex justify-between">
+          <p className="text-gray-500">
+            {tCart("itemsLabel", { count: totalItems })}
+          </p>
+          <p>${totalPrice.toFixed(2)}</p>
+        </div>
+        <div className="flex justify-between">
+          <p className="text-gray-500">{tCart("shippingFee")}</p>
+          <p>{tCart("freeShipping")}</p>
+        </div>
+        {appliedPromoCode && discountAmount > 0 && (
+          <div className="flex justify-between text-green-600">
+            <p className="text-gray-500">
+              {tCart("discountLabel", { code: appliedPromoCode })}
+            </p>
+            <p>-${discountAmount.toFixed(2)}</p>
           </div>
-          {appliedPromoCode && discountAmount > 0 && (
-            <div className="flex justify-between text-green-600">
-              <p className="text-gray-500">Discount ({appliedPromoCode})</p>
-              <p>-${discountAmount.toFixed(2)}</p>
-            </div>
-          )}
-        </div>
-        <hr />
-        <div className="flex justify-between font-medium text-xl">
-          <p>Total</p>
-          <p>${finalPrice.toFixed(2)}</p>
-        </div>
+        )}
+      </div>
+      <hr />
+      <div className="flex justify-between font-medium text-xl">
+        <p>{tCart("total")}</p>
+        <p>${finalPrice.toFixed(2)}</p>
+      </div>
 
       <button
         type="submit"
@@ -224,10 +223,10 @@ const OrderForm = () => {
         disabled={!isOrderValidToPlace}
       >
         {session.status === "unauthenticated"
-          ? "Please Login to add orders "
+          ? tCart("loginToOrder")
           : cart.length === 0
-          ? "Cart is empty"
-          : "Proceed to Checkout"}
+          ? tCart("cartEmptyShort")
+          : tCart("proceedToCheckout")}
       </button>
     </form>
   );

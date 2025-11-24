@@ -21,10 +21,12 @@ const CartProvider = ({ children }: CartProviderProps) => {
   const [cart, setCart] = useState<ProductCardProps[]>([]);
   const [error, setError] = useState<string>("");
   const [totalPrice, setTotalPrice] = useState(0);
+  const [isCartHydrated, setIsCartHydrated] = useState(false);
 
   // Initialize cart from localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
+    setIsCartHydrated(false);
 
     try {
       const storageKey = getCartStorageKey(session?.user?.id);
@@ -32,15 +34,19 @@ const CartProvider = ({ children }: CartProviderProps) => {
 
       if (storedCart) {
         setCart(JSON.parse(storedCart));
+      } else {
+        setCart([]);
       }
     } catch (error) {
       console.error("Error loading cart from localStorage:", error);
+    } finally {
+      setIsCartHydrated(true);
     }
   }, [session?.user?.id]);
 
   // Save to localStorage whenever cart or user changes
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !isCartHydrated) return;
 
     try {
       const storageKey = getCartStorageKey(session?.user?.id);
@@ -48,7 +54,7 @@ const CartProvider = ({ children }: CartProviderProps) => {
     } catch (error) {
       console.error("Error saving cart to localStorage:", error);
     }
-  }, [cart, session?.user?.id]);
+  }, [cart, session?.user?.id, isCartHydrated]);
 
   //This occurs when a user navigates away from a page, closes a tab, or refreshes the browser.
   useEffect(() => {
@@ -183,9 +189,9 @@ const CartProvider = ({ children }: CartProviderProps) => {
           } else if (userCart && userCart.length > 0) {
             setCart(uniqueListItems([...serverCart, ...JSON.parse(userCart)]));
           }
-        } catch {
+        } catch (err) {
           setError("Error Fetching Cart Please try again later ");
-          console.error("Error syncing cart with server:", error);
+          console.error("Error syncing cart with server:", err);
         }
       }
     };

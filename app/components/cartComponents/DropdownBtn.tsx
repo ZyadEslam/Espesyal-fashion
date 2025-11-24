@@ -1,5 +1,6 @@
 import { AddressProps } from "@/app/types/types";
 import React from "react";
+import { useTranslations } from "next-intl";
 
 interface dropDownProps {
   handleDropdownToggle(e: React.MouseEvent): void;
@@ -12,6 +13,8 @@ const DropdownBtn = ({
   selectedAddress,
   isOpen,
 }: dropDownProps) => {
+  const tShipping = useTranslations("shipping");
+
   return (
     <button
       type="button"
@@ -26,11 +29,13 @@ const DropdownBtn = ({
             </div>
             <div className="text-sm text-gray-600">
               {selectedAddress.address}, {selectedAddress.city},{" "}
-              {selectedAddress.state} {selectedAddress.pinCode}
+              {selectedAddress.state}
             </div>
           </div>
         ) : (
-          <span className="text-gray-500">Select a shipping address</span>
+          <span className="text-gray-500">
+            {tShipping("selectAddressPlaceholder")}
+          </span>
         )}
       </div>
       <svg

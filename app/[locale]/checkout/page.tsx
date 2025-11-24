@@ -25,7 +25,6 @@ interface CheckoutData {
   promoCode: string | null;
   discountAmount: number;
   discountPercentage: number;
-  taxes: number;
   subtotal: number;
 }
 
@@ -340,13 +339,6 @@ const CheckoutPage = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">{t("shipping")}</span>
                     <span className="font-semibold text-green-600">Free</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">{t("tax")}</span>
-                    <span className="font-semibold text-gray-900">
-                      ${checkoutData.taxes.toFixed(2)}
-                    </span>
                   </div>
 
                   {checkoutData.promoCode && checkoutData.discountAmount > 0 && (

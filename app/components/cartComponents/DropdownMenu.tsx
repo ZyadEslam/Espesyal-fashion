@@ -1,5 +1,4 @@
 import React from "react";
-import Link from "next/link";
 import { AddressProps } from "@/app/types/types";
 
 interface dropDownMenuProps {
@@ -8,6 +7,8 @@ interface dropDownMenuProps {
   selectedAddress: AddressProps;
   handleDeleteAddress(addressId: string, event: React.MouseEvent): void;
   setIsOpen(value: boolean): void;
+  onAddNewAddress(): void;
+  addNewLabel: string;
 }
 const DropdownMeu = ({
   addresses,
@@ -15,6 +16,8 @@ const DropdownMeu = ({
   selectedAddress,
   handleDeleteAddress,
   setIsOpen,
+  onAddNewAddress,
+  addNewLabel,
 }: dropDownMenuProps) => {
   return (
     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-64 overflow-y-auto">
@@ -44,7 +47,7 @@ const DropdownMeu = ({
                       {address.address}
                     </div>
                     <div className="text-sm text-gray-600">
-                      {address.city}, {address.state} {address.pinCode}
+                      {address.city}, {address.state}
                     </div>
                     <div className="text-sm text-gray-600">
                       Phone: {address.phone}
@@ -80,28 +83,29 @@ const DropdownMeu = ({
 
       {/* Add New Address Link */}
       <div className="border-t border-gray-200">
-        <Link
-          href="/shipping-address"
-          className="block px-4 py-3 text-orange hover:bg-orange/10 transition-colors"
-          onClick={() => setIsOpen(false)}
+        <button
+          type="button"
+          className="flex w-full items-center px-4 py-3 text-left text-orange transition-colors hover:bg-orange/10"
+          onClick={() => {
+            setIsOpen(false);
+            onAddNewAddress();
+          }}
         >
-          <div className="flex items-center">
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-            Add New Address
-          </div>
-        </Link>
+          <svg
+            className="mr-2 h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+            />
+          </svg>
+          {addNewLabel}
+        </button>
       </div>
     </div>
   );

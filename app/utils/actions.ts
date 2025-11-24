@@ -64,7 +64,6 @@ export const shippingFormAction = async (
     const addressData = {
       name: formData.get("name") as string,
       phone: formData.get("phone") as string,
-      pinCode: formData.get("pinCode") as string,
       address: formData.get("address") as string,
       city: formData.get("city") as string,
       state: formData.get("state") as string,
@@ -74,7 +73,6 @@ export const shippingFormAction = async (
     const requiredFields = [
       "name",
       "phone",
-      "pinCode",
       "address",
       "city",
       "state",

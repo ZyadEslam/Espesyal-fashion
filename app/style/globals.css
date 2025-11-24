@@ -112,4 +112,19 @@ html {
   .address-form-input {
     @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange/20 focus:border-orange;
   }
+  .orders-table-th {
+    @apply px-4 py-3 text-center text-sm font-medium text-gray-500 uppercase tracking-wider;
+  }
+  .promo-code-table-th {
+    @apply px-4 py-3 text-sm font-medium text-gray-500 uppercase tracking-wider;
+  }
+  .promo-code-table-td {
+    @apply px-4 py-3 whitespace-nowrap text-sm font-medium;
+  }
+  .product-table-th {
+    @apply px-4 lg:px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+  .product-table-td {
+    @apply px-4 lg:px-6 py-4 whitespace-nowrap;
+  }
 }

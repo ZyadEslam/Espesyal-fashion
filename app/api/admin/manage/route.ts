@@ -22,7 +22,10 @@ export async function GET() {
       .select("_id name email isAdmin")
       .lean();
 
-    return NextResponse.json({ admins }, { status: 200 });
+    // Include protected admin email in response
+    const protectedAdminEmail = process.env.FIRST_ADMIN_EMAIL?.toLowerCase().trim();
+
+    return NextResponse.json({ admins, protectedAdminEmail }, { status: 200 });
   } catch (error) {
     console.error("Error fetching admins:", error);
     return NextResponse.json(
@@ -153,6 +156,15 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json(
         { error: "You cannot remove your own admin access" },
         { status: 400 }
+      );
+    }
+
+    // Prevent deletion of the protected admin email from environment variables
+    const protectedAdminEmail = process.env.FIRST_ADMIN_EMAIL?.toLowerCase().trim();
+    if (protectedAdminEmail && email.toLowerCase() === protectedAdminEmail) {
+      return NextResponse.json(
+        { error: "This admin account cannot be deleted as it is protected" },
+        { status: 403 }
       );
     }
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Tag, Plus } from "lucide-react";
-
+import { useTranslations } from "next-intl";
 interface PromoCodeHeaderProps {
   onCreateClick: () => void;
 }
@@ -8,6 +8,7 @@ interface PromoCodeHeaderProps {
 const PromoCodeHeader: React.FC<PromoCodeHeaderProps> = ({
   onCreateClick,
 }) => {
+  const t = useTranslations("dashboard.promoCodes");
   return (
     <div className="mb-6 sm:mb-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
@@ -17,10 +18,10 @@ const PromoCodeHeader: React.FC<PromoCodeHeaderProps> = ({
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-              Promo Code Management
+              {t("title")}
             </h1>
             <p className="text-sm sm:text-base text-gray-600 mt-1">
-              Create and manage promotional codes
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -29,7 +30,7 @@ const PromoCodeHeader: React.FC<PromoCodeHeaderProps> = ({
           className="flex items-center justify-center gap-2 bg-orange text-white px-4 py-2 rounded-lg hover:bg-orange/90 transition-colors text-sm sm:text-base w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
-          <span className="whitespace-nowrap">Create Promo Code</span>
+          <span className="whitespace-nowrap">{t("createButton")}</span>
         </button>
       </div>
     </div>

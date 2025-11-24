@@ -39,7 +39,6 @@ export interface AddressProps {
   _id: string;
   name: string;
   phone: string;
-  pinCode: string;
   address: string;
   city: string;
   state: string;

@@ -9,9 +9,13 @@ import PriceInputs from "../../components/dashboardComponents/PriceInputs";
 import SubmitButton from "../../components/dashboardComponents/SubmitBtn";
 import ProductForm from "../../components/dashboardComponents/ProductForm";
 import { Plus } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 
-// Main Dashboard Page Component
 const DashboardPage = memo(() => {
+  const t = useTranslations("dashboard.addProduct");
+  const locale = useLocale();
+  const direction = locale.startsWith("ar") ? "rtl" : "ltr";
+
   const [images, setImages] = useState<ImageState>({
     image1: assets.upload_area,
     image2: assets.upload_area,
@@ -42,24 +46,25 @@ const DashboardPage = memo(() => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Header */}
       <div className="mb-6 sm:mb-8">
         <div className="flex items-center gap-2 sm:gap-3 mb-4">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange/10 rounded-lg flex items-center justify-center">
             <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-orange" />
           </div>
           <div>
+            <p className="text-xs font-semibold uppercase text-orange">
+              {t("badge")}
+            </p>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-              Add New Product
+              {t("title")}
             </h1>
             <p className="text-sm sm:text-base text-gray-600 mt-1">
-              Create a new product listing for your store
+              {t("subtitle")}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Form Container */}
       <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-4 sm:p-6 lg:p-8">
           <ProductForm>
@@ -73,38 +78,42 @@ const DashboardPage = memo(() => {
               <FormInput
                 id="name"
                 name="name"
-                label="Product Name"
+                label={t("nameLabel")}
                 type="text"
-                placeholder="Enter product name"
+                placeholder={t("namePlaceholder")}
                 required
+                direction={direction as "ltr" | "rtl"}
               />
 
               <FormInput
                 id="description"
                 name="description"
-                label="Product Description"
+                label={t("descriptionLabel")}
                 type="textarea"
-                placeholder="Enter product description"
+                placeholder={t("descriptionPlaceholder")}
                 required
                 rows={4}
+                direction={direction as "ltr" | "rtl"}
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormInput
                   id="category"
                   name="category"
-                  label="Product Category"
+                  label={t("categoryLabel")}
                   type="text"
-                  placeholder="Category"
+                  placeholder={t("categoryPlaceholder")}
                   required
+                  direction={direction as "ltr" | "rtl"}
                 />
                 <FormInput
                   id="brand"
                   name="brand"
-                  label="Product Brand"
+                  label={t("brandLabel")}
                   type="text"
-                  placeholder="Brand"
+                  placeholder={t("brandPlaceholder")}
                   required
+                  direction={direction as "ltr" | "rtl"}
                 />
               </div>
 

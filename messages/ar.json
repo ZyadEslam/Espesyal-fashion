@@ -97,7 +97,32 @@
     "addItemsToCart": "أضف بعض العناصر إلى سلتك وستظهر هنا.",
     "startShopping": "ابدأ التسوق",
     "itemsInCart": "عنصر في سلتك",
-    "proceedToCheckout": "المتابعة إلى الدفع"
+    "proceedToCheckout": "المتابعة إلى الدفع",
+    "subtotalItems": "المجموع الفرعي ({count} عنصر)",
+    "freeShipping": "مجاني",
+    "selectAddress": "اختر العنوان",
+    "selectAddressPlaceholder": "اختر عنوان الشحن",
+    "promoCode": "رمز الخصم",
+    "promoPlaceholder": "أدخل رمز الخصم",
+    "apply": "تطبيق",
+    "applying": "جاري التطبيق...",
+    "promoRequired": "يرجى إدخال رمز خصم",
+    "promoInvalid": "رمز الخصم غير صالح",
+    "promoValidateError": "فشل التحقق من رمز الخصم. حاول مرة أخرى.",
+    "promoApplied": "{code} - خصم {discount}٪",
+    "discountLabel": "الخصم ({code})",
+    "itemsLabel": "العناصر {count}",
+    "shippingFee": "رسوم الشحن",
+    "taxWithPercent": "الضريبة ({percent}٪)",
+    "loginToOrder": "يرجى تسجيل الدخول لإتمام الطلب",
+    "cartEmptyShort": "السلة فارغة",
+    "promoRemove": "إزالة رمز الخصم",
+    "table": {
+      "productDetails": "تفاصيل المنتج",
+      "quantity": "الكمية",
+      "price": "السعر",
+      "total": "الإجمالي"
+    }
   },
   "checkout": {
     "title": "الدفع",
@@ -289,6 +314,221 @@
       "email": "البريد الإلكتروني",
       "location": "الموقع",
       "address": "القاهرة، مصر"
+    }
+  },
+  "shipping": {
+    "title": "إضافة عنوان جديد",
+    "addNew": "إضافة جديد",
+    "address": "العنوان",
+    "selectAddressPlaceholder": "اختر عنوان الشحن",
+    "loginRequired": "يرجى تسجيل الدخول لحفظ عناوين الشحن الخاصة بك.",
+    "creatingAddress": "جاري إنشاء عنوانك الجديد...",
+    "addressCreatedSuccess": "تم إنشاء العنوان بنجاح!",
+    "redirectingToCart": "جاري إعادة التوجيه إلى السلة خلال {countdown} {seconds}...",
+    "second": "ثانية",
+    "seconds": "ثانية",
+    "goToCartNow": "انتقل إلى السلة الآن",
+    "cancel": "إلغاء",
+    "form": {
+      "fullName": "الاسم الكامل",
+      "fullNameRequired": "الاسم الكامل *",
+      "fullNamePlaceholder": "أحمد محمد",
+      "phoneNumber": "رقم الهاتف",
+      "phoneNumberRequired": "رقم الهاتف *",
+      "phoneNumberPlaceholder": "01234567890",
+      "streetAddress": "عنوان الشارع",
+      "streetAddressRequired": "عنوان الشارع *",
+      "streetAddressPlaceholder": "123 شارع رئيسي، شقة 4ب",
+      "city": "المدينة",
+      "cityRequired": "المدينة *",
+      "cityPlaceholder": "القاهرة",
+      "state": "المحافظة",
+      "stateRequired": "المحافظة *",
+      "statePlaceholder": "القاهرة"
+    },
+    "submit": {
+      "saving": "جاري الحفظ...",
+      "saveAddress": "حفظ العنوان"
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "title": "لوحة التحكم",
+      "subtitle": "لوحة الإدارة",
+      "footerSafe": "لوحة آمنة",
+      "footerAccess": "وصول المشرف",
+      "links": {
+        "addProduct": "إضافة منتج",
+        "productList": "قائمة المنتجات",
+        "orders": "الطلبات",
+        "promoCodes": "أكواد الخصم",
+        "adminManagement": "إدارة المشرفين"
+      }
+    },
+    "addProduct": {
+      "badge": "وضع إضافة منتج",
+      "title": "إضافة منتج جديد",
+      "subtitle": "أنشئ قائمة منتج جديدة لمتجرك",
+      "imagesLabel": "صور المنتج",
+      "imagesHint": "اضغط على الصور للرفع (بحد أقصى 4 صور)",
+      "nameLabel": "اسم المنتج",
+      "namePlaceholder": "أدخل اسم المنتج",
+      "descriptionLabel": "وصف المنتج",
+      "descriptionPlaceholder": "أدخل وصف المنتج",
+      "categoryLabel": "تصنيف المنتج",
+      "categoryPlaceholder": "التصنيف",
+      "brandLabel": "علامة المنتج",
+      "brandPlaceholder": "العلامة التجارية",
+      "priceLabel": "سعر المنتج",
+      "oldPriceLabel": "السعر القديم",
+      "discountLabel": "الخصم",
+      "ratingLabel": "التقييم",
+      "pricePlaceholder": "0.00",
+      "submit": "إضافة المنتج"
+    },
+    "productList": {
+      "title": "إدارة المنتجات",
+      "subtitle": "تتبع وتحرير جميع منتجات المتجر",
+      "searchPlaceholder": "ابحث باسم المنتج أو العلامة التجارية أو التصنيف...",
+      "totalLabel": "{count} منتج",
+      "table": {
+        "name": "المنتج",
+        "price": "السعر",
+        "brand": "العلامة التجارية",
+        "images": "الصور",
+        "category": "التصنيف",
+        "rating": "التقييم",
+        "stock": "المخزون",
+        "status": "الحالة",
+        "actions": "الإجراءات",
+        "view": "عرض",
+        "edit": "تعديل",
+        "delete": "حذف",
+        "cancel": "إلغاء"
+      },
+      "viewModal": {
+        "title": "تفاصيل المنتج",
+        "description": "الوصف",
+        "price": "السعر",
+        "category": "التصنيف",
+        "brand": "العلامة التجارية",
+        "close": "إغلاق"
+      },
+      "editModal": {
+        "title": "تعديل المنتج",
+        "cancel": "إلغاء",
+        "save": "حفظ التغييرات"
+      },
+      "messages": {
+        "noProducts": "لا توجد منتجات",
+        "loading": "جاري تحميل المنتجات..."
+      }
+    },
+    "orders": {
+      "title": "إدارة الطلبات",
+      "subtitle": "إدارة وتتبع جميع طلبات العملاء",
+      "connected": "متصل لحظياً",
+      "disconnected": "غير متصل",
+      "refresh": "تحديث",
+      "searchPlaceholder": "ابحث برقم الطلب أو اسم المستخدم أو البريد...",
+      "allStatus": "كل الحالات",
+      "statuses": {
+        "Pending": "قيد الانتظار",
+        "Processing": "قيد المعالجة",
+        "Shipped": "تم الشحن",
+        "Delivered": "تم التسليم",
+        "Cancelled": "ملغي"
+      },
+      "table": {
+        "order": "رقم الطلب",
+        "customer": "العميل",
+        "date": "التاريخ",
+        "status": "الحالة",
+        "total": "الإجمالي",
+        "payment": "الدفع",
+        "actions": "الإجراءات",
+        "noOrders": "لا توجد طلبات"
+      },
+      "paymentStatus": {
+        "paid": "مدفوع",
+        "pending": "قيد الانتظار",
+        "failed": "فشل"
+      },
+      "details": {
+        "title": "تفاصيل الطلب",
+        "close": "إغلاق",
+        "update": "تحديث الطلب"
+      },
+      "pagination": "عرض الصفحة {page} من {totalPages}",
+      "prevPage": "الصفحة السابقة",
+      "nextPage": "الصفحة التالية",
+      "goToPage": "الانتقال إلى الصفحة {page}"
+    },
+    "promoCodes": {
+      "title": "إدارة أكواد الخصم",
+      "subtitle": "أنشئ وتحكم في أكواد الخصم الترويجية",
+      "createButton": "إنشاء كود خصم",
+      "table": {
+        "code": "الكود",
+        "discount": "الخصم",
+        "status": "الحالة",
+        "usage": "الاستخدام",
+        "validity": "الصلاحية",
+        "actions": "الإجراءات",
+        "noPromoCodes": "لا توجد أكواد خصم"
+      },
+      "form": {
+        "createTitle": "إنشاء كود خصم",
+        "editTitle": "تعديل كود خصم",
+        "codeLabel": "الكود",
+        "discountLabel": "نسبة الخصم",
+        "limitLabel": "حد الاستخدام",
+        "startLabel": "تاريخ البداية",
+        "endLabel": "تاريخ الانتهاء",
+        "submitCreate": "إنشاء الكود",
+        "submitUpdate": "تحديث الكود",
+        "cancel": "إلغاء"
+      },
+      "messages": {
+        "successCreate": "تم إنشاء الكود بنجاح",
+        "successUpdate": "تم تحديث الكود بنجاح",
+        "successDelete": "تم حذف الكود بنجاح",
+        "error": "حدث خطأ، يرجى المحاولة مرة أخرى"
+      }
+    },
+    "adminManagement": {
+      "title": "إدارة المشرفين",
+      "subtitle": "إدارة أعضاء الفريق والصلاحيات",
+      "addAdmin": "إضافة مشرف",
+      "emailAddress": "البريد الإلكتروني",
+      "enterAdminEmailAddress": "أدخل البريد الإلكتروني للمشرف",
+      "adding": "جاري الإضافة...",
+      "currentAdmins": "المشرفين الحاليين",
+      "noAdminsFound": "لا توجد مشرفين",
+      "noName": "بدون اسم",
+      "you": "أنت",
+      "protected": "محمي",
+      "youCannotRemoveYourOwnAdminAccess": "لا يمكنك إزالة صلاحيات المشرف الخاصة بك",
+      "removeAdmin": "إزالة المشرف",
+      "note": "تذكر أن المستخدم يجب أن يقوم بتسجيل الدخول على الأقل مرة واحدة قبل أن يتم السماح له بالوصول إلى لوحة التحكم.",
+      "table": {
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "role": "الدور",
+        "status": "الحالة",
+        "actions": "الإجراءات"
+      },
+      "form": {
+        "name": "الاسم الكامل",
+        "email": "البريد الإلكتروني",
+        "role": "الدور",
+        "submit": "دعوة مشرف",
+        "cancel": "إلغاء"
+      },
+      "messages": {
+        "success": "تم تحديث المشرف بنجاح",
+        "error": "فشل تحديث المشرف، حاول مرة أخرى"
+      }
     }
   }
 }

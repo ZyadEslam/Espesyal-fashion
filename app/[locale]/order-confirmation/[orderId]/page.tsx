@@ -19,7 +19,6 @@ interface Address {
   address?: string;
   city?: string;
   state?: string;
-  pinCode?: string;
   phone?: string;
 }
 

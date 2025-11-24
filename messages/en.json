@@ -97,7 +97,32 @@
     "addItemsToCart": "Add some items to your cart and they'll appear here.",
     "startShopping": "Start Shopping",
     "itemsInCart": "items in your cart",
-    "proceedToCheckout": "Proceed to Checkout"
+    "proceedToCheckout": "Proceed to Checkout",
+    "subtotalItems": "Subtotal ({count} items)",
+    "freeShipping": "Free",
+    "selectAddress": "Select Address",
+    "selectAddressPlaceholder": "Select a shipping address",
+    "promoCode": "Promo Code",
+    "promoPlaceholder": "Enter promo code",
+    "apply": "Apply",
+    "applying": "Applying...",
+    "promoRequired": "Please enter a promo code",
+    "promoInvalid": "Invalid promo code",
+    "promoValidateError": "Failed to validate promo code. Please try again.",
+    "promoApplied": "{code} - {discount}% OFF",
+    "discountLabel": "Discount ({code})",
+    "itemsLabel": "Items {count}",
+    "shippingFee": "Shipping Fee",
+    "taxWithPercent": "Tax ({percent}%)",
+    "loginToOrder": "Please login to place orders",
+    "cartEmptyShort": "Cart is empty",
+    "promoRemove": "Remove promo code",
+    "table": {
+      "productDetails": "Product Details",
+      "quantity": "Quantity",
+      "price": "Price",
+      "total": "Total"
+    }
   },
   "checkout": {
     "title": "Checkout",
@@ -289,6 +314,221 @@
       "email": "Email",
       "location": "Location",
       "address": "Cairo, Egypt"
+    }
+  },
+  "shipping": {
+    "title": "Add New Address",
+    "addNew": "Add New",
+    "address": "Address",
+    "selectAddressPlaceholder": "Select a shipping address",
+    "loginRequired": "Please log in to save your shipping addresses.",
+    "creatingAddress": "Creating Your New Address...",
+    "addressCreatedSuccess": "Address created successfully!",
+    "redirectingToCart": "Redirecting to cart in {countdown} {seconds}...",
+    "second": "second",
+    "seconds": "seconds",
+    "goToCartNow": "Go to Cart Now",
+    "cancel": "Cancel",
+    "form": {
+      "fullName": "Full Name",
+      "fullNameRequired": "Full Name *",
+      "fullNamePlaceholder": "John Doe",
+      "phoneNumber": "Phone Number",
+      "phoneNumberRequired": "Phone Number *",
+      "phoneNumberPlaceholder": "1234567890",
+      "streetAddress": "Street Address",
+      "streetAddressRequired": "Street Address *",
+      "streetAddressPlaceholder": "123 Main Street, Apartment 4B",
+      "city": "City",
+      "cityRequired": "City *",
+      "cityPlaceholder": "New York",
+      "state": "State",
+      "stateRequired": "State *",
+      "statePlaceholder": "NY"
+    },
+    "submit": {
+      "saving": "Saving...",
+      "saveAddress": "Save Address"
+    }
+  },
+  "dashboard": {
+    "nav": {
+      "title": "Dashboard",
+      "subtitle": "Admin Panel",
+      "footerSafe": "Secure Panel",
+      "footerAccess": "Admin Access",
+      "links": {
+        "addProduct": "Add Product",
+        "productList": "Products List",
+        "orders": "Orders",
+        "promoCodes": "Promo Codes",
+        "adminManagement": "Admin Management"
+      }
+    },
+    "addProduct": {
+      "badge": "Add Product Mode",
+      "title": "Add New Product",
+      "subtitle": "Create a new product listing for your store",
+      "imagesLabel": "Product Images",
+      "imagesHint": "Click on images to upload (max 4 images)",
+      "nameLabel": "Product Name",
+      "namePlaceholder": "Enter product name",
+      "descriptionLabel": "Product Description",
+      "descriptionPlaceholder": "Enter product description",
+      "categoryLabel": "Product Category",
+      "categoryPlaceholder": "Category",
+      "brandLabel": "Product Brand",
+      "brandPlaceholder": "Brand",
+      "priceLabel": "Product Price",
+      "oldPriceLabel": "Old Price",
+      "discountLabel": "Discount",
+      "ratingLabel": "Rating",
+      "pricePlaceholder": "0.00",
+      "submit": "Add Product"
+    },
+    "productList": {
+      "title": "Products Management",
+      "subtitle": "Track and edit all store products",
+      "searchPlaceholder": "Search by product name, brand, or category...",
+      "totalLabel": "{count} products",
+      "table": {
+        "name": "Product",
+        "price": "Price",
+        "brand": "Brand",
+        "images": "Images",
+        "category": "Category",
+        "rating": "Rating",
+        "stock": "Stock",
+        "status": "Status",
+        "actions": "Actions",
+        "view": "View",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel"
+      },
+      "viewModal": {
+        "title": "Product Details",
+        "description": "Description",
+        "price": "Price",
+        "category": "Category",
+        "brand": "Brand",
+        "close": "Close"
+      },
+      "editModal": {
+        "title": "Edit Product",
+        "cancel": "Cancel",
+        "save": "Save Changes"
+      },
+      "messages": {
+        "noProducts": "No products found",
+        "loading": "Loading products..."
+      }
+    },
+    "orders": {
+      "title": "Orders Management",
+      "subtitle": "Manage and track all customer orders",
+      "connected": "Real-time connected",
+      "disconnected": "Disconnected",
+      "refresh": "Refresh",
+      "searchPlaceholder": "Search by order number, username, or email...",
+      "allStatus": "All Status",
+      "statuses": {
+        "Pending": "Pending",
+        "Processing": "Processing",
+        "Shipped": "Shipped",
+        "Delivered": "Delivered",
+        "Cancelled": "Cancelled"
+      },
+      "table": {
+        "order": "Order #",
+        "customer": "Customer",
+        "date": "Date",
+        "status": "Status",
+        "total": "Total",
+        "payment": "Payment",
+        "actions": "Actions",
+        "noOrders": "No orders found"
+      },
+      "paymentStatus": {
+        "paid": "Paid",
+        "pending": "Pending",
+        "failed": "Failed"
+      },
+      "details": {
+        "title": "Order Details",
+        "close": "Close",
+        "update": "Update Order"
+      },
+      "pagination": "Showing page {page} of {totalPages}",
+      "prevPage": "Previous page",
+      "nextPage": "Next page",
+      "goToPage": "Go to page {page}"
+    },
+    "promoCodes": {
+      "title": "Promo Code Management",
+      "subtitle": "Create and control promotional codes",
+      "createButton": "Create Promo Code",
+      "table": {
+        "code": "Code",
+        "discount": "Discount",
+        "status": "Status",
+        "usage": "Usage",
+        "validity": "Validity",
+        "actions": "Actions",
+        "noPromoCodes": "No promo codes found"
+      },
+      "form": {
+        "createTitle": "Create Promo Code",
+        "editTitle": "Edit Promo Code",
+        "codeLabel": "Code",
+        "discountLabel": "Discount Percentage",
+        "limitLabel": "Usage Limit",
+        "startLabel": "Start Date",
+        "endLabel": "End Date",
+        "submitCreate": "Create Code",
+        "submitUpdate": "Update Code",
+        "cancel": "Cancel"
+      },
+      "messages": {
+        "successCreate": "Promo code created successfully",
+        "successUpdate": "Promo code updated successfully",
+        "successDelete": "Promo code deleted successfully",
+        "error": "An error occurred, please try again"
+      }
+    },
+    "adminManagement": {
+      "title": "Admin Management",
+      "subtitle": "Manage team members and permissions",
+      "addAdmin": "Add Admin",
+      "emailAddress": "Email Address",
+      "enterAdminEmailAddress": "Enter admin email address",
+      "adding": "Adding...",
+      "currentAdmins": "Current Admins",
+      "noAdminsFound": "No admins found",
+      "noName": "No name",
+      "you": "You",
+      "protected": "Protected",
+      "youCannotRemoveYourOwnAdminAccess": "You cannot remove your own admin access",
+      "removeAdmin": "Remove Admin",
+      "note": "Note: The user must sign in at least once before being granted admin access.",
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "form": {
+        "name": "Full Name",
+        "email": "Email Address",
+        "role": "Role",
+        "submit": "Invite Admin",
+        "cancel": "Cancel"
+      },
+      "messages": {
+        "success": "Admin updated successfully",
+        "error": "Failed to update admin, please try again"
+      }
     }
   }
 }

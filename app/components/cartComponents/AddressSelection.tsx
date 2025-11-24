@@ -4,6 +4,8 @@ import { AddressProps } from "@/app/types/types";
 import LoadingSpinner from "@/app/UI/LoadingSpinner";
 import { api } from "@/app/utils/api";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
+import NewAddressModal from "./NewAddressModal";
 const ErrorBox = lazy(() => import("@/app/UI/ErrorBox"));
 const DropdownBtn = lazy(() => import("./DropdownBtn"));
 const DropdownMenu = lazy(() => import("./DropdownMenu"));
@@ -25,7 +27,9 @@ const AddressSelection = ({
   const [error, setError] = useState<string | null>(null);
   const session = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const tShipping = useTranslations("shipping");
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -136,6 +140,27 @@ const AddressSelection = ({
     fetchAddresses();
   };
 
+  const handleAddNewAddress = () => {
+    if (session.status !== "authenticated") {
+      alert("Please login to add an address");
+      return;
+    }
+    setIsOpen(false);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleAddressCreated = (address: AddressProps) => {
+    setAddresses((prev) => [
+      address,
+      ...prev.filter((prevAddress) => prevAddress._id !== address._id),
+    ]);
+    setSelectedAddress(address);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-4">
@@ -162,33 +187,43 @@ const AddressSelection = ({
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      <h3 className="text-lg font-semibold text-gray-800 mb-3">
-        Shipping Address
-      </h3>
+    <>
+      <div className="relative" ref={dropdownRef}>
+        <h3 className="mb-3 text-lg font-semibold text-gray-800">
+          {tShipping("address")}
+        </h3>
 
-      {/* Dropdown Button */}
-      <Suspense>
-        <DropdownBtn
-          isOpen={isOpen}
-          handleDropdownToggle={handleDropdownToggle}
-          selectedAddress={selectedAddress}
-        />
-      </Suspense>
-
-      {/* Dropdown Menu */}
-      {isOpen && (
+        {/* Dropdown Button */}
         <Suspense>
-          <DropdownMenu
-            addresses={addresses}
-            handleAddressSelect={handleAddressSelect}
+          <DropdownBtn
+            isOpen={isOpen}
+            handleDropdownToggle={handleDropdownToggle}
             selectedAddress={selectedAddress}
-            handleDeleteAddress={handleDeleteAddress}
-            setIsOpen={setIsOpen}
           />
         </Suspense>
-      )}
-    </div>
+
+        {/* Dropdown Menu */}
+        {isOpen && (
+          <Suspense>
+            <DropdownMenu
+              addresses={addresses}
+              handleAddressSelect={handleAddressSelect}
+              selectedAddress={selectedAddress}
+              handleDeleteAddress={handleDeleteAddress}
+              setIsOpen={setIsOpen}
+              onAddNewAddress={handleAddNewAddress}
+              addNewLabel={tShipping("title")}
+            />
+          </Suspense>
+        )}
+      </div>
+
+      <NewAddressModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onSuccess={handleAddressCreated}
+      />
+    </>
   );
 };
 

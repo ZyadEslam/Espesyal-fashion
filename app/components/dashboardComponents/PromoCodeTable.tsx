@@ -3,7 +3,7 @@ import { Tag, Calendar, User, Percent } from "lucide-react";
 import { PromoCode } from "@/app/hooks/usePromoCodes";
 import PromoCodeStateBadge from "./PromoCodeStateBadge";
 import PromoCodeActionButtons from "./PromoCodeActionButtons";
-
+import { useLocale, useTranslations } from "next-intl";
 interface PromoCodeTableProps {
   promoCodes: PromoCode[];
   onEdit: (promoCode: PromoCode) => void;
@@ -26,11 +26,17 @@ const PromoCodeTable: React.FC<PromoCodeTableProps> = ({
   onDelete,
   deleting,
 }) => {
+  const t = useTranslations("dashboard.promoCodes");
+  const locale = useLocale();
+  const isArabic = locale.startsWith("ar");
+  const textAlign = isArabic ? "text-right" : "text-left";
+  const thClass = `promo-code-table-th ${textAlign}`;
+  const tdClass = `promo-code-table-td ${textAlign}`;
   if (promoCodes.length === 0) {
     return (
       <div className="p-12 text-center">
         <Tag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-600">No promo codes found</p>
+        <p className="text-gray-600">{t("table.noPromoCodes")}</p>
       </div>
     );
   }
@@ -42,30 +48,18 @@ const PromoCodeTable: React.FC<PromoCodeTableProps> = ({
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-4 lg:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Code
-              </th>
-              <th className="px-4 lg:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Discount
-              </th>
-              <th className="px-4 lg:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                State
-              </th>
-              <th className="px-4 lg:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Period
-              </th>
-              <th className="px-4 lg:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Author
-              </th>
-              <th className="px-4 lg:px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
+              <th className={thClass}>{t("table.code")}</th>
+              <th className={thClass}>{t("table.discount")}</th>
+              <th className={thClass}>{t("table.status")}</th>
+              <th className={thClass}>{t("table.validity")}</th>
+              <th className={thClass}>{t("table.usage")}</th>
+              <th className={thClass}>{t("table.actions")}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {promoCodes.map((promoCode) => (
               <tr key={promoCode._id} className="hover:bg-gray-50">
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                <td className={tdClass}>
                   <div className="flex items-center gap-2">
                     <Tag className="w-4 h-4 text-gray-400" />
                     <span className="font-mono font-semibold text-gray-900">
@@ -73,7 +67,7 @@ const PromoCodeTable: React.FC<PromoCodeTableProps> = ({
                     </span>
                   </div>
                 </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                <td className={tdClass}>
                   <div className="flex items-center gap-2">
                     <Percent className="w-4 h-4 text-gray-400" />
                     <span className="text-gray-900">
@@ -81,10 +75,10 @@ const PromoCodeTable: React.FC<PromoCodeTableProps> = ({
                     </span>
                   </div>
                 </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                <td className={tdClass}>
                   <PromoCodeStateBadge state={promoCode.state} />
                 </td>
-                <td className="px-4 lg:px-6 py-4">
+                <td className={tdClass}>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="w-4 h-4" />
                     <div>
@@ -94,7 +88,7 @@ const PromoCodeTable: React.FC<PromoCodeTableProps> = ({
                     </div>
                   </div>
                 </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                <td className={tdClass}>
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-gray-400" />
                     <span className="text-sm text-gray-600">
@@ -104,7 +98,7 @@ const PromoCodeTable: React.FC<PromoCodeTableProps> = ({
                     </span>
                   </div>
                 </td>
-                <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className={tdClass}>
                   <PromoCodeActionButtons
                     promoCode={promoCode}
                     onEdit={onEdit}
@@ -138,7 +132,7 @@ const PromoCodeTable: React.FC<PromoCodeTableProps> = ({
             <div className="flex items-center gap-2">
               <Percent className="w-4 h-4 text-gray-400" />
               <span className="text-lg font-semibold text-gray-900">
-                {promoCode.discountPercentage}% OFF
+                {promoCode.discountPercentage}% {t("table.discount")}
               </span>
             </div>
 
@@ -147,8 +141,10 @@ const PromoCodeTable: React.FC<PromoCodeTableProps> = ({
                 <Calendar className="w-4 h-4" />
                 <div>
                   <div>{formatDate(promoCode.startDate)}</div>
-                  <div className="text-xs text-gray-400">to</div>
-                  <div>{formatDate(promoCode.endDate)}</div>
+                  <div className="text-xs text-gray-400">{t("table.to")}</div>
+                  <div className="text-xs text-gray-400">
+                    {formatDate(promoCode.endDate)}
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
@@ -156,7 +152,7 @@ const PromoCodeTable: React.FC<PromoCodeTableProps> = ({
                 <span>
                   {promoCode.author?.name ||
                     promoCode.author?.email ||
-                    "Unknown"}
+                    t("table.unknown")}
                 </span>
               </div>
             </div>
@@ -177,4 +173,3 @@ const PromoCodeTable: React.FC<PromoCodeTableProps> = ({
 };
 
 export default PromoCodeTable;
-

@@ -10,7 +10,7 @@ import girl7 from "../espesyal/product7.jpg";
 import girl8 from "../espesyal/product8.jpg";
 import girl9 from "../espesyal/product9.jpg";
 import girl10 from "../espesyal/product10.jpg";
-import espesialLogo from "../espesyal/متفرغ 2.png";
+import espesialLogo from "../espesyal/متفرغ 2 تعديل.png";
 import logo from "./logo.svg";
 import search_icon from "./search_icon.svg";
 import user_icon from "./user_icon.svg";

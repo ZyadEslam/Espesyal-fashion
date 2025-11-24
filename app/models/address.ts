@@ -15,10 +15,6 @@ const addressSchema = new mongoose.Schema({
     type: String,
     required: [true, "Phone Number is required"],
   },
-  pinCode: {
-    type: String,
-    required: [true, "Pin Code is required"],
-  },
   address: {
     type: String,
     required: [true, "Address is required"],
@@ -41,5 +37,9 @@ const addressSchema = new mongoose.Schema({
   },
 });
 
-const Address = mongoose.models.Address || mongoose.model("Address", addressSchema);
+if (mongoose.models.Address) {
+  mongoose.deleteModel("Address");
+}
+
+const Address = mongoose.model("Address", addressSchema);
 export default Address;

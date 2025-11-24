@@ -1,6 +1,7 @@
 import { assets } from "@/public/assets/assets";
 import Image, { StaticImageData } from "next/image";
 import React, { useCallback, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 export interface ImageState {
   image1: StaticImageData;
@@ -20,6 +21,7 @@ interface ImageUploaderProps {
 
 const ImageUploaderComponent: React.FC<ImageUploaderProps> = React.memo(
   ({ images, onImageChange, onRemoveImage }) => {
+    const t = useTranslations("dashboard.addProduct");
     const fileInputRefs = {
       image1: useRef<HTMLInputElement>(null),
       image2: useRef<HTMLInputElement>(null),
@@ -37,7 +39,7 @@ const ImageUploaderComponent: React.FC<ImageUploaderProps> = React.memo(
     return (
       <div className="space-y-2">
         <label className="text-sm font-medium text-gray-700">
-          Product Images
+          {t("imagesLabel")}
         </label>
         <div className="flex sm:flex-col md:flex-row gap-3">
           {Object.keys(images).map((imageKey, index) => (
@@ -78,9 +80,7 @@ const ImageUploaderComponent: React.FC<ImageUploaderProps> = React.memo(
             </div>
           ))}
         </div>
-        <p className="text-xs text-gray-500 mt-1">
-          Click on images to upload (max 4 images)
-        </p>
+        <p className="text-xs text-gray-500 mt-1">{t("imagesHint")}</p>
       </div>
     );
   }

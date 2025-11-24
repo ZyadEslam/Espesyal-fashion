@@ -78,8 +78,10 @@ const UserNav = memo(() => {
   return (
     <nav
       className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200"
+        isDashboard
+          ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200"
+          : isScrolled
+          ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200"
           : "bg-white border-b border-gray-200"
       }`}
     >
@@ -322,12 +324,54 @@ const UserNav = memo(() => {
               </div>
             </>
           ) : (
-            <Link
-              href={getLocalizedPath("/")}
-              className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-medium rounded-full hover:shadow-lg transition-all duration-300 hover:scale-105"
-            >
-              Exit Admin Mode
-            </Link>
+            <div className="flex items-center gap-4">
+              {/* Dashboard Badge */}
+              <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange/10 to-orange/5 border border-orange/20 rounded-xl">
+                <div className="w-2 h-2 bg-orange rounded-full animate-pulse" />
+                <span className="text-sm font-medium text-gray-700">
+                  Admin Mode
+                </span>
+              </div>
+
+              <LanguageSwitcher />
+
+              {/* User Info */}
+              {session?.user && (
+                <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="w-8 h-8 bg-gradient-to-br from-orange to-orange/80 rounded-full flex items-center justify-center shadow-md">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium text-gray-900 leading-tight">
+                      {session.user.name || session.user.email?.split("@")[0]}
+                    </span>
+                    <span className="text-xs text-gray-500">Admin</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Exit Button */}
+              <Link
+                href={getLocalizedPath("/")}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-50 hover:from-gray-200 hover:to-gray-100 text-gray-700 text-sm font-medium rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-300 group"
+              >
+                <svg
+                  className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Exit Dashboard</span>
+                <span className="sm:hidden">Exit</span>
+              </Link>
+            </div>
           )}
         </div>
       </div>

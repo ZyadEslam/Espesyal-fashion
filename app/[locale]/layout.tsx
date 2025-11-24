@@ -13,8 +13,8 @@ import { PerformanceMonitor } from "../components/seo/PerformanceOptimizations";
 import { routing } from "../../routing";
 
 const outfit = localFont({
-  src: "../../fonts/Outfit-VariableFont_wght.ttf",
-  variable: "--font-outfit400",
+  src: "../../fonts/Tajawal/Tajawal-Regular.ttf",
+  variable: "--font-tajawal400",
   display: "swap",
   weight: "100 900",
 });
