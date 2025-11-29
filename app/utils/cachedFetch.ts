@@ -236,10 +236,29 @@ export async function cachedFetchJson<T = unknown>(
   const response = await cachedFetch(url, options);
 
   if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ message: "Unknown error" }));
-    throw new Error(error.message || error.error || `HTTP ${response.status}`);
+    let errorMessage = `HTTP ${response.status}`;
+    let errorDetails: any = {};
+
+    try {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        errorDetails = await response.json();
+        errorMessage =
+          errorDetails.message || errorDetails.error || errorMessage;
+      } else {
+        // If not JSON, try to get text
+        const text = await response.text();
+        errorMessage = text || errorMessage;
+      }
+    } catch (parseError) {
+      // If we can't parse the error, include status and statusText
+      errorMessage = `HTTP ${response.status}: ${
+        response.statusText || "Unknown error"
+      }`;
+      console.error("Failed to parse error response:", parseError);
+    }
+
+    throw new Error(errorMessage);
   }
 
   return response.json();

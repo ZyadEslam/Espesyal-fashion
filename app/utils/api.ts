@@ -4,8 +4,19 @@ import { cachedFetchJson, cacheStrategies } from "./cachedFetch";
 
 export function getBaseUrl() {
   if (typeof window !== "undefined") return ""; // browser should use relative url
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
-  return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
+
+  // In production, prefer NEXT_PUBLIC_SITE_URL if set
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL;
+  }
+
+  // Fallback to VERCEL_URL for Vercel deployments
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // Development fallback
+  return `http://localhost:${process.env.PORT ?? 3000}`;
 }
 
 const API_BASE_URL = `${getBaseUrl()}/api`;
@@ -32,22 +43,32 @@ export const api = {
     try {
       // Use absolute URL for server-side rendering
       const url = `${API_BASE_URL}/product/${id}`;
+      console.log("Fetching product from URL:", url);
+
       const data = await cachedFetchJson<{ product: ProductCardProps }>(
         url,
         cacheStrategies.products()
       );
 
-      if (!data.product) {
+      if (!data || !data.product) {
         throw new Error("Product not found");
       }
 
       return data.product;
     } catch (error) {
       console.error("Error fetching product:", error);
-      // Throw a proper Error instead of NextResponse
-      throw new Error(
-        error instanceof Error ? error.message : "Failed to fetch product"
-      );
+      console.error("API_BASE_URL:", API_BASE_URL);
+      console.error("Product ID:", id);
+
+      // Provide more detailed error message
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : typeof error === "string"
+          ? error
+          : "Failed to fetch product. Please check your database connection and API configuration.";
+
+      throw new Error(errorMessage);
     }
   },
   getUser: async (id: string) => {

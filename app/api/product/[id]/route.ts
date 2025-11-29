@@ -28,7 +28,24 @@ interface ProductUpdateData {
 
 export async function GET(request: NextRequest, { params }: Params) {
   try {
-    await connectDB();
+    // Connect to database
+    try {
+      await connectDB();
+    } catch (dbError) {
+      console.error("Database connection error:", dbError);
+      return NextResponse.json(
+        {
+          message: "Database connection failed",
+          success: false,
+          error:
+            dbError instanceof Error
+              ? dbError.message
+              : "Database connection error",
+        },
+        { status: 500 }
+      );
+    }
+
     const { id } = await params;
 
     if (!id) {
@@ -87,9 +104,18 @@ export async function GET(request: NextRequest, { params }: Params) {
   } catch (error) {
     console.error("Error fetching product:", error);
     const errorMessage =
-      error instanceof Error ? error.message : "Failed to fetch product";
+      error instanceof Error
+        ? error.message
+        : typeof error === "string"
+        ? error
+        : "Failed to fetch product";
+
     return NextResponse.json(
-      { message: errorMessage, success: false, error: errorMessage },
+      {
+        message: errorMessage,
+        success: false,
+        error: errorMessage,
+      },
       { status: 500 }
     );
   }
