@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import Order from "@/app/models/order";
 import dbConnect from "@/lib/mongoose";
 
-
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -40,8 +39,27 @@ export async function GET(
       discountAmount?: number;
     }>;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mapProductsForClient = (products: any[] = []) =>
+    interface ProductItem {
+      product?: {
+        toObject?: () => Record<string, unknown>;
+        _id?: unknown;
+        price?: number;
+        color?: string;
+        size?: string;
+        sku?: string;
+        [key: string]: unknown;
+      };
+      price?: number;
+      quantity?: number;
+      color?: string;
+      size?: string;
+      sku?: string;
+      variantId?: { toString: () => string };
+      quantityInCart?: number;
+      [key: string]: unknown;
+    }
+
+    const mapProductsForClient = (products: ProductItem[] = []) =>
       products.map((item) => {
         if (item?.product) {
           const productDoc = item.product;
@@ -73,8 +91,7 @@ export async function GET(
           orderState: order.orderState,
           paymentStatus: order.paymentStatus,
           paymentMethod: order.paymentMethod,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          products: mapProductsForClient(order.products as any[]),
+          products: mapProductsForClient(order.products as ProductItem[]),
           address: order.addressId,
           trackingNumber: order.trackingNumber,
           estimatedDeliveryDate: order.estimatedDeliveryDate,
@@ -94,4 +111,3 @@ export async function GET(
     );
   }
 }
-

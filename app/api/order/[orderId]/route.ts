@@ -17,29 +17,29 @@ export async function GET(
       );
     }
 
-    const order = await Order.findById(orderId)
+    const order = (await Order.findById(orderId)
       .populate("products.product")
       .populate("addressId")
       .populate("userId")
-      .lean() as {
-        _id: { toString: () => string };
-        date: Date | string;
-        totalPrice: number;
-        orderState: string;
-        paymentStatus: string;
-        paymentMethod: string;
-        products: unknown;
-        addressId: unknown;
-        userId?: unknown;
-        trackingNumber?: string;
-        estimatedDeliveryDate?: Date | string;
-        shippedDate?: Date | string;
-        deliveredDate?: Date | string;
-        promoCode?: string;
-        discountAmount?: number;
-        discountPercentage?: number;
-        stripePaymentIntentId?: string;
-      } | null;
+      .lean()) as {
+      _id: { toString: () => string };
+      date: Date | string;
+      totalPrice: number;
+      orderState: string;
+      paymentStatus: string;
+      paymentMethod: string;
+      products: unknown;
+      addressId: unknown;
+      userId?: unknown;
+      trackingNumber?: string;
+      estimatedDeliveryDate?: Date | string;
+      shippedDate?: Date | string;
+      deliveredDate?: Date | string;
+      promoCode?: string;
+      discountAmount?: number;
+      discountPercentage?: number;
+      stripePaymentIntentId?: string;
+    } | null;
 
     if (!order) {
       return NextResponse.json(
@@ -48,9 +48,23 @@ export async function GET(
       );
     }
 
+    interface ProductItem {
+      product?: {
+        toObject?: () => Record<string, unknown>;
+        _id?: unknown;
+        [key: string]: unknown;
+      };
+      price?: number;
+      quantity?: number;
+      color?: string;
+      size?: string;
+      sku?: string;
+      variantId?: { toString: () => string };
+      [key: string]: unknown;
+    }
+
     const clientProducts = Array.isArray(order.products)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ? order.products.map((item: any) => {
+      ? order.products.map((item: ProductItem) => {
           if (item?.product) {
             const productDoc = item.product;
             const normalizedProduct = productDoc?.toObject
@@ -104,4 +118,3 @@ export async function GET(
     );
   }
 }
-

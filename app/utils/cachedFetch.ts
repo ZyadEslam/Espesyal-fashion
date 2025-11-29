@@ -3,7 +3,12 @@
  * Supports multiple cache strategies and automatic cache invalidation
  */
 
-type CacheStrategy = 'default' | 'no-store' | 'force-cache' | 'reload' | 'only-if-cached';
+type CacheStrategy =
+  | "default"
+  | "no-store"
+  | "force-cache"
+  | "reload"
+  | "only-if-cached";
 
 interface CachedFetchOptions extends RequestInit {
   cache?: CacheStrategy;
@@ -20,6 +25,10 @@ interface CacheEntry {
 
 // In-memory cache for client-side
 const memoryCache = new Map<string, CacheEntry>();
+
+// Pending requests map for request deduplication
+// Tracks in-flight requests to prevent duplicate concurrent requests
+const pendingRequests = new Map<string, Promise<Response>>();
 
 // Cache configuration
 const CACHE_CONFIG = {
@@ -39,9 +48,9 @@ function getCacheKey(url: string, options?: CachedFetchOptions): string {
   if (options?.cacheKey) {
     return options.cacheKey;
   }
-  
+
   // Create a unique key based on URL and method
-  const method = options?.method || 'GET';
+  const method = options?.method || "GET";
   return `${method}:${url}`;
 }
 
@@ -60,12 +69,12 @@ function getCachedData(key: string): unknown | null {
   if (entry && isCacheValid(entry)) {
     return entry.data;
   }
-  
+
   // Remove expired entry
   if (entry) {
     memoryCache.delete(key);
   }
-  
+
   return null;
 }
 
@@ -88,24 +97,24 @@ function getCacheTTL(url: string, revalidate?: number): number {
   if (revalidate) {
     return revalidate * 1000;
   }
-  
+
   // Auto-detect cache TTL based on endpoint
-  if (url.includes('/api/product')) {
+  if (url.includes("/api/product")) {
     return CACHE_CONFIG.PRODUCTS;
   }
-  if (url.includes('/api/categories')) {
+  if (url.includes("/api/categories")) {
     return CACHE_CONFIG.CATEGORIES;
   }
-  if (url.includes('/api/promo-code')) {
+  if (url.includes("/api/promo-code")) {
     return CACHE_CONFIG.PROMO_CODES;
   }
-  if (url.includes('/api/admin/manage')) {
+  if (url.includes("/api/admin/manage")) {
     return CACHE_CONFIG.ADMINS;
   }
-  if (url.includes('/api/user')) {
+  if (url.includes("/api/user")) {
     return CACHE_CONFIG.USER_DATA;
   }
-  
+
   return CACHE_CONFIG.DEFAULT;
 }
 
@@ -118,7 +127,7 @@ export function invalidateCache(tagOrKey: string): void {
     memoryCache.delete(tagOrKey);
     return;
   }
-  
+
   // If it's a tag, remove all entries with that tag
   // (For now, we'll use key-based invalidation)
   // In a more advanced implementation, you could store tags separately
@@ -137,60 +146,84 @@ export function clearCache(): void {
 }
 
 /**
- * Cached fetch function with automatic cache management
+ * Cached fetch function with automatic cache management and request deduplication
  */
 export async function cachedFetch(
   url: string,
   options?: CachedFetchOptions
 ): Promise<Response> {
-  const cacheStrategy = options?.cache || 'default';
-  const method = options?.method || 'GET';
-  
+  const cacheStrategy = options?.cache || "default";
+  const method = options?.method || "GET";
+  const requestKey = getCacheKey(url, options);
+
   // For GET requests, check cache first
-  if (method === 'GET' && cacheStrategy !== 'no-store' && cacheStrategy !== 'reload') {
-    const cacheKey = getCacheKey(url, options);
-    const cachedData = getCachedData(cacheKey);
-    
-    if (cachedData && cacheStrategy === 'force-cache') {
+  if (
+    method === "GET" &&
+    cacheStrategy !== "no-store" &&
+    cacheStrategy !== "reload"
+  ) {
+    const cachedData = getCachedData(requestKey);
+
+    if (cachedData && cacheStrategy === "force-cache") {
       // Return cached data immediately
       return new Response(JSON.stringify(cachedData), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
       });
     }
   }
-  
+
+  // Request deduplication: if there's already a pending request for this URL, return it
+  // This prevents multiple concurrent requests for the same resource
+  if (method === "GET" && pendingRequests.has(requestKey)) {
+    return pendingRequests.get(requestKey)!;
+  }
+
   // Prepare fetch options
   const fetchOptions: RequestInit = {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...options?.headers,
     },
   };
-  
-  // Make the actual fetch request
-  const response = await fetch(url, fetchOptions);
-  
-  // Cache successful GET responses
-  if (
-    method === 'GET' &&
-    response.ok &&
-    cacheStrategy !== 'no-store' &&
-    cacheStrategy !== 'reload'
-  ) {
+
+  // Create the fetch promise and store it for deduplication
+  const fetchPromise = (async () => {
     try {
-      const data = await response.clone().json();
-      const cacheKey = getCacheKey(url, options);
-      const ttl = getCacheTTL(url, options?.revalidate);
-      setCachedData(cacheKey, data, ttl);
-    } catch (error) {
-      // If response is not JSON, don't cache
-      console.warn('Failed to cache response:', error);
+      // Make the actual fetch request
+      const response = await fetch(url, fetchOptions);
+
+      // Cache successful GET responses
+      if (
+        method === "GET" &&
+        response.ok &&
+        cacheStrategy !== "no-store" &&
+        cacheStrategy !== "reload"
+      ) {
+        try {
+          const data = await response.clone().json();
+          const ttl = getCacheTTL(url, options?.revalidate);
+          setCachedData(requestKey, data, ttl);
+        } catch (error) {
+          // If response is not JSON, don't cache
+          console.warn("Failed to cache response:", error);
+        }
+      }
+
+      return response;
+    } finally {
+      // Remove from pending requests once completed (success or failure)
+      pendingRequests.delete(requestKey);
     }
+  })();
+
+  // Store the promise for request deduplication (only for GET requests)
+  if (method === "GET") {
+    pendingRequests.set(requestKey, fetchPromise);
   }
-  
-  return response;
+
+  return fetchPromise;
 }
 
 /**
@@ -200,34 +233,16 @@ export async function cachedFetchJson<T = unknown>(
   url: string,
   options?: CachedFetchOptions
 ): Promise<T> {
-  try {
-    const response = await cachedFetch(url, options);
-    
-    if (!response.ok) {
-      let errorMessage = `HTTP ${response.status}`;
-      try {
-        const error = await response.json();
-        errorMessage = error.message || error.error || errorMessage;
-      } catch {
-        // If response is not JSON, try to get text
-        try {
-          const text = await response.text();
-          errorMessage = text || errorMessage;
-        } catch {
-          // Fallback to status code
-        }
-      }
-      throw new Error(errorMessage);
-    }
-    
-    return response.json();
-  } catch (error) {
-    // Re-throw if it's already an Error, otherwise wrap it
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error(`Failed to fetch: ${url}`);
+  const response = await cachedFetch(url, options);
+
+  if (!response.ok) {
+    const error = await response
+      .json()
+      .catch(() => ({ message: "Unknown error" }));
+    throw new Error(error.message || error.error || `HTTP ${response.status}`);
   }
+
+  return response.json();
 }
 
 /**
@@ -236,32 +251,31 @@ export async function cachedFetchJson<T = unknown>(
 export const cacheStrategies = {
   // Products - cache for 30 seconds
   products: (force = false): CachedFetchOptions => ({
-    cache: force ? 'no-store' : 'default',
+    cache: force ? "no-store" : "default",
     revalidate: 30,
   }),
-  
+
   // Categories - cache for 60 seconds
   categories: (force = false): CachedFetchOptions => ({
-    cache: force ? 'no-store' : 'default',
+    cache: force ? "no-store" : "default",
     revalidate: 60,
   }),
-  
+
   // Promo codes - cache for 30 seconds
   promoCodes: (force = false): CachedFetchOptions => ({
-    cache: force ? 'no-store' : 'default',
+    cache: force ? "no-store" : "default",
     revalidate: 30,
   }),
-  
+
   // Admin data - cache for 60 seconds
   admins: (force = false): CachedFetchOptions => ({
-    cache: force ? 'no-store' : 'default',
+    cache: force ? "no-store" : "default",
     revalidate: 60,
   }),
-  
+
   // User data - cache for 5 minutes
   userData: (force = false): CachedFetchOptions => ({
-    cache: force ? 'no-store' : 'default',
+    cache: force ? "no-store" : "default",
     revalidate: 300,
   }),
 };
-

@@ -30,7 +30,33 @@ export async function GET(request: NextRequest, { params }: Params) {
   try {
     await connectDB();
     const { id } = await params;
-    const product = await Product.findById(id);
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "Product ID is required", success: false },
+        { status: 400 }
+      );
+    }
+
+    interface ProductDoc {
+      _id: { toString: () => string };
+      name: string;
+      description: string;
+      price: number;
+      oldPrice?: number;
+      discount?: number;
+      rating: number;
+      brand: string;
+      categoryName: string;
+      imgSrc?: unknown[];
+      hideFromHome?: boolean;
+      createdAt?: Date | string;
+      [key: string]: unknown;
+    }
+
+    const product = (await Product.findById(
+      id
+    ).lean()) as unknown as ProductDoc | null;
 
     if (!product) {
       return NextResponse.json(
@@ -39,25 +65,31 @@ export async function GET(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Convert to plain object and keep the image data
-    const productObj = product.toObject({ virtuals: true });
-
-    // Instead of converting to base64, we'll use the image API endpoint
-    productObj.imgSrc = productObj.imgSrc.map(
-      (_: unknown, index: number) => `/api/product/image/${id}?index=${index}`
-    );
+    // Convert to plain object and format image sources
+    const productObj = {
+      ...product,
+      _id: product._id.toString(),
+      // Instead of converting to base64, we'll use the image API endpoint
+      imgSrc: (product.imgSrc || []).map(
+        (_: unknown, index: number) => `/api/product/image/${id}?index=${index}`
+      ),
+    };
 
     return NextResponse.json(
       { product: productObj, success: true },
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        },
+      }
     );
   } catch (error) {
     console.error("Error fetching product:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to fetch product";
     return NextResponse.json(
-      { 
-        message: error instanceof Error ? error.message : "Failed to fetch product",
-        success: false 
-      },
+      { message: errorMessage, success: false, error: errorMessage },
       { status: 500 }
     );
   }
@@ -81,11 +113,9 @@ export async function POST(request: NextRequest, { params }: Params) {
       }
     }
 
-    const product = await Product.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true }
-    );
+    const product = await Product.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
 
     if (!product) {
       return NextResponse.json(
@@ -151,11 +181,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       }
     }
 
-    const product = await Product.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true }
-    );
+    const product = await Product.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
 
     if (!product) {
       return NextResponse.json(

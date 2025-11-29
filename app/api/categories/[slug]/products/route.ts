@@ -17,7 +17,12 @@ export async function GET(request: NextRequest, { params }: Params) {
     await connectDB();
     const resolvedParams = await params;
     const slug = resolvedParams.slug;
-    
+
+    // Get limit from query params, default to 20 for home page display
+    const { searchParams } = new URL(request.url);
+    const limitParam = searchParams.get("limit");
+    const limit = limitParam ? parseInt(limitParam, 10) : 20;
+
     console.log("[slug]/products route hit with slug:", slug);
 
     if (!slug) {
@@ -31,15 +36,27 @@ export async function GET(request: NextRequest, { params }: Params) {
       );
     }
 
-    let category;
-    
+    interface CategoryDoc {
+      _id: { toString: () => string };
+      name: string;
+      slug: string;
+      [key: string]: unknown;
+    }
+
+    let category: CategoryDoc | null = null;
+
     // Check if slug is an ObjectId (categoryId) or a slug string
     if (isValidObjectId(slug)) {
-      // It's an ObjectId, find by ID
-      category = await Category.findById(slug);
+      // It's an ObjectId, find by ID - use lean() for performance
+      category = (await Category.findById(
+        slug
+      ).lean()) as unknown as CategoryDoc | null;
     } else {
-      // It's a slug string, find by slug
-      category = await Category.findOne({ slug, isActive: true });
+      // It's a slug string, find by slug - use lean() for performance
+      category = (await Category.findOne({
+        slug,
+        isActive: true,
+      }).lean()) as unknown as CategoryDoc | null;
     }
 
     if (!category) {
@@ -52,36 +69,59 @@ export async function GET(request: NextRequest, { params }: Params) {
         { status: 404 }
       );
     }
-    
+
     console.log("Category found:", category.name);
 
-    // Fetch all products for this category, excluding hidden products, sorted by createdAt
-    const products = await Product.find({ 
+    // Fetch products for this category with limit, excluding hidden products, sorted by createdAt
+    // Use lean() for faster queries - returns plain objects instead of Mongoose documents
+    const products = await Product.find({
       category: category._id,
-      hideFromHome: { $ne: true } // Exclude products hidden from home
+      hideFromHome: { $ne: true }, // Exclude products hidden from home
     })
-      .select("name description price oldPrice discount rating brand categoryName imgSrc hideFromHome createdAt")
+      .select(
+        "name description price oldPrice discount rating brand categoryName imgSrc hideFromHome createdAt"
+      )
       .sort({ createdAt: -1 })
+      .limit(limit)
       .lean()
       .exec();
 
+    // Type definition for product from lean query
+    interface ProductDoc {
+      _id: { toString: () => string };
+      name: string;
+      description: string;
+      price: number;
+      oldPrice?: number;
+      discount?: number;
+      rating: number;
+      brand: string;
+      categoryName: string;
+      imgSrc?: unknown[];
+      hideFromHome?: boolean;
+      createdAt?: Date | string;
+      [key: string]: unknown;
+    }
+
     // Convert products to format compatible with ProductCardProps
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formattedProducts = products.map((product: any) => ({
-      _id: product._id?.toString() || "",
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      oldPrice: product.oldPrice,
-      discount: product.discount,
-      rating: product.rating,
-      brand: product.brand,
-      categoryName: product.categoryName,
-      imgSrc: (product.imgSrc || []).map(
-        (_: unknown, index: number) =>
-          `/api/product/image/${product._id}?index=${index}`
-      ) as unknown as Array<unknown>,
-    }));
+    const formattedProducts = products.map((product) => {
+      const productTyped = product as unknown as ProductDoc;
+      return {
+        _id: productTyped._id.toString(),
+        name: productTyped.name,
+        description: productTyped.description,
+        price: productTyped.price,
+        oldPrice: productTyped.oldPrice,
+        discount: productTyped.discount,
+        rating: productTyped.rating,
+        brand: productTyped.brand,
+        categoryName: productTyped.categoryName,
+        imgSrc: (productTyped.imgSrc || []).map(
+          (_: unknown, index: number) =>
+            `/api/product/image/${productTyped._id}?index=${index}`
+        ) as unknown as Array<unknown>,
+      };
+    });
 
     return NextResponse.json(
       {
@@ -91,8 +131,8 @@ export async function GET(request: NextRequest, { params }: Params) {
       },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
-        }
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        },
       }
     );
   } catch (error) {
@@ -107,5 +147,3 @@ export async function GET(request: NextRequest, { params }: Params) {
     );
   }
 }
-
-

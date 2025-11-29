@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
           { email: { $regex: username, $options: "i" } },
         ],
       }).select("_id");
-      
+
       if (users.length > 0) {
         query.userId = { $in: users.map((u) => u._id) };
       } else {
@@ -91,28 +91,54 @@ export async function GET(req: NextRequest) {
       .lean();
 
     // Format orders for response
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formattedOrders = orders.map((order: any) => ({
-      _id: order._id.toString(),
-      orderNumber: order._id.toString().slice(-8).toUpperCase(),
-      date: order.date,
-      totalPrice: order.totalPrice,
-      orderState: order.orderState,
-      paymentStatus: order.paymentStatus,
-      paymentMethod: order.paymentMethod,
-      userId: order.userId?._id?.toString(),
-      userName: order.userId?.name || "Unknown",
-      userEmail: order.userId?.email || "Unknown",
-      address: order.addressId,
-      products: order.products || [],
-      trackingNumber: order.trackingNumber,
-      estimatedDeliveryDate: order.estimatedDeliveryDate,
-      shippedDate: order.shippedDate,
-      deliveredDate: order.deliveredDate,
-      promoCode: order.promoCode,
-      discountAmount: order.discountAmount || 0,
-      discountPercentage: order.discountPercentage,
-    }));
+    interface OrderWithPopulated {
+      _id: { toString: () => string };
+      date: Date | string;
+      totalPrice: number;
+      orderState: string;
+      paymentStatus: string;
+      paymentMethod: string;
+      userId?: {
+        _id?: { toString: () => string };
+        name?: string;
+        email?: string;
+      };
+      addressId?: unknown;
+      products?: unknown[];
+      trackingNumber?: string;
+      estimatedDeliveryDate?: Date | string;
+      shippedDate?: Date | string;
+      deliveredDate?: Date | string;
+      promoCode?: string;
+      discountAmount?: number;
+      discountPercentage?: number;
+    }
+
+    const formattedOrders = orders.map((order) => {
+      // Convert through unknown first to handle Mongoose type mismatch
+      const orderTyped = order as unknown as OrderWithPopulated;
+      return {
+        _id: orderTyped._id.toString(),
+        orderNumber: orderTyped._id.toString().slice(-8).toUpperCase(),
+        date: orderTyped.date,
+        totalPrice: orderTyped.totalPrice,
+        orderState: orderTyped.orderState,
+        paymentStatus: orderTyped.paymentStatus,
+        paymentMethod: orderTyped.paymentMethod,
+        userId: orderTyped.userId?._id?.toString(),
+        userName: orderTyped.userId?.name || "Unknown",
+        userEmail: orderTyped.userId?.email || "Unknown",
+        address: orderTyped.addressId,
+        products: orderTyped.products || [],
+        trackingNumber: orderTyped.trackingNumber,
+        estimatedDeliveryDate: orderTyped.estimatedDeliveryDate,
+        shippedDate: orderTyped.shippedDate,
+        deliveredDate: orderTyped.deliveredDate,
+        promoCode: orderTyped.promoCode,
+        discountAmount: orderTyped.discountAmount || 0,
+        discountPercentage: orderTyped.discountPercentage,
+      };
+    });
 
     return NextResponse.json(
       {
@@ -134,4 +160,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-

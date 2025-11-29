@@ -8,13 +8,29 @@ interface Params {
   params: Promise<{ orderId: string }>;
 }
 
+interface OrderWithPopulated {
+  _id: { toString: () => string };
+  date: Date | string;
+  totalPrice: number;
+  orderState: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  userId?: { _id?: { toString: () => string }; name?: string; email?: string };
+  addressId?: unknown;
+  products?: unknown[];
+  trackingNumber?: string;
+  estimatedDeliveryDate?: Date | string;
+  shippedDate?: Date | string;
+  deliveredDate?: Date | string;
+  promoCode?: string;
+  discountAmount?: number;
+  discountPercentage?: number;
+}
+
 /**
  * GET: Fetch a single order by ID
  */
-export async function GET(
-  _req: NextRequest,
-  { params }: Params
-) {
+export async function GET(_req: NextRequest, { params }: Params) {
   try {
     const session = await requireAdmin();
     if (!session) {
@@ -43,35 +59,32 @@ export async function GET(
       .lean();
 
     if (!order) {
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     // Format order response to match expected structure
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const orderDoc = order as any;
+    // Convert through unknown first to handle Mongoose type mismatch
+    const orderTyped = order as unknown as OrderWithPopulated;
     const formattedOrder = {
-      _id: orderDoc._id.toString(),
-      orderNumber: orderDoc._id.toString().slice(-8).toUpperCase(),
-      date: orderDoc.date,
-      totalPrice: orderDoc.totalPrice,
-      orderState: orderDoc.orderState,
-      paymentStatus: orderDoc.paymentStatus,
-      paymentMethod: orderDoc.paymentMethod,
-      userId: orderDoc.userId?._id?.toString(),
-      userName: orderDoc.userId?.name || "Unknown",
-      userEmail: orderDoc.userId?.email || "Unknown",
-      address: orderDoc.addressId, // Map addressId to address
-      products: orderDoc.products || [],
-      trackingNumber: orderDoc.trackingNumber,
-      estimatedDeliveryDate: orderDoc.estimatedDeliveryDate,
-      shippedDate: orderDoc.shippedDate,
-      deliveredDate: orderDoc.deliveredDate,
-      promoCode: orderDoc.promoCode,
-      discountAmount: orderDoc.discountAmount || 0,
-      discountPercentage: orderDoc.discountPercentage,
+      _id: orderTyped._id.toString(),
+      orderNumber: orderTyped._id.toString().slice(-8).toUpperCase(),
+      date: orderTyped.date,
+      totalPrice: orderTyped.totalPrice,
+      orderState: orderTyped.orderState,
+      paymentStatus: orderTyped.paymentStatus,
+      paymentMethod: orderTyped.paymentMethod,
+      userId: orderTyped.userId?._id?.toString(),
+      userName: orderTyped.userId?.name || "Unknown",
+      userEmail: orderTyped.userId?.email || "Unknown",
+      address: orderTyped.addressId, // Map addressId to address
+      products: orderTyped.products || [],
+      trackingNumber: orderTyped.trackingNumber,
+      estimatedDeliveryDate: orderTyped.estimatedDeliveryDate,
+      shippedDate: orderTyped.shippedDate,
+      deliveredDate: orderTyped.deliveredDate,
+      promoCode: orderTyped.promoCode,
+      discountAmount: orderTyped.discountAmount || 0,
+      discountPercentage: orderTyped.discountPercentage,
     };
 
     return NextResponse.json(
@@ -92,10 +105,7 @@ export async function GET(
 /**
  * PATCH: Update order status and details
  */
-export async function PATCH(
-  req: NextRequest,
-  { params }: Params
-) {
+export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     const session = await requireAdmin();
     if (!session) {
@@ -118,28 +128,40 @@ export async function PATCH(
     } = body;
 
     // Validate orderState if provided
-    const validStates = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+    const validStates = [
+      "Pending",
+      "Processing",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
+    ];
     if (orderState && !validStates.includes(orderState)) {
       return NextResponse.json(
-        { error: `Invalid order state. Must be one of: ${validStates.join(", ")}` },
+        {
+          error: `Invalid order state. Must be one of: ${validStates.join(
+            ", "
+          )}`,
+        },
         { status: 400 }
       );
     }
 
     // Build update object
     const updateData: Record<string, unknown> = {};
-    
+
     if (orderState) updateData.orderState = orderState;
-    if (trackingNumber !== undefined) updateData.trackingNumber = trackingNumber;
-    if (estimatedDeliveryDate) updateData.estimatedDeliveryDate = new Date(estimatedDeliveryDate);
-    
+    if (trackingNumber !== undefined)
+      updateData.trackingNumber = trackingNumber;
+    if (estimatedDeliveryDate)
+      updateData.estimatedDeliveryDate = new Date(estimatedDeliveryDate);
+
     // Auto-set dates based on status
     if (orderState === "Shipped" && !shippedDate) {
       updateData.shippedDate = new Date();
     } else if (shippedDate) {
       updateData.shippedDate = new Date(shippedDate);
     }
-    
+
     if (orderState === "Delivered" && !deliveredDate) {
       updateData.deliveredDate = new Date();
     } else if (deliveredDate) {
@@ -167,43 +189,40 @@ export async function PATCH(
       .lean();
 
     if (!order) {
-      return NextResponse.json(
-        { error: "Order not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     // Broadcast update via SSE
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const orderDoc = order as any;
+    // Convert through unknown first to handle Mongoose type mismatch
+    const orderTyped = order as unknown as OrderWithPopulated;
     sseManager.broadcast("order-updated", {
-      orderId: orderDoc._id.toString(),
-      orderNumber: orderDoc._id.toString().slice(-8).toUpperCase(),
-      orderState: orderDoc.orderState,
+      orderId: orderTyped._id.toString(),
+      orderNumber: orderTyped._id.toString().slice(-8).toUpperCase(),
+      orderState: orderTyped.orderState,
       updatedAt: new Date().toISOString(),
     });
 
     // Format order response to match expected structure
     const formattedOrder = {
-      _id: orderDoc._id.toString(),
-      orderNumber: orderDoc._id.toString().slice(-8).toUpperCase(),
-      date: orderDoc.date,
-      totalPrice: orderDoc.totalPrice,
-      orderState: orderDoc.orderState,
-      paymentStatus: orderDoc.paymentStatus,
-      paymentMethod: orderDoc.paymentMethod,
-      userId: orderDoc.userId?._id?.toString(),
-      userName: orderDoc.userId?.name || "Unknown",
-      userEmail: orderDoc.userId?.email || "Unknown",
-      address: orderDoc.addressId, // Map addressId to address
-      products: orderDoc.products || [],
-      trackingNumber: orderDoc.trackingNumber,
-      estimatedDeliveryDate: orderDoc.estimatedDeliveryDate,
-      shippedDate: orderDoc.shippedDate,
-      deliveredDate: orderDoc.deliveredDate,
-      promoCode: orderDoc.promoCode,
-      discountAmount: orderDoc.discountAmount || 0,
-      discountPercentage: orderDoc.discountPercentage,
+      _id: orderTyped._id.toString(),
+      orderNumber: orderTyped._id.toString().slice(-8).toUpperCase(),
+      date: orderTyped.date,
+      totalPrice: orderTyped.totalPrice,
+      orderState: orderTyped.orderState,
+      paymentStatus: orderTyped.paymentStatus,
+      paymentMethod: orderTyped.paymentMethod,
+      userId: orderTyped.userId?._id?.toString(),
+      userName: orderTyped.userId?.name || "Unknown",
+      userEmail: orderTyped.userId?.email || "Unknown",
+      address: orderTyped.addressId, // Map addressId to address
+      products: orderTyped.products || [],
+      trackingNumber: orderTyped.trackingNumber,
+      estimatedDeliveryDate: orderTyped.estimatedDeliveryDate,
+      shippedDate: orderTyped.shippedDate,
+      deliveredDate: orderTyped.deliveredDate,
+      promoCode: orderTyped.promoCode,
+      discountAmount: orderTyped.discountAmount || 0,
+      discountPercentage: orderTyped.discountPercentage,
     };
 
     return NextResponse.json(
@@ -221,4 +240,3 @@ export async function PATCH(
     );
   }
 }
-

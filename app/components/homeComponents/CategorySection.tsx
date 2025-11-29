@@ -7,6 +7,7 @@ import { ArrowRightIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCardProps } from "../../types/types";
 import ProductCard from "../productComponents/ProductCard";
 import { useLocale } from "next-intl";
+import { cachedFetchJson, cacheStrategies } from "../../utils/cachedFetch";
 
 interface CategorySectionProps {
   categoryId: string;
@@ -31,8 +32,14 @@ const CategorySection: React.FC<CategorySectionProps> = ({
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`/api/categories/${categoryId}/products`);
-        const data = await response.json();
+        // Limit to 20 products for home page display
+        const data = await cachedFetchJson<{
+          success: boolean;
+          data: ProductCardProps[];
+        }>(
+          `/api/categories/${categoryId}/products?limit=20`,
+          cacheStrategies.products()
+        );
 
         if (data.success) {
           setProducts(data.data || []);

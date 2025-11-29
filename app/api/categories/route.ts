@@ -42,7 +42,8 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const categories = await categoriesQuery.exec();
+    // Use .lean() for faster queries - returns plain objects instead of Mongoose documents
+    const categories = await categoriesQuery.lean().exec();
 
     return NextResponse.json(
       {

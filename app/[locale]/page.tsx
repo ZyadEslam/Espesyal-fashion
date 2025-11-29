@@ -5,6 +5,7 @@ import HeroSection from "../components/homeComponents/HeroSection";
 import CategorySection from "../components/homeComponents/CategorySection";
 import SubscriptionOffer from "../components/homeComponents/SubscriptionOffer";
 import CategoriesLoadingSection from "../components/homeComponents/CategoriesLoadingSection";
+import { cachedFetchJson, cacheStrategies } from "../utils/cachedFetch";
 
 interface Category {
   _id: string;
@@ -20,8 +21,10 @@ export default function Home() {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/categories?active=true");
-        const data = await response.json();
+        const data = await cachedFetchJson<{
+          success: boolean;
+          data: (Category & { sortOrder: number; createdAt: string })[];
+        }>("/api/categories?active=true", cacheStrategies.categories());
 
         if (data.success) {
           // Sort categories by sortOrder (priority) ascending, then by createdAt

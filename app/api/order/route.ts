@@ -22,7 +22,9 @@ interface IncomingOrderProduct {
   sku?: string;
 }
 
-const normalizeOrderItems = (items: unknown[]): {
+const normalizeOrderItems = (
+  items: unknown[]
+): {
   product: mongoose.Types.ObjectId;
   variantId?: mongoose.Types.ObjectId;
   size?: string;
@@ -67,7 +69,10 @@ const normalizeOrderItems = (items: unknown[]): {
 
       const resolvedProductId = productId || _id;
 
-      if (!resolvedProductId || !mongoose.Types.ObjectId.isValid(resolvedProductId)) {
+      if (
+        !resolvedProductId ||
+        !mongoose.Types.ObjectId.isValid(resolvedProductId)
+      ) {
         return null;
       }
 
@@ -145,7 +150,9 @@ export async function POST(req: Request) {
       session.startTransaction();
 
       for (const item of normalizedProducts) {
-        const productDoc = await Product.findById(item.product).session(session);
+        const productDoc = await Product.findById(item.product).session(
+          session
+        );
 
         if (!productDoc) {
           throw new Error("One of the products in the order no longer exists.");
@@ -186,7 +193,9 @@ export async function POST(req: Request) {
             ? "paid"
             : "pending",
         ...(promoCode && { promoCode }),
-        ...(discountAmount !== undefined && { discountAmount: +discountAmount }),
+        ...(discountAmount !== undefined && {
+          discountAmount: +discountAmount,
+        }),
         ...(discountPercentage !== undefined && {
           discountPercentage: +discountPercentage,
         }),
@@ -203,8 +212,16 @@ export async function POST(req: Request) {
     }
 
     // Get user info for broadcast
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = (await User.findById(userId).select("name email").lean()) as any;
+    interface UserDoc {
+      _id?: { toString: () => string };
+      name?: string;
+      email?: string;
+      [key: string]: unknown;
+    }
+
+    const user = (await User.findById(userId)
+      .select("name email")
+      .lean()) as unknown as UserDoc | null;
 
     // Broadcast new order via SSE to all connected admin clients
     sseManager.broadcast("new-order", {

@@ -82,23 +82,21 @@ export const useProducts = (): UseProductsReturn => {
     if (fetchingRef.current && !force) {
       return;
     }
-    
+
     try {
       fetchingRef.current = true;
       setLoading(true);
       setError(null);
-      
+
       // Use cached fetch with appropriate cache strategy
-      const data = await cachedFetchJson<{ products: Product[]; success: boolean }>(
-        "/api/product",
-        cacheStrategies.products(force)
-      );
+      const data = await cachedFetchJson<{
+        products: Product[];
+        success: boolean;
+      }>("/api/product", cacheStrategies.products(force));
 
       setProducts(data.products || []);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load products"
-      );
+      setError(err instanceof Error ? err.message : "Failed to load products");
     } finally {
       setLoading(false);
       fetchingRef.current = false;
@@ -107,10 +105,10 @@ export const useProducts = (): UseProductsReturn => {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const data = await cachedFetchJson<{ data: Category[]; success: boolean }>(
-        "/api/categories",
-        cacheStrategies.categories()
-      );
+      const data = await cachedFetchJson<{
+        data: Category[];
+        success: boolean;
+      }>("/api/categories", cacheStrategies.categories());
       if (data.success) {
         setCategories(data.data || []);
       }
@@ -132,9 +130,9 @@ export const useProducts = (): UseProductsReturn => {
               const sanitized = { ...variant };
               delete sanitized.clientId;
               return {
-                ...(sanitized._id && { _id: sanitized._id }),
-                color: sanitized.color?.trim(),
-                size: sanitized.size?.trim(),
+                _id: sanitized._id || `temp-${Date.now()}-${Math.random()}`, // Temporary ID for new variants
+                color: sanitized.color?.trim() || "",
+                size: sanitized.size?.trim() || "",
                 quantity:
                   Number(sanitized.quantity) > 0
                     ? Number(sanitized.quantity)
@@ -165,11 +163,11 @@ export const useProducts = (): UseProductsReturn => {
         setProducts((prevProducts) =>
           prevProducts.map((product) =>
             product._id === id
-              ? ({
+              ? {
                   ...product,
                   ...updateData,
                   imageCount: product.imageCount, // Preserve image count
-                } as Product)
+                }
               : product
           )
         );
@@ -207,44 +205,39 @@ export const useProducts = (): UseProductsReturn => {
     [fetchProducts]
   );
 
-  const deleteProduct = useCallback(
-    async (id: string): Promise<boolean> => {
-      try {
-        setError(null);
+  const deleteProduct = useCallback(async (id: string): Promise<boolean> => {
+    try {
+      setError(null);
 
-        // Optimistic update - remove from local state immediately
-        let deletedProduct: Product | undefined;
-        setProducts((prevProducts) => {
-          deletedProduct = prevProducts.find((p) => p._id === id);
-          return prevProducts.filter((product) => product._id !== id);
-        });
+      // Optimistic update - remove from local state immediately
+      let deletedProduct: Product | undefined;
+      setProducts((prevProducts) => {
+        deletedProduct = prevProducts.find((p) => p._id === id);
+        return prevProducts.filter((product) => product._id !== id);
+      });
 
-        const response = await fetch(`/api/product/${id}`, {
-          method: "DELETE",
-        });
+      const response = await fetch(`/api/product/${id}`, {
+        method: "DELETE",
+      });
 
-        const result = await response.json();
+      const result = await response.json();
 
-        if (!response.ok) {
-          // Revert optimistic update on error
-          if (deletedProduct) {
-            setProducts((prevProducts) => [...prevProducts, deletedProduct!]);
-          }
-          throw new Error(result.message || "Failed to delete product");
+      if (!response.ok) {
+        // Revert optimistic update on error
+        if (deletedProduct) {
+          setProducts((prevProducts) => [...prevProducts, deletedProduct!]);
         }
-
-        setSuccess("Product deleted successfully");
-        setTimeout(() => setSuccess(null), 3000);
-        return true;
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to delete product"
-        );
-        return false;
+        throw new Error(result.message || "Failed to delete product");
       }
-    },
-    []
-  );
+
+      setSuccess("Product deleted successfully");
+      setTimeout(() => setSuccess(null), 3000);
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete product");
+      return false;
+    }
+  }, []);
 
   return {
     products,

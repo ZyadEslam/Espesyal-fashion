@@ -4,11 +4,19 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { CreditCard, Wallet, ArrowLeft } from "lucide-react";
+import {
+  CreditCard,
+  Wallet,
+  ArrowLeft,
+  Sparkles,
+  Lock,
+  ArrowRight,
+} from "lucide-react";
 import LoadingOverlay from "@/app/components/LoadingOverlay";
 import ActionNotification from "@/app/UI/ActionNotification";
 import StripePaymentForm from "@/app/components/checkoutComponents/StripePaymentForm";
 import { api } from "@/app/utils/api";
+import { signIn } from "next-auth/react";
 
 interface Product {
   _id?: string;
@@ -38,9 +46,25 @@ const CheckoutPage = () => {
   const router = useRouter();
   const session = useSession();
   const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"cash_on_delivery" | "stripe">("cash_on_delivery");
+
+  const handleSignIn = async () => {
+    try {
+      await signIn("google", {
+        callbackUrl: `/${locale}/checkout`,
+        redirect: true,
+      });
+    } catch (error) {
+      console.error("Sign in error:", error);
+    }
+  };
+  const [paymentMethod, setPaymentMethod] = useState<
+    "cash_on_delivery" | "stripe"
+  >("cash_on_delivery");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [orderStatus, setOrderStatus] = useState<{ success: boolean; message: string } | null>(null);
+  const [orderStatus, setOrderStatus] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     // Get checkout data from sessionStorage
@@ -70,8 +94,12 @@ const CheckoutPage = () => {
         totalPrice: checkoutData.totalPrice,
         paymentMethod: paymentMethod,
         ...(checkoutData.promoCode && { promoCode: checkoutData.promoCode }),
-        ...(checkoutData.discountAmount && { discountAmount: checkoutData.discountAmount }),
-        ...(checkoutData.discountPercentage && { discountPercentage: checkoutData.discountPercentage }),
+        ...(checkoutData.discountAmount && {
+          discountAmount: checkoutData.discountAmount,
+        }),
+        ...(checkoutData.discountPercentage && {
+          discountPercentage: checkoutData.discountPercentage,
+        }),
       };
 
       const response = await fetch("/api/order", {
@@ -101,7 +129,10 @@ const CheckoutPage = () => {
           router.push(`/${locale}/order-confirmation/${result.orderId}`);
         }, 1500);
       } else {
-        setOrderStatus({ success: false, message: result.message || t("paymentFailed") });
+        setOrderStatus({
+          success: false,
+          message: result.message || t("paymentFailed"),
+        });
       }
     } catch (error) {
       console.error("Error placing order:", error);
@@ -126,8 +157,12 @@ const CheckoutPage = () => {
         paymentMethod: "stripe",
         stripePaymentIntentId: paymentIntentId,
         ...(checkoutData.promoCode && { promoCode: checkoutData.promoCode }),
-        ...(checkoutData.discountAmount && { discountAmount: checkoutData.discountAmount }),
-        ...(checkoutData.discountPercentage && { discountPercentage: checkoutData.discountPercentage }),
+        ...(checkoutData.discountAmount && {
+          discountAmount: checkoutData.discountAmount,
+        }),
+        ...(checkoutData.discountPercentage && {
+          discountPercentage: checkoutData.discountPercentage,
+        }),
       };
 
       const response = await fetch("/api/order", {
@@ -155,7 +190,10 @@ const CheckoutPage = () => {
           router.push(`/${locale}/order-confirmation/${result.orderId}`);
         }, 1500);
       } else {
-        setOrderStatus({ success: false, message: result.message || t("paymentFailed") });
+        setOrderStatus({
+          success: false,
+          message: result.message || t("paymentFailed"),
+        });
       }
     } catch (error) {
       console.error("Error placing order:", error);
@@ -345,16 +383,17 @@ const CheckoutPage = () => {
                     <span className="font-semibold text-green-600">Free</span>
                   </div>
 
-                  {checkoutData.promoCode && checkoutData.discountAmount > 0 && (
-                    <div className="flex justify-between text-green-600">
-                      <span className="text-gray-600">
-                        {t("discount")} ({checkoutData.promoCode})
-                      </span>
-                      <span className="font-semibold">
-                        -${checkoutData.discountAmount.toFixed(2)}
-                      </span>
-                    </div>
-                  )}
+                  {checkoutData.promoCode &&
+                    checkoutData.discountAmount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span className="text-gray-600">
+                          {t("discount")} ({checkoutData.promoCode})
+                        </span>
+                        <span className="font-semibold">
+                          -${checkoutData.discountAmount.toFixed(2)}
+                        </span>
+                      </div>
+                    )}
 
                   <hr className="border-gray-200" />
 
@@ -367,6 +406,46 @@ const CheckoutPage = () => {
                     </span>
                   </div>
                 </div>
+
+                {/* Creative Login Prompt for Guest Users */}
+                {session.status === "unauthenticated" && (
+                  <div className="mt-6 p-4 bg-gradient-to-br from-orange/10 via-orange/5 to-transparent border border-orange/20 rounded-xl relative overflow-hidden">
+                    {/* Decorative elements */}
+                    <div className="absolute top-2 right-2 opacity-20">
+                      <Sparkles className="w-8 h-8 text-orange" />
+                    </div>
+                    <div className="absolute bottom-2 left-2 opacity-10">
+                      <Lock className="w-6 h-6 text-orange" />
+                    </div>
+
+                    <div className="relative z-10">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="w-10 h-10 bg-orange/20 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Lock className="w-5 h-5 text-orange" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 mb-1">
+                            Unlock Exclusive Benefits
+                          </h3>
+                          <p className="text-sm text-gray-600 leading-relaxed">
+                            Sign in to save your addresses, track orders, and
+                            enjoy faster checkout!
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleSignIn}
+                        className="w-full mt-3 flex items-center justify-center gap-2 bg-gradient-to-r from-orange to-orange/90 hover:from-orange/90 hover:to-orange text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                      >
+                        <span>Sign in with Google</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                      <p className="text-xs text-gray-500 text-center mt-2">
+                        Quick & secure • No password needed
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -377,4 +456,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-

@@ -1,16 +1,16 @@
 "use client";
 import React, { useState, useEffect, useCallback, memo, useRef } from "react";
-import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { assets } from "@/public/assets/assets";
 import { AuthButtons, ToggleMenuBtn } from "./";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { ShoppingCart, User, Package } from "lucide-react";
+import { ShoppingCart, User, Package, LogOut } from "lucide-react";
 import { useCart } from "@/app/hooks/useCart";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
+import { signOut } from "next-auth/react";
 
 const UserNav = memo(() => {
   const pathname = usePathname();
@@ -19,11 +19,19 @@ const UserNav = memo(() => {
   const tOrders = useTranslations("orders");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const originalOverflowRef = useRef<string | null>(null);
   const { data: session } = useSession();
-  const { getCartItemCount } = useCart();
+  const { getCartItemCount, manualSync: syncCart } = useCart();
   const cartItemCount = getCartItemCount();
+
+  const handleSignout = async () => {
+    try {
+      await syncCart();
+      await signOut({ callbackUrl: "/" });
+    } catch (error) {
+      console.error("❌ SignOut error:", error);
+    }
+  };
 
   // Helper to add locale to paths
   const getLocalizedPath = (path: string) => {
@@ -62,11 +70,6 @@ const UserNav = memo(() => {
       }
     };
   }, [isMenuOpen]);
-
-  useEffect(() => {
-    setIsMounted(true);
-    return () => setIsMounted(false);
-  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -180,101 +183,112 @@ const UserNav = memo(() => {
                   </Link>
                 )}
 
-                {/* User Icon - Hidden on mobile */}
+                {/* User Icon with Signout - Hidden on mobile */}
                 {session?.user && (
-                  <div className="hidden md:flex text-gray-600 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5">
-                    <div className="flex items-center justify-center">
+                  <div className="hidden md:flex items-center gap-2">
+                    <div className="flex items-center justify-center text-gray-600 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5 p-2">
                       <User className="w-5 h-5 font-semibold text-gray-600" />
                     </div>
+                    <button
+                      onClick={handleSignout}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5"
+                      title={t("signOut")}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="hidden lg:inline">{t("signOut")}</span>
+                    </button>
                   </div>
                 )}
               </div>
 
-              {/* Menu Panel - Left Side (Mobile & Desktop) - Rendered via Portal */}
-              {isMounted &&
-                isMenuOpen &&
-                createPortal(
-                  <div className="mobile-menu fixed inset-0 z-[100]">
-                    {/* Backdrop */}
-                    <div
-                      className="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300"
-                      onClick={closeMenu}
-                    />
+              {/* Menu Panel - Left Side (Mobile & Desktop) */}
+              <div
+                className={`mobile-menu fixed inset-0 z-40 transition-all duration-300 ${
+                  isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                }`}
+              >
+                {/* Backdrop */}
+                <div
+                  className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+                  onClick={closeMenu}
+                />
 
-                    {/* Menu Panel - Slides from Left */}
-                    <div className="absolute top-0 left-0 h-full w-80 max-w-[85vw] lg:max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-out translate-x-0">
-                      <div className="flex flex-col h-full">
-                        {/* Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                          <span className="text-lg font-semibold text-gray-900">
-                            {t("menu") || "Menu"}
-                          </span>
-                          <button
-                            onClick={closeMenu}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                            aria-label="Close menu"
-                          >
-                            <svg
-                              className="w-5 h-5 text-gray-600"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
-                          </button>
-                        </div>
+                {/* Menu Panel - Slides from Left */}
+                <div
+                  className={`absolute top-0 left-0 h-full w-80 max-w-[85vw] lg:max-w-md bg-white shadow-2xl transform transition-transform duration-300 ${
+                    isMenuOpen ? "translate-x-0" : "-translate-x-full"
+                  }`}
+                >
+                  <div className="flex flex-col h-full">
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                      <span className="text-lg font-semibold text-gray-900">
+                        {t("menu") || "Menu"}
+                      </span>
+                      <button
+                        onClick={closeMenu}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        aria-label="Close menu"
+                      >
+                        <svg
+                          className="w-5 h-5 text-gray-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
 
-                        {/* Navigation Links */}
-                        <div className="flex-1 px-6 py-8 space-y-4 overflow-y-auto">
-                          <Link
-                            href={getLocalizedPath("/")}
-                            className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
-                            onClick={closeMenu}
-                          >
-                            {t("home")}
-                          </Link>
-                          <Link
-                            href={getLocalizedPath("/shop")}
-                            className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
-                            onClick={closeMenu}
-                          >
-                            {t("shop")}
-                          </Link>
-                          <Link
-                            href={getLocalizedPath("/about")}
-                            className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
-                            onClick={closeMenu}
-                          >
-                            {t("about")}
-                          </Link>
+                    {/* Navigation Links */}
+                    <div className="flex-1 px-6 py-8 space-y-4 overflow-y-auto">
+                      <Link
+                        href={getLocalizedPath("/")}
+                        className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
+                        onClick={closeMenu}
+                      >
+                        {t("home")}
+                      </Link>
+                      <Link
+                        href={getLocalizedPath("/shop")}
+                        className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
+                        onClick={closeMenu}
+                      >
+                        {t("shop")}
+                      </Link>
+                      <Link
+                        href={getLocalizedPath("/about")}
+                        className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
+                        onClick={closeMenu}
+                      >
+                        {t("about")}
+                      </Link>
 
-                          {/* Dashboard Link */}
-                          {session?.user?.isAdmin && (
-                            <Link
-                              href={getLocalizedPath("/dashboard")}
-                              className="block w-full px-4 py-3 bg-gradient-to-r from-primary to-secondary text-white text-center font-semibold rounded-lg hover:shadow-lg transition-all duration-300 mt-4"
-                              onClick={closeMenu}
-                            >
-                              {t("dashboard")}
-                            </Link>
-                          )}
+                      {/* Dashboard Link */}
+                      {session?.user?.isAdmin && (
+                        <Link
+                          href={getLocalizedPath("/dashboard")}
+                          className="block w-full px-4 py-3 bg-gradient-to-r from-primary to-secondary text-white text-center font-semibold rounded-lg hover:shadow-lg transition-all duration-300 mt-4"
+                          onClick={closeMenu}
+                        >
+                          {t("dashboard")}
+                        </Link>
+                      )}
 
-                          {/* Auth Buttons */}
-                          <div className="pt-6 border-t border-gray-200 mt-6">
-                            <AuthButtons screen="mobile" />
-                          </div>
-                        </div>
+                      {/* Auth Buttons */}
+                      <div className="pt-6 border-t border-gray-200 mt-6">
+                        <AuthButtons screen="mobile" />
                       </div>
                     </div>
-                  </div>,
-                  document.body
-                )}
+                  </div>
+                </div>
+              </div>
             </>
           ) : (
             <div className="flex items-center gap-4">

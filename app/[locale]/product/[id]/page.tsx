@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         "product",
         "buy",
         "shop",
-      ].filter((keyword): keyword is string => typeof keyword === 'string'),
+      ].filter((keyword): keyword is string => typeof keyword === "string"),
       canonical: generateCanonicalUrl(`/product/${id}`),
       ogImage: productImages[0],
       ogType: "product",
@@ -78,10 +78,20 @@ export default async function ProductPage({ params }: Props) {
   let error: string | null = null;
 
   try {
-    product = await api.getProduct(id);
+    if (!id) {
+      error = "Product ID is required";
+    } else {
+      product = await api.getProduct(id);
+    }
   } catch (err) {
     console.error("Error fetching product:", err);
-    error = err instanceof Error ? err.message : "An error occurred";
+    if (err instanceof Error) {
+      error = err.message;
+    } else if (typeof err === "string") {
+      error = err;
+    } else {
+      error = "Failed to load product. Please try again later.";
+    }
   }
 
   if (error) {

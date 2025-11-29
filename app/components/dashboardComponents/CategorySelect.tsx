@@ -32,6 +32,7 @@ const CategorySelect: React.FC<CategorySelectProps> = ({
   onChange,
 }) => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [, setLoading] = useState(true);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [selectedValue, setSelectedValue] = useState(value ?? "");
 
@@ -44,6 +45,7 @@ const CategorySelect: React.FC<CategorySelectProps> = ({
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        setLoading(true);
         const response = await fetch("/api/categories");
         const data = await response.json();
 
@@ -52,13 +54,18 @@ const CategorySelect: React.FC<CategorySelectProps> = ({
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCategories();
   }, []);
 
-  const handleCategoryCreated = async (categoryId: string) => {
+  const handleCategoryCreated = async (
+    categoryId: string,
+    _categoryName: string // eslint-disable-line @typescript-eslint/no-unused-vars
+  ) => {
     // Refresh categories list
     try {
       const response = await fetch("/api/categories");
@@ -120,7 +127,7 @@ const CategorySelect: React.FC<CategorySelectProps> = ({
           <Plus className="w-4 h-4" />
         </button>
       </div>
-      
+
       {showCategoryForm && (
         <QuickCategoryForm
           onCategoryCreated={handleCategoryCreated}
@@ -132,4 +139,3 @@ const CategorySelect: React.FC<CategorySelectProps> = ({
 };
 
 export default CategorySelect;
-
