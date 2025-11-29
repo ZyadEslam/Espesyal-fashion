@@ -1,33 +1,48 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { ProductCardProps } from "../types/types";
 import { cachedFetchJson, cacheStrategies } from "./cachedFetch";
 
-export function getBaseUrl() {
-  if (typeof window !== "undefined") return ""; // browser should use relative url
+export async function getBaseUrl(): Promise<string> {
+  // Browser should use relative URL
+  if (typeof window !== "undefined") {
+    return "";
+  }
 
-  // In production, prefer NEXT_PUBLIC_SITE_URL if set
+  // For server-side, try to get the host from headers
+  // This works correctly even with Vercel deployment protection
+  try {
+    const headersList = await headers();
+    const host = headersList.get("host");
+    const protocol = headersList.get("x-forwarded-proto") || "https";
+
+    if (host) {
+      return `${protocol}://${host}`;
+    }
+  } catch (error) {
+    // If headers() fails (e.g., in static generation), fall back to env vars
+    console.warn("Could not get headers for base URL:", error);
+  }
+
+  // Fallback to environment variables
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL;
   }
 
-  // Fallback to VERCEL_URL for Vercel deployments
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-
-  // Development fallback
-  return `http://localhost:${process.env.PORT ?? 3000}`;
+  // For Vercel preview deployments, avoid using VERCEL_URL to prevent auth issues
+  // Use relative URLs which Next.js will resolve correctly
+  return "";
 }
-
-const API_BASE_URL = `${getBaseUrl()}/api`;
 
 export const api = {
   getProducts: async (): Promise<ProductCardProps[]> => {
-    console.log("API_BASE_URL:", API_BASE_URL);
+    const baseUrl = await getBaseUrl();
+    const apiBaseUrl = baseUrl ? `${baseUrl}/api` : "/api";
+    console.log("API_BASE_URL:", apiBaseUrl);
 
     try {
       const data = await cachedFetchJson<{ products: ProductCardProps[] }>(
-        `${API_BASE_URL}/product`,
+        `${apiBaseUrl}/product`,
         cacheStrategies.products()
       );
       console.log("fetched products:", data);
@@ -41,8 +56,9 @@ export const api = {
   },
   getProduct: async (id: string): Promise<ProductCardProps> => {
     try {
-      // Use absolute URL for server-side rendering
-      const url = `${API_BASE_URL}/product/${id}`;
+      const baseUrl = await getBaseUrl();
+      const apiBaseUrl = baseUrl ? `${baseUrl}/api` : "/api";
+      const url = `${apiBaseUrl}/product/${id}`;
       console.log("Fetching product from URL:", url);
 
       const data = await cachedFetchJson<{ product: ProductCardProps }>(
@@ -57,7 +73,6 @@ export const api = {
       return data.product;
     } catch (error) {
       console.error("Error fetching product:", error);
-      console.error("API_BASE_URL:", API_BASE_URL);
       console.error("Product ID:", id);
 
       // Provide more detailed error message
@@ -73,8 +88,10 @@ export const api = {
   },
   getUser: async (id: string) => {
     try {
+      const baseUrl = await getBaseUrl();
+      const apiBaseUrl = baseUrl ? `${baseUrl}/api` : "/api";
       const user = await cachedFetchJson(
-        `${API_BASE_URL}/user/${id}`,
+        `${apiBaseUrl}/user/${id}`,
         cacheStrategies.userData()
       );
       return user;
@@ -85,8 +102,10 @@ export const api = {
   },
   getCart: async (userId: string): Promise<{ cart: ProductCardProps[] }> => {
     try {
+      const baseUrl = await getBaseUrl();
+      const apiBaseUrl = baseUrl ? `${baseUrl}/api` : "/api";
       const res = await cachedFetchJson<{ cart: ProductCardProps[] }>(
-        `${API_BASE_URL}/user/${userId}/cart`,
+        `${apiBaseUrl}/user/${userId}/cart`,
         cacheStrategies.userData()
       );
       console.log("Cart response:", res);
@@ -102,7 +121,9 @@ export const api = {
     userId: string | undefined
   ) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/${userId}/cart`, {
+      const baseUrl = await getBaseUrl();
+      const apiBaseUrl = baseUrl ? `${baseUrl}/api` : "/api";
+      const response = await fetch(`${apiBaseUrl}/user/${userId}/cart`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -120,7 +141,9 @@ export const api = {
   },
   clearCart: async (userId: string | undefined) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/user/${userId}/cart`, {
+      const baseUrl = await getBaseUrl();
+      const apiBaseUrl = baseUrl ? `${baseUrl}/api` : "/api";
+      const response = await fetch(`${apiBaseUrl}/user/${userId}/cart`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
