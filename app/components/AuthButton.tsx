@@ -38,14 +38,21 @@ export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
   if (session?.user) {
     if (screen.screen === "mobile") {
       return (
-        <span
-          className="cursor-pointer md:hidden"
-          onClick={() => {
-            handleSignout();
-          }}
-        >
-          {t("signOut")}
-        </span>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 text-gray-700">
+            <span className="text-sm font-medium">
+              {session.user.name || session.user.email?.split("@")[0]}
+            </span>
+          </div>
+          <span
+            className="cursor-pointer text-orange hover:text-orange/80 transition-colors font-medium"
+            onClick={() => {
+              handleSignout();
+            }}
+          >
+            {t("signOut")}
+          </span>
+        </div>
       );
     }
     return (

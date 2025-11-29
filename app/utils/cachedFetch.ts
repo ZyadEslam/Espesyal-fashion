@@ -200,14 +200,34 @@ export async function cachedFetchJson<T = unknown>(
   url: string,
   options?: CachedFetchOptions
 ): Promise<T> {
-  const response = await cachedFetch(url, options);
-  
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Unknown error' }));
-    throw new Error(error.message || error.error || `HTTP ${response.status}`);
+  try {
+    const response = await cachedFetch(url, options);
+    
+    if (!response.ok) {
+      let errorMessage = `HTTP ${response.status}`;
+      try {
+        const error = await response.json();
+        errorMessage = error.message || error.error || errorMessage;
+      } catch {
+        // If response is not JSON, try to get text
+        try {
+          const text = await response.text();
+          errorMessage = text || errorMessage;
+        } catch {
+          // Fallback to status code
+        }
+      }
+      throw new Error(errorMessage);
+    }
+    
+    return response.json();
+  } catch (error) {
+    // Re-throw if it's already an Error, otherwise wrap it
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(`Failed to fetch: ${url}`);
   }
-  
-  return response.json();
 }
 
 /**

@@ -54,7 +54,10 @@ export async function GET(request: NextRequest, { params }: Params) {
   } catch (error) {
     console.error("Error fetching product:", error);
     return NextResponse.json(
-      { message: error, success: false },
+      { 
+        message: error instanceof Error ? error.message : "Failed to fetch product",
+        success: false 
+      },
       { status: 500 }
     );
   }

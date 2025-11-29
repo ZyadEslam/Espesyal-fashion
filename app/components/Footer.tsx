@@ -174,17 +174,7 @@ const Footer = () => {
             <div className="flex items-center justify-center w-16 h-10 bg-white border border-black/20 rounded px-2">
               <span className="text-2xl font-bold text-[#1A1F71]">VISA</span>
             </div>
-            {/* Mastercard Logo */}
-            <div className="flex items-center justify-center w-16 h-10 bg-white border border-black/20 rounded px-2">
-              <div className="flex items-center space-x-1">
-                <div className="w-6 h-6 bg-[#EB001B] rounded-full"></div>
-                <div className="w-6 h-6 bg-[#F79E1B] rounded-full -ml-3"></div>
-              </div>
-            </div>
-            {/* PayPal Logo */}
-            <div className="flex items-center justify-center w-16 h-10 bg-white border border-black/20 rounded px-2">
-              <span className="text-xs font-bold text-[#003087]">PayPal</span>
-            </div>
+            
             {/* Cash on Delivery */}
             <div className="flex items-center justify-center w-20 h-10 bg-white border border-black/20 rounded px-2">
               <span className="text-xs font-semibold text-gray-700">CASH</span>
