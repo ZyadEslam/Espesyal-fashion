@@ -11,6 +11,7 @@ import {
   Tag,
   Menu,
   X,
+  FolderTree,
 } from "lucide-react";
 import { cachedFetch } from "@/app/utils/cachedFetch";
 import { useLocale } from "next-intl";
@@ -27,6 +28,12 @@ const sideNavLinks = [
     icon: List,
     label: "Products List",
     labelAr: "قائمة المنتجات",
+  },
+  {
+    href: "/dashboard/categories",
+    icon: FolderTree,
+    label: "Categories",
+    labelAr: "الفئات",
   },
   {
     href: "/dashboard/orders",

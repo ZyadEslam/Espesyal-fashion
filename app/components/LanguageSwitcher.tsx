@@ -24,8 +24,8 @@ export default function LanguageSwitcher() {
         onClick={() => switchLocale("en")}
         className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
           locale === "en"
-            ? "bg-orange text-white"
-            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            ? "text-secondary"
+            : " text-gray-700 hover:bg-gray-200"
         }`}
       >
         English
@@ -33,9 +33,7 @@ export default function LanguageSwitcher() {
       <button
         onClick={() => switchLocale("ar")}
         className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-          locale === "ar"
-            ? "bg-orange text-white"
-            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+          locale === "ar" ? "text-secondary" : "text-gray-700 hover:bg-gray-200"
         }`}
       >
         العربية

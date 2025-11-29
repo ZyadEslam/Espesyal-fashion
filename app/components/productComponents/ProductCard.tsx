@@ -10,30 +10,26 @@ import React, {
 // import Image from "next/image";
 // import { assets } from "@/public/assets/assets";
 import Link from "next/link";
-import { Heart, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { ProductCardProps } from "../../types/types";
-import { useWishlist } from "../../hooks/useWishlist";
 import { useCart } from "../../hooks/useCart";
 const Toast = lazy(() => import("../../UI/Toast"));
 const ProductImage = lazy(() => import("./ProductImage"));
 
 const ProductCard = memo(({ product }: { product: ProductCardProps }) => {
-  const [inWishlist, setInWishlist] = useState(false);
   const [inCart, setInCart] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageSrc, setImageSrc] = useState("");
   const [showToast, setShowToast] = useState({ show: false, message: "" });
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const { addToCart, removeFromCart, isInCart: checkInCart } = useCart();
 
   useEffect(() => {
-    setInWishlist(isInWishlist(product._id as string));
     setInCart(checkInCart(product._id as string));
 
     if (product._id) {
       setImageSrc(`/api/product/image/${product._id}?index=0`);
     }
-  }, [product._id, isInWishlist, checkInCart]);
+  }, [product._id, checkInCart]);
 
   const handleShowToast = useCallback((showState: boolean, message: string) => {
     setShowToast(() => {
@@ -49,28 +45,15 @@ const ProductCard = memo(({ product }: { product: ProductCardProps }) => {
     }, 3000);
   }, []);
 
-  const wishlistHandler = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault(); // Prevent navigation when clicking heart
-      e.stopPropagation();
-
-      if (!inWishlist) {
-        addToWishlist(product);
-        handleShowToast(true, "Added To wishlist");
-        setInWishlist(true);
-      } else {
-        removeFromWishlist(product._id as string);
-        handleShowToast(true, "Removed from wishlist");
-        setInWishlist(false);
-      }
-    },
-    [inWishlist, addToWishlist, removeFromWishlist, product, handleShowToast]
-  );
-
   const cartHandler = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault(); // Prevent navigation when clicking cart button
       e.stopPropagation();
+
+      if (product.variants?.length) {
+        handleShowToast(true, "Select size & color to add this item");
+        return;
+      }
 
       if (!inCart) {
         addToCart(product);
@@ -92,24 +75,6 @@ const ProductCard = memo(({ product }: { product: ProductCardProps }) => {
 
   return (
     <div className="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 hover:border-orange/20">
-      {/* Wishlist Button */}
-      <button
-        className={`absolute top-3 right-3 z-20 w-8 h-8 rounded-full backdrop-blur-sm transition-all duration-200 ${
-          inWishlist
-            ? "bg-orange/90 text-white shadow-md"
-            : "bg-white/80 text-gray-500 hover:bg-orange/10 hover:text-orange"
-        }`}
-        onClick={wishlistHandler}
-        aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-      >
-        <Heart
-          className={`w-4 h-4 mx-auto ${
-            inWishlist ? "text-white" : "text-gray-500"
-          }`}
-          fill={inWishlist ? "#c4956c" : "none"}
-        />
-      </button>
-
       {/* Toast Notification */}
       {showToast.show && (
         <Toast
@@ -121,7 +86,7 @@ const ProductCard = memo(({ product }: { product: ProductCardProps }) => {
       {/* Product Link */}
       <Link href={`/product/${product._id}`} className="block">
         {/* Product Image Container */}
-        <div className="relative bg-secondaryLight rounded-t-2xl h-48 overflow-hidden">
+        <div className="relative bg-secondaryLight rounded-t-2xl h-[260px] sm:h-[320px] flex items-center justify-center overflow-hidden">
           {imageSrc && !imageError ? (
             <Suspense
               fallback={

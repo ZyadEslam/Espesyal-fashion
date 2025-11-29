@@ -12,9 +12,9 @@ export async function GET(req: NextRequest, { params }: Params) {
     const userFound = await User.findById(id);
 
     if (userFound) {
-      const { _id, name, email, isAdmin, cart, wishlist } = userFound;
+      const { _id, name, email, isAdmin, cart } = userFound;
       return NextResponse.json(
-        { _id, name, email, isAdmin, cart, wishlist },
+        { _id, name, email, isAdmin, cart },
         { status: 200 }
       );
     } else {

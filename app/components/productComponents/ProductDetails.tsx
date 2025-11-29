@@ -1,33 +1,84 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import RatingStars from "../RatingStars";
 import Toast from "../../UI/Toast";
 import { ProductCardProps } from "../../types/types";
 import { Plus, Minus } from "lucide-react";
 
 import { useCart } from "../../hooks/useCart";
-import { useWishlist } from "../../hooks/useWishlist";
 
 const ProductDetails = ({ data }: { data: ProductCardProps }) => {
   const { addToCart, removeFromCart, isInCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [showToast, setShowToast] = useState({ show: false, message: "" });
 
   // Product options state
-  const [selectedSize, setSelectedSize] = useState<string>("");
-  const [selectedColor, setSelectedColor] = useState<string>("");
+  const variants = useMemo(() => data.variants || [], [data.variants]);
+  const hasVariants = variants.length > 0;
+  const [selectedColor, setSelectedColor] = useState<string>(
+    variants[0]?.color || ""
+  );
+  const [selectedSize, setSelectedSize] = useState<string>(
+    variants[0]?.size || ""
+  );
   const [quantity, setQuantity] = useState<number>(1);
 
-  // Available options (you can make these dynamic based on product data)
-  const availableSizes = ["XS", "S", "M", "L", "XL", "XXL"];
-  const availableColors = [
-    { name: "Black", value: "black", color: "bg-black" },
-    { name: "White", value: "white", color: "bg-white border border-gray-300" },
-    { name: "Red", value: "red", color: "bg-red-500" },
-    { name: "Blue", value: "blue", color: "bg-blue-500" },
-    { name: "Green", value: "green", color: "bg-green-500" },
-    { name: "Gray", value: "gray", color: "bg-gray-500" },
-  ];
+  useEffect(() => {
+    if (hasVariants && variants.length > 0) {
+      setSelectedColor(variants[0].color);
+      setSelectedSize(variants[0].size);
+      setQuantity(variants[0].quantity > 0 ? 1 : 0);
+    } else {
+      setSelectedColor("");
+      setSelectedSize("");
+      setQuantity(1);
+    }
+  }, [data._id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const colorOptions = useMemo(() => {
+    const map = new Map<string, number>();
+    variants.forEach((variant) => {
+      if (!map.has(variant.color)) {
+        map.set(variant.color, 0);
+      }
+      map.set(variant.color, map.get(variant.color)! + variant.quantity);
+    });
+    return Array.from(map.entries()).map(([color, qty]) => ({
+      color,
+      total: qty,
+    }));
+  }, [variants]);
+
+  const sizeOptions = useMemo(() => {
+    if (!selectedColor) {
+      return Array.from(new Set(variants.map((variant) => variant.size))).map(
+        (size) => ({
+          size,
+          available: variants
+            .filter((v) => v.size === size)
+            .reduce((sum, v) => sum + v.quantity, 0),
+        })
+      );
+    }
+
+    const filtered = variants.filter(
+      (variant) => variant.color === selectedColor
+    );
+    return filtered.map((variant) => ({
+      size: variant.size,
+      available: variant.quantity,
+    }));
+  }, [variants, selectedColor]);
+
+  const selectedVariant = hasVariants
+    ? variants.find(
+        (variant) =>
+          variant.color === selectedColor && variant.size === selectedSize
+      )
+    : undefined;
+
+  const availableQuantity = hasVariants
+    ? selectedVariant?.quantity ?? 0
+    : data.totalStock ?? 0;
 
   const handleShowToast = (showState: boolean, message: string) => {
     setShowToast(() => {
@@ -44,32 +95,68 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
   };
 
   const listHandler = (handlerType: string) => {
-    if (handlerType === "wishlist") {
-      if (!isInWishlist(data._id as string)) {
-        handleShowToast(true, "Added To wishlist");
-        addToWishlist(data);
-      } else {
-        handleShowToast(true, "Removed from wishlist");
-        removeFromWishlist(data._id as string);
-      }
-    } else if (handlerType === "cart") {
-      if (!isInCart(data._id as string)) {
+    if (handlerType !== "cart") return;
+
+    if (hasVariants) {
+      if (!selectedVariant) return;
+      const inCart = isInCart(data._id as string, selectedVariant._id);
+
+      if (!inCart) {
+        addToCart({
+          ...data,
+          selectedVariantId: selectedVariant._id,
+          selectedColor: selectedVariant.color,
+          selectedSize: selectedVariant.size,
+          maxAvailable: selectedVariant.quantity,
+          variantSku: selectedVariant.sku,
+          quantityInCart: quantity,
+        });
         handleShowToast(true, "Added To Cart");
-        addToCart(data);
       } else {
+        removeFromCart(data._id as string, selectedVariant._id);
         handleShowToast(true, "Removed From Cart");
-        removeFromCart(data._id as string);
       }
+      return;
+    }
+
+    // No variants defined, fallback to simple cart behavior
+    if (!isInCart(data._id as string)) {
+      addToCart({
+        ...data,
+        quantityInCart: quantity,
+        maxAvailable: data.totalStock,
+      });
+      handleShowToast(true, "Added To Cart");
+    } else {
+      removeFromCart(data._id as string);
+      handleShowToast(true, "Removed From Cart");
     }
   };
 
   const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity >= 1 && newQuantity <= 10) {
-      setQuantity(newQuantity);
-    }
+    if (newQuantity < 1) return;
+    if (availableQuantity && newQuantity > availableQuantity) return;
+    setQuantity(newQuantity);
   };
 
-  const isAddToCartDisabled = !selectedSize || !selectedColor;
+  useEffect(() => {
+    if (!hasVariants) return;
+    if (!selectedVariant) {
+      setQuantity(1);
+      return;
+    }
+    if (selectedVariant.quantity === 0) {
+      setQuantity(0);
+      return;
+    }
+    setQuantity((prev) =>
+      prev < 1 ? 1 : Math.min(prev, selectedVariant.quantity)
+    );
+  }, [selectedVariant, hasVariants]);
+
+  const isAddToCartDisabled = hasVariants
+    ? !selectedVariant || selectedVariant.quantity === 0 || quantity === 0
+    : quantity === 0;
 
   return (
     <div className="w-full md:w-1/2 mt-6 md:mt-0">
@@ -97,52 +184,63 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
 
       <hr className="my-4 sm:my-5 md:my-6 border-gray-200" />
 
-      {/* Size Selection */}
-      <div className="mb-6">
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Size</h3>
-        <div className="flex flex-wrap gap-2">
-          {availableSizes.map((size) => (
-            <button
-              key={size}
-              onClick={() => setSelectedSize(size)}
-              className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
-                selectedSize === size
-                  ? "bg-orange text-white border-orange"
-                  : "bg-white text-gray-700 border-gray-300 hover:border-orange hover:text-orange"
-              }`}
-            >
-              {size}
-            </button>
-          ))}
-        </div>
-      </div>
+      {variants.length > 0 && (
+        <>
+          {/* Color Selection */}
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Color</h3>
+            <div className="flex flex-wrap gap-2">
+              {colorOptions.map((color) => (
+                <button
+                  key={color.color}
+                  onClick={() => {
+                    setSelectedColor(color.color);
+                    const sizeForColor = variants.find(
+                      (variant) =>
+                        variant.color === color.color &&
+                        variant.size === selectedSize
+                    );
+                    if (!sizeForColor) {
+                      const firstSize = variants.find(
+                        (variant) => variant.color === color.color
+                      );
+                      setSelectedSize(firstSize?.size || "");
+                    }
+                  }}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
+                    selectedColor === color.color
+                      ? "bg-secondary text-white border-secondary"
+                      : "bg-white text-gray-700 border-gray-300 hover:border-orange hover:text-orange"
+                  }`}
+                >
+                  {color.color}
+                </button>
+              ))}
+            </div>
+          </div>
 
-      {/* Color Selection */}
-      <div className="mb-6">
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Color</h3>
-        <div className="flex flex-wrap gap-3">
-          {availableColors.map((color) => (
-            <button
-              key={color.value}
-              onClick={() => setSelectedColor(color.value)}
-              className={`w-10 h-10 rounded-full border-2 transition-all duration-200 ${
-                color.color
-              } ${
-                selectedColor === color.value
-                  ? "ring-2 ring-orange ring-offset-2"
-                  : "hover:ring-2 hover:ring-gray-300 hover:ring-offset-2"
-              }`}
-              title={color.name}
-            />
-          ))}
-        </div>
-        {selectedColor && (
-          <p className="text-sm text-gray-600 mt-2">
-            Selected:{" "}
-            {availableColors.find((c) => c.value === selectedColor)?.name}
-          </p>
-        )}
-      </div>
+          {/* Size Selection */}
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Size</h3>
+            <div className="flex flex-wrap gap-2">
+              {sizeOptions.map((option) => (
+                <button
+                  key={`${option.size}-${option.available}`}
+                  onClick={() => setSelectedSize(option.size)}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all duration-200 ${
+                    selectedSize === option.size
+                      ? "bg-secondary text-white border-orange"
+                      : "bg-white text-gray-700 border-gray-300 hover:border-orange hover:text-orange"
+                  }`}
+                  disabled={option.available === 0}
+                >
+                  {option.size}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Quantity Selection */}
       <div className="mb-6">
@@ -160,12 +258,22 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
           </span>
           <button
             onClick={() => handleQuantityChange(quantity + 1)}
-            disabled={quantity >= 10}
+            disabled={
+              quantity >= 10 ||
+              (availableQuantity ? quantity >= availableQuantity : false)
+            }
             className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Plus className="w-4 h-4" />
           </button>
         </div>
+        {selectedVariant && (
+          <p className="text-xs text-gray-500 mt-1">
+            {selectedVariant.quantity > 0
+              ? `${selectedVariant.quantity} items available`
+              : "Out of stock"}
+          </p>
+        )}
       </div>
 
       <div className="md:space-y-1 text-[14px] sm:space-y-3 mb-4 sm:mb-6">
@@ -197,18 +305,14 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
           }}
           disabled={showToast.show || isAddToCartDisabled}
         >
-          {isInCart(data._id as string) ? "Remove From Cart" : "Add to Cart"}
-        </button>
-        <button
-          className="sm:w-auto sm:px-6 md:px-8 py-2 sm:py-3 bg-orange text-white hover:bg-orange/90 transition-colors text-sm sm:text-base"
-          onClick={() => {
-            listHandler("wishlist");
-          }}
-          disabled={showToast.show}
-        >
-          {isInWishlist(data._id as string)
-            ? "Remove from wishlist"
-            : "Add to wishlist"}
+          {hasVariants
+            ? selectedVariant &&
+              isInCart(data._id as string, selectedVariant._id)
+              ? "Remove From Cart"
+              : "Add to Cart"
+            : isInCart(data._id as string)
+            ? "Remove From Cart"
+            : "Add to Cart"}
         </button>
       </div>
 
@@ -220,12 +324,7 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
           </h4>
           <div className="text-sm text-gray-600">
             {selectedSize && <p>Size: {selectedSize}</p>}
-            {selectedColor && (
-              <p>
-                Color:{" "}
-                {availableColors.find((c) => c.value === selectedColor)?.name}
-              </p>
-            )}
+            {selectedColor && <p>Color: {selectedColor}</p>}
             <p>Quantity: {quantity}</p>
           </div>
         </div>

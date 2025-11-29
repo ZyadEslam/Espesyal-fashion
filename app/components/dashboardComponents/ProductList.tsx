@@ -45,6 +45,7 @@ const ProductList = React.memo(() => {
     brand: "",
     category: "",
     categoryName: "",
+    variants: [],
   });
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -90,6 +91,15 @@ const ProductList = React.memo(() => {
       brand: product.brand,
       category: product.category,
       categoryName: product.categoryName,
+      hideFromHome: product.hideFromHome ?? false,
+      variants:
+        product.variants?.map((variant) => ({
+          _id: variant._id,
+          color: variant.color,
+          size: variant.size,
+          quantity: variant.quantity.toString(),
+          sku: variant.sku,
+        })) || [],
     });
     setIsEditModalOpen(true);
   };
@@ -107,6 +117,8 @@ const ProductList = React.memo(() => {
       brand: "",
       category: "",
       categoryName: "",
+      hideFromHome: false,
+      variants: [],
     });
   };
 
@@ -121,6 +133,7 @@ const ProductList = React.memo(() => {
     }
     setSubmitting(false);
   };
+
 
   const handleDelete = async (id: string) => {
     if (deleteConfirm !== id) {

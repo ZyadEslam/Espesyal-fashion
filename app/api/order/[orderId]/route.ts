@@ -18,7 +18,7 @@ export async function GET(
     }
 
     const order = await Order.findById(orderId)
-      .populate("products")
+      .populate("products.product")
       .populate("addressId")
       .populate("userId")
       .lean() as {
@@ -48,6 +48,29 @@ export async function GET(
       );
     }
 
+    const clientProducts = Array.isArray(order.products)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? order.products.map((item: any) => {
+          if (item?.product) {
+            const productDoc = item.product;
+            const normalizedProduct = productDoc?.toObject
+              ? productDoc.toObject()
+              : productDoc;
+            return {
+              ...normalizedProduct,
+              _id: normalizedProduct?._id || item.product,
+              price: item.price ?? normalizedProduct?.price,
+              quantityInCart: item.quantity ?? item.quantityInCart ?? 1,
+              selectedColor: item.color || normalizedProduct?.color,
+              selectedSize: item.size || normalizedProduct?.size,
+              sku: item.sku || normalizedProduct?.sku,
+              selectedVariantId: item.variantId?.toString?.(),
+            };
+          }
+          return item;
+        })
+      : [];
+
     return NextResponse.json(
       {
         success: true,
@@ -59,7 +82,7 @@ export async function GET(
           orderState: order.orderState,
           paymentStatus: order.paymentStatus,
           paymentMethod: order.paymentMethod,
-          products: order.products,
+          products: clientProducts,
           address: order.addressId,
           trackingNumber: order.trackingNumber,
           estimatedDeliveryDate: order.estimatedDeliveryDate,

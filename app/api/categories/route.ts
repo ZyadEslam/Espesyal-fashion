@@ -52,8 +52,8 @@ export async function GET(request: NextRequest) {
       },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
-        }
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        },
       }
     );
   } catch (error) {
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
 
     const body = await request.json();
-    const { name, description, image, isFeatured, sortOrder } = body;
+    const { name, description, image, isFeatured, sortOrder, isActive } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -98,8 +98,9 @@ export async function POST(request: NextRequest) {
       slug,
       description,
       image,
+      isActive: typeof isActive === "boolean" ? isActive : true,
       isFeatured: isFeatured || false,
-      sortOrder: sortOrder || 0,
+      sortOrder: typeof sortOrder === "number" ? sortOrder : 0,
       products: [],
     });
 
@@ -127,6 +128,89 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         message: "Failed to create category",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH update existing category (e.g. active state and priority/sort order)
+export async function PATCH(request: NextRequest) {
+  try {
+    await connectDB();
+
+    const body = await request.json();
+    const { id, isActive, isFeatured, sortOrder, name, description } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Category id is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    const updateData: Record<string, unknown> = {};
+
+    if (typeof isActive === "boolean") {
+      updateData.isActive = isActive;
+    }
+
+    if (typeof isFeatured === "boolean") {
+      updateData.isFeatured = isFeatured;
+    }
+
+    if (typeof sortOrder === "number") {
+      // Ensure non-negative integer priority
+      updateData.sortOrder = Math.max(0, Math.floor(sortOrder));
+    }
+
+    if (typeof name === "string" && name.trim()) {
+      updateData.name = name.trim();
+    }
+
+    if (typeof description === "string") {
+      updateData.description = description;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "No valid fields provided to update",
+        },
+        { status: 400 }
+      );
+    }
+
+    const category = await Category.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
+
+    if (!category) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Category not found",
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: category,
+      message: "Category updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating category:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to update category",
         error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }

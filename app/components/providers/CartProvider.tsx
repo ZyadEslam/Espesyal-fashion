@@ -23,6 +23,35 @@ const CartProvider = ({ children }: CartProviderProps) => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [isCartHydrated, setIsCartHydrated] = useState(false);
 
+  const matchCartItem = useCallback(
+    (
+      item: ProductCardProps,
+      productId?: string,
+      variantId?: string | null
+    ) =>
+      item._id === productId &&
+      (item.selectedVariantId || null) === (variantId || null),
+    []
+  );
+
+  const resolveVariantQuantity = useCallback(
+    (product: ProductCardProps): number | undefined => {
+      if (product.maxAvailable !== undefined) {
+        return product.maxAvailable;
+      }
+      if (product.selectedVariantId && product.variants?.length) {
+        const variant = product.variants.find(
+          (v) => v._id === product.selectedVariantId
+        );
+        if (variant) {
+          return variant.quantity;
+        }
+      }
+      return product.totalStock;
+    },
+    []
+  );
+
   // Initialize cart from localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -96,43 +125,94 @@ const CartProvider = ({ children }: CartProviderProps) => {
     }
   }, [session?.user?.id]);
   // Add to cart
-  const addToCart = (product: ProductCardProps) => {
-    setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item._id === product._id);
-
-      if (existingItem) {
-        return prevCart.map((item) =>
-          item._id === product._id
-            ? {
-                ...item,
-                quantityInCart: (item.quantityInCart || 1) + 1,
-              }
-            : item
-        );
-      } else {
-        return [...prevCart, { ...product, quantityInCart: 1 }];
+  const addToCart = useCallback(
+    (product: ProductCardProps) => {
+      if (!product?._id) {
+        console.warn("Cannot add product without id to cart");
+        return;
       }
-    });
-  };
+
+      if (product.variants?.length && !product.selectedVariantId) {
+        console.warn("Variant selection required for this product");
+        return;
+      }
+
+      setCart((prevCart) => {
+        const variantId = product.selectedVariantId || null;
+        const existingIndex = prevCart.findIndex((item) =>
+          matchCartItem(item, product._id, variantId)
+        );
+        const quantityToAdd =
+          product.quantityInCart && product.quantityInCart > 0
+            ? product.quantityInCart
+            : 1;
+        const maxAvailable = resolveVariantQuantity(product);
+
+        if (existingIndex !== -1) {
+          return prevCart.map((item, idx) => {
+            if (idx !== existingIndex) return item;
+            const currentQty = item.quantityInCart || 1;
+            const updatedQuantity = maxAvailable
+              ? Math.min(currentQty + quantityToAdd, maxAvailable)
+              : currentQty + quantityToAdd;
+
+            return {
+              ...item,
+              quantityInCart: updatedQuantity,
+              maxAvailable: maxAvailable ?? item.maxAvailable,
+            };
+          });
+        }
+
+        return [
+          ...prevCart,
+          {
+            ...product,
+            quantityInCart: maxAvailable
+              ? Math.min(quantityToAdd, maxAvailable)
+              : quantityToAdd,
+            maxAvailable,
+          },
+        ];
+      });
+    },
+    [matchCartItem, resolveVariantQuantity]
+  );
 
   // Remove from cart
-  const removeFromCart = useCallback((productId: string) => {
-    setCart((prevCart) => prevCart.filter((item) => item._id !== productId));
-  }, []);
-
-  // Update quantity
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      setCart((prevCart) => prevCart.filter((item) => item._id !== productId));
-      return;
-    }
-
+  const removeFromCart = useCallback((productId: string, variantId?: string) => {
     setCart((prevCart) =>
-      prevCart.map((item) =>
-        item._id === productId ? { ...item, quantityInCart: quantity } : item
+      prevCart.filter(
+        (item) => !matchCartItem(item, productId, variantId || null)
       )
     );
-  }, []);
+  }, [matchCartItem]);
+
+  // Update quantity
+  const updateQuantity = useCallback(
+    (productId: string, variantId: string | undefined, quantity: number) => {
+      if (quantity <= 0) {
+        setCart((prevCart) =>
+          prevCart.filter((item) => !matchCartItem(item, productId, variantId || null))
+        );
+        return;
+      }
+
+      setCart((prevCart) =>
+        prevCart.map((item) => {
+          if (!matchCartItem(item, productId, variantId || null)) {
+            return item;
+          }
+          const maxAvailable = item.maxAvailable ?? resolveVariantQuantity(item);
+          const clampedQuantity = maxAvailable
+            ? Math.min(quantity, maxAvailable)
+            : quantity;
+          return { ...item, quantityInCart: clampedQuantity, maxAvailable };
+        })
+      );
+    },
+    [matchCartItem, resolveVariantQuantity]
+  );
 
   // Clear cart
   const clearCart = () => {
@@ -154,9 +234,18 @@ const CartProvider = ({ children }: CartProviderProps) => {
   }, [cart]);
 
   // Check if product is in cart
-  const isInCart = useCallback((productId: string) => {
-    return cart.some((item) => item._id === productId);
-  }, [cart]);
+  const isInCart = useCallback(
+    (productId: string, variantId?: string) => {
+      if (!variantId) {
+        return cart.some((item) => item._id === productId);
+      }
+
+      return cart.some((item) =>
+        matchCartItem(item, productId, variantId || null)
+      );
+    },
+    [cart, matchCartItem]
+  );
 
   // Sync with server database on component mount
   useEffect(() => {
@@ -220,6 +309,7 @@ const CartProvider = ({ children }: CartProviderProps) => {
       totalPrice,
       error,
       calculateTotals,
+      addToCart,
       getCartItemCount,
       isInCart,
       manualSync,

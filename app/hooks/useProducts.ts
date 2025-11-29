@@ -13,6 +13,26 @@ export interface Product {
   category: string;
   categoryName: string;
   imageCount?: number;
+  hideFromHome?: boolean;
+  variants?: ProductVariant[];
+  totalStock?: number;
+}
+
+export interface ProductVariant {
+  _id: string;
+  color: string;
+  size: string;
+  quantity: number;
+  sku?: string;
+}
+
+export interface ProductFormVariant {
+  _id?: string;
+  color: string;
+  size: string;
+  quantity: string;
+  sku?: string;
+  clientId?: string;
 }
 
 export interface Category {
@@ -31,6 +51,8 @@ export interface ProductFormData {
   brand: string;
   category: string;
   categoryName: string;
+  hideFromHome?: boolean;
+  variants: ProductFormVariant[];
 }
 
 interface UseProductsReturn {
@@ -103,6 +125,24 @@ export const useProducts = (): UseProductsReturn => {
         setError(null);
         setSuccess(null);
 
+        const normalizedVariants =
+          formData.variants
+            ?.filter((variant) => variant.color && variant.size)
+            .map((variant) => {
+              const sanitized = { ...variant };
+              delete sanitized.clientId;
+              return {
+                ...(sanitized._id && { _id: sanitized._id }),
+                color: sanitized.color?.trim(),
+                size: sanitized.size?.trim(),
+                quantity:
+                  Number(sanitized.quantity) > 0
+                    ? Number(sanitized.quantity)
+                    : 0,
+                ...(sanitized.sku && { sku: sanitized.sku.trim() }),
+              };
+            }) || [];
+
         const updateData = {
           name: formData.name,
           description: formData.description,
@@ -113,17 +153,23 @@ export const useProducts = (): UseProductsReturn => {
           brand: formData.brand,
           category: formData.category,
           categoryName: formData.categoryName,
+          hideFromHome: formData.hideFromHome ?? false,
+          variants: normalizedVariants,
+          totalStock: normalizedVariants.reduce(
+            (sum, variant) => sum + (variant.quantity || 0),
+            0
+          ),
         };
 
         // Optimistic update - update local state immediately
         setProducts((prevProducts) =>
           prevProducts.map((product) =>
             product._id === id
-              ? {
+              ? ({
                   ...product,
                   ...updateData,
                   imageCount: product.imageCount, // Preserve image count
-                }
+                } as Product)
               : product
           )
         );

@@ -13,6 +13,14 @@ const ProductViewModal: React.FC<ProductViewModalProps> = ({
 }) => {
   if (!product) return null;
 
+  const totalStock =
+    product.totalStock ??
+    product.variants?.reduce(
+      (sum, variant) => sum + (variant.quantity || 0),
+      0
+    ) ??
+    0;
+
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4"
@@ -72,7 +80,7 @@ const ProductViewModal: React.FC<ProductViewModalProps> = ({
               <p className="mt-1 text-gray-900">{product.categoryName}</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700">
                 Rating
@@ -85,7 +93,43 @@ const ProductViewModal: React.FC<ProductViewModalProps> = ({
               </label>
               <p className="mt-1 text-gray-900">{product.imageCount || 0}</p>
             </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700">
+                Total Stock
+              </label>
+              <p className="mt-1 text-gray-900">{totalStock}</p>
+            </div>
           </div>
+          {product.variants && product.variants.length > 0 && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Variants
+              </label>
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="grid grid-cols-4 bg-gray-50 text-xs font-semibold text-gray-600">
+                  <span className="px-3 py-2">Color</span>
+                  <span className="px-3 py-2">Size</span>
+                  <span className="px-3 py-2">Quantity</span>
+                  <span className="px-3 py-2">SKU</span>
+                </div>
+                {product.variants.map((variant) => (
+                  <div
+                    key={variant._id}
+                    className="grid grid-cols-4 text-sm text-gray-900 border-t border-gray-100"
+                  >
+                    <span className="px-3 py-2 capitalize">
+                      {variant.color}
+                    </span>
+                    <span className="px-3 py-2 uppercase">{variant.size}</span>
+                    <span className="px-3 py-2">{variant.quantity}</span>
+                    <span className="px-3 py-2 text-gray-500">
+                      {variant.sku || "—"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

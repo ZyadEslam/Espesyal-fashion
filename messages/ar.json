@@ -43,7 +43,6 @@
     "about": "من نحن",
     "contact": "اتصل بنا",
     "cart": "السلة",
-    "wishlist": "قائمة الأمنيات",
     "dashboard": "لوحة التحكم",
     "signIn": "تسجيل الدخول",
     "signOut": "تسجيل الخروج",
@@ -72,8 +71,6 @@
   },
   "product": {
     "addToCart": "أضف إلى السلة",
-    "addToWishlist": "أضف إلى قائمة الأمنيات",
-    "removeFromWishlist": "احذف من قائمة الأمنيات",
     "viewDetails": "عرض التفاصيل",
     "description": "الوصف",
     "specifications": "المواصفات",
@@ -204,6 +201,7 @@
     "copyright": "Copyright 2025 © Zyad Elbehiry All Right Reserved."
   },
   "home": {
+    "heroBadge": "الشتاء هنا",
     "featuredProducts": "المنتجات المميزة",
     "handpickedSelections": "اختيارات",
     "selections": "مختارة بعناية",
@@ -222,6 +220,7 @@
     "discoverMostLoved": "اكتشف منتجاتنا الأكثر حباً التي لا يستطيع العملاء الحصول على ما يكفي منها",
     "quickView": "عرض سريع",
     "viewAllBestSellers": "عرض جميع الأكثر مبيعاً",
+    "viewAll": "عرض الكل",
     "newCollections": "مجموعات جديدة",
     "freshArrivals": "وصلات",
     "arrivals": "جديدة",
@@ -397,6 +396,7 @@
         "brand": "العلامة التجارية",
         "images": "الصور",
         "category": "التصنيف",
+        "priority": "الأولوية",
         "rating": "التقييم",
         "stock": "المخزون",
         "status": "الحالة",

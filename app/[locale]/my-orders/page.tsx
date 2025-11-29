@@ -13,6 +13,11 @@ interface Product {
   price?: number;
   quantityInCart?: number;
   quantity?: number;
+  selectedColor?: string;
+  selectedSize?: string;
+  color?: string;
+  size?: string;
+  sku?: string;
 }
 
 interface Order {

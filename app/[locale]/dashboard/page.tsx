@@ -1,13 +1,16 @@
 "use client";
-import React, { useState, useCallback, memo } from "react";
+import React, { useState, useCallback, memo, useMemo } from "react";
 import { assets } from "@/public/assets/assets";
 import ImageUploader, {
   ImageState,
 } from "../../components/dashboardComponents/ImageUploader";
 import FormInput from "../../components/dashboardComponents/FormInput";
+import CategorySelect from "../../components/dashboardComponents/CategorySelect";
 import PriceInputs from "../../components/dashboardComponents/PriceInputs";
 import SubmitButton from "../../components/dashboardComponents/SubmitBtn";
 import ProductForm from "../../components/dashboardComponents/ProductForm";
+import ProductVariantInputs from "../../components/dashboardComponents/ProductVariantInputs";
+import type { ProductFormVariant } from "@/app/hooks/useProducts";
 import { Plus } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 
@@ -22,6 +25,19 @@ const DashboardPage = memo(() => {
     image3: assets.upload_area,
     image4: assets.upload_area,
   });
+  const createVariantRow = (): ProductFormVariant => ({
+    clientId:
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : Math.random().toString(36).slice(2),
+    color: "",
+    size: "",
+    quantity: "",
+    sku: "",
+  });
+  const [variants, setVariants] = useState<ProductFormVariant[]>([
+    createVariantRow(),
+  ]);
 
   const handleImageChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, imageKey: string) => {
@@ -44,8 +60,22 @@ const DashboardPage = memo(() => {
     }));
   }, []);
 
+  const serializedVariants = useMemo(
+    () =>
+      JSON.stringify(
+        variants
+          .filter((variant) => variant.color && variant.size)
+          .map((variant) => {
+            const sanitized = { ...variant };
+            delete sanitized.clientId;
+            return sanitized;
+          })
+      ),
+    [variants]
+  );
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl ">
       <div className="mb-6 sm:mb-8">
         <div className="flex items-center gap-2 sm:gap-3 mb-4">
           <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange/10 rounded-lg flex items-center justify-center">
@@ -97,11 +127,10 @@ const DashboardPage = memo(() => {
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormInput
+                <CategorySelect
                   id="category"
                   name="category"
                   label={t("categoryLabel")}
-                  type="text"
                   placeholder={t("categoryPlaceholder")}
                   required
                   direction={direction as "ltr" | "rtl"}
@@ -118,6 +147,14 @@ const DashboardPage = memo(() => {
               </div>
 
               <PriceInputs />
+
+              <div className="space-y-4">
+                <ProductVariantInputs
+                  variants={variants}
+                  onChange={setVariants}
+                />
+                <input type="hidden" name="variants" value={serializedVariants} />
+              </div>
 
               <div className="pt-6 border-t border-gray-200">
                 <SubmitButton />

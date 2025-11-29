@@ -12,6 +12,19 @@ export async function GET(
     await connectDB();
 
     const { slug } = await params;
+    
+    // If the slug is "products", this route shouldn't handle it
+    // It should be handled by [categoryId]/products route
+    // This is a safeguard in case Next.js routing doesn't prioritize correctly
+    if (slug === "products") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid route",
+        },
+        { status: 404 }
+      );
+    }
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "12");
@@ -184,6 +197,115 @@ export async function GET(
       {
         success: false,
         message: "Failed to fetch products",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// Helper function to check if a string is a valid MongoDB ObjectId
+function isValidObjectId(id: string): boolean {
+  return /^[0-9a-fA-F]{24}$/.test(id);
+}
+
+// PATCH update existing category by ID or slug
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    await connectDB();
+
+    const { slug } = await params;
+    const body = await request.json();
+    const { isActive, isFeatured, sortOrder, name, slug: newSlug, description } = body;
+
+    const updateData: Record<string, unknown> = {};
+
+    if (typeof isActive === "boolean") {
+      updateData.isActive = isActive;
+    }
+
+    if (typeof isFeatured === "boolean") {
+      updateData.isFeatured = isFeatured;
+    }
+
+    if (typeof sortOrder === "number") {
+      // Ensure non-negative integer priority
+      updateData.sortOrder = Math.max(0, Math.floor(sortOrder));
+    }
+
+    if (typeof name === "string" && name.trim()) {
+      updateData.name = name.trim();
+      // Auto-generate slug from name if slug is not provided
+      if (!newSlug || typeof newSlug !== "string" || !newSlug.trim()) {
+        const generatedSlug = name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
+        updateData.slug = generatedSlug;
+      }
+    }
+
+    // Allow manual slug override if provided
+    if (typeof newSlug === "string" && newSlug.trim()) {
+      const cleanedSlug = newSlug
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+      updateData.slug = cleanedSlug;
+    }
+
+    if (typeof description === "string") {
+      updateData.description = description;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "No valid fields provided to update",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check if slug is an ObjectId (categoryId) or a slug string
+    let category;
+    if (isValidObjectId(slug)) {
+      // It's an ObjectId, find by ID
+      category = await Category.findByIdAndUpdate(slug, updateData, {
+        new: true,
+      });
+    } else {
+      // It's a slug string, find by slug
+      category = await Category.findOneAndUpdate({ slug }, updateData, {
+        new: true,
+      });
+    }
+
+    if (!category) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Category not found",
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: category,
+      message: "Category updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating category:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to update category",
         error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }

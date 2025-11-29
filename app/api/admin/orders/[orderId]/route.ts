@@ -3,46 +3,9 @@ import dbConnect from "@/lib/mongoose";
 import Order from "@/app/models/order";
 import { requireAdmin } from "@/lib/adminAuth";
 import { sseManager } from "@/lib/sse";
-import { Types } from "mongoose";
 
 interface Params {
   params: Promise<{ orderId: string }>;
-}
-
-// Type for populated order from Mongoose lean()
-interface PopulatedOrder {
-  _id: Types.ObjectId;
-  date: Date;
-  totalPrice: number;
-  orderState: string;
-  paymentStatus: string;
-  paymentMethod: string;
-  userId?: {
-    _id: Types.ObjectId;
-    name?: string;
-    email?: string;
-  };
-  addressId?: {
-    _id: Types.ObjectId;
-    name?: string;
-    phone?: string;
-    address?: string;
-    city?: string;
-    state?: string;
-  };
-  products?: Array<{
-    _id: Types.ObjectId;
-    name?: string;
-    price?: number;
-    images?: string[];
-  }>;
-  trackingNumber?: string;
-  estimatedDeliveryDate?: Date;
-  shippedDate?: Date;
-  deliveredDate?: Date;
-  promoCode?: string;
-  discountAmount?: number;
-  discountPercentage?: number;
 }
 
 /**
@@ -87,27 +50,28 @@ export async function GET(
     }
 
     // Format order response to match expected structure
-    const populatedOrder = order as unknown as PopulatedOrder;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const orderDoc = order as any;
     const formattedOrder = {
-      _id: populatedOrder._id.toString(),
-      orderNumber: populatedOrder._id.toString().slice(-8).toUpperCase(),
-      date: populatedOrder.date,
-      totalPrice: populatedOrder.totalPrice,
-      orderState: populatedOrder.orderState,
-      paymentStatus: populatedOrder.paymentStatus,
-      paymentMethod: populatedOrder.paymentMethod,
-      userId: populatedOrder.userId?._id?.toString(),
-      userName: populatedOrder.userId?.name || "Unknown",
-      userEmail: populatedOrder.userId?.email || "Unknown",
-      address: populatedOrder.addressId, // Map addressId to address
-      products: populatedOrder.products || [],
-      trackingNumber: populatedOrder.trackingNumber,
-      estimatedDeliveryDate: populatedOrder.estimatedDeliveryDate,
-      shippedDate: populatedOrder.shippedDate,
-      deliveredDate: populatedOrder.deliveredDate,
-      promoCode: populatedOrder.promoCode,
-      discountAmount: populatedOrder.discountAmount || 0,
-      discountPercentage: populatedOrder.discountPercentage,
+      _id: orderDoc._id.toString(),
+      orderNumber: orderDoc._id.toString().slice(-8).toUpperCase(),
+      date: orderDoc.date,
+      totalPrice: orderDoc.totalPrice,
+      orderState: orderDoc.orderState,
+      paymentStatus: orderDoc.paymentStatus,
+      paymentMethod: orderDoc.paymentMethod,
+      userId: orderDoc.userId?._id?.toString(),
+      userName: orderDoc.userId?.name || "Unknown",
+      userEmail: orderDoc.userId?.email || "Unknown",
+      address: orderDoc.addressId, // Map addressId to address
+      products: orderDoc.products || [],
+      trackingNumber: orderDoc.trackingNumber,
+      estimatedDeliveryDate: orderDoc.estimatedDeliveryDate,
+      shippedDate: orderDoc.shippedDate,
+      deliveredDate: orderDoc.deliveredDate,
+      promoCode: orderDoc.promoCode,
+      discountAmount: orderDoc.discountAmount || 0,
+      discountPercentage: orderDoc.discountPercentage,
     };
 
     return NextResponse.json(
@@ -210,35 +174,36 @@ export async function PATCH(
     }
 
     // Broadcast update via SSE
-    const populatedOrder = order as unknown as PopulatedOrder;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const orderDoc = order as any;
     sseManager.broadcast("order-updated", {
-      orderId: populatedOrder._id.toString(),
-      orderNumber: populatedOrder._id.toString().slice(-8).toUpperCase(),
-      orderState: populatedOrder.orderState,
+      orderId: orderDoc._id.toString(),
+      orderNumber: orderDoc._id.toString().slice(-8).toUpperCase(),
+      orderState: orderDoc.orderState,
       updatedAt: new Date().toISOString(),
     });
 
     // Format order response to match expected structure
     const formattedOrder = {
-      _id: populatedOrder._id.toString(),
-      orderNumber: populatedOrder._id.toString().slice(-8).toUpperCase(),
-      date: populatedOrder.date,
-      totalPrice: populatedOrder.totalPrice,
-      orderState: populatedOrder.orderState,
-      paymentStatus: populatedOrder.paymentStatus,
-      paymentMethod: populatedOrder.paymentMethod,
-      userId: populatedOrder.userId?._id?.toString(),
-      userName: populatedOrder.userId?.name || "Unknown",
-      userEmail: populatedOrder.userId?.email || "Unknown",
-      address: populatedOrder.addressId, // Map addressId to address
-      products: populatedOrder.products || [],
-      trackingNumber: populatedOrder.trackingNumber,
-      estimatedDeliveryDate: populatedOrder.estimatedDeliveryDate,
-      shippedDate: populatedOrder.shippedDate,
-      deliveredDate: populatedOrder.deliveredDate,
-      promoCode: populatedOrder.promoCode,
-      discountAmount: populatedOrder.discountAmount || 0,
-      discountPercentage: populatedOrder.discountPercentage,
+      _id: orderDoc._id.toString(),
+      orderNumber: orderDoc._id.toString().slice(-8).toUpperCase(),
+      date: orderDoc.date,
+      totalPrice: orderDoc.totalPrice,
+      orderState: orderDoc.orderState,
+      paymentStatus: orderDoc.paymentStatus,
+      paymentMethod: orderDoc.paymentMethod,
+      userId: orderDoc.userId?._id?.toString(),
+      userName: orderDoc.userId?.name || "Unknown",
+      userEmail: orderDoc.userId?.email || "Unknown",
+      address: orderDoc.addressId, // Map addressId to address
+      products: orderDoc.products || [],
+      trackingNumber: orderDoc.trackingNumber,
+      estimatedDeliveryDate: orderDoc.estimatedDeliveryDate,
+      shippedDate: orderDoc.shippedDate,
+      deliveredDate: orderDoc.deliveredDate,
+      promoCode: orderDoc.promoCode,
+      discountAmount: orderDoc.discountAmount || 0,
+      discountPercentage: orderDoc.discountPercentage,
     };
 
     return NextResponse.json(

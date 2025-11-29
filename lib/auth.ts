@@ -37,7 +37,6 @@ export const authOptions: NextAuthOptions = {
               name: user.name,
               isAdmin: shouldBeAdmin || false,
               cart:[],
-              wishlist:[],
               addresses:[],
               // image: user.image,
               // googleId: account.providerAccountId,

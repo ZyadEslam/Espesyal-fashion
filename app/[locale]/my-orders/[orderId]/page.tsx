@@ -21,6 +21,11 @@ interface Product {
   price?: number;
   quantityInCart?: number;
   quantity?: number;
+  selectedColor?: string;
+  selectedSize?: string;
+  color?: string;
+  size?: string;
+  sku?: string;
 }
 
 interface Address {
@@ -236,6 +241,23 @@ const OrderDetailPage = () => {
                       <h3 className="font-semibold text-gray-900 mb-1">
                         {product.name || "Product"}
                       </h3>
+                      {(product.selectedColor ||
+                        product.color ||
+                        product.selectedSize ||
+                        product.size) && (
+                        <p className="text-sm text-gray-500 mb-2">
+                          {product.selectedColor || product.color ? (
+                            <span>
+                              Color: {product.selectedColor || product.color}
+                            </span>
+                          ) : null}
+                          {product.selectedSize || product.size ? (
+                            <span className="ml-2">
+                              Size: {product.selectedSize || product.size}
+                            </span>
+                          ) : null}
+                        </p>
+                      )}
                       <p className="text-sm text-gray-600 mb-2">
                         Quantity: {product.quantityInCart || product.quantity || 1}
                       </p>

@@ -1,129 +1,125 @@
 "use client";
-import React from "react";
-import Image from "next/image";
-import { assets } from "@/public/assets/assets";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import PrimaryBtn from "../PrimaryBtn";
+import { Copy, Check, Sparkles } from "lucide-react";
 
 const HeroSection = () => {
   const t = useTranslations("home");
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText("BFRIDAY");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-background via-secondaryLight to-background shadow-lg border border-secondary">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/20 to-transparent"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-primary/30 to-transparent rounded-full blur-3xl"></div>
-      </div>
+    <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-black via-black/90 to-black/80 px-6 py-5 md:px-8 md:py-6">
+      {/* Creative Background Patterns */}
+      <div className="absolute inset-0">
+        {/* Grid Pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.09]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, white 1px, transparent 1px),
+              linear-gradient(to bottom, white 1px, transparent 1px)
+            `,
+            backgroundSize: "40px 40px",
+          }}
+        />
 
-      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-center p-6 lg:p-8">
-        {/* Text Content - Left Side */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col justify-center space-y-6 text-foreground"
-        >
-          {/* Limited Time Badge */}
+        {/* Sparkle Icons */}
+        {[...Array(6)].map((_, i) => (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="inline-flex items-center"
-          >
-            <span className="bg-orange/10 text-orange px-4 py-2 rounded-full text-sm font-semibold border border-orange/20">
-              {t("specialOffer")}
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
-          >
-            {t("elevateYourStyle")} <span className="text-orange">{t("styleGame")}</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-foreground/70 text-base md:text-lg leading-relaxed max-w-lg"
-          >
-            {t("discoverExclusive")} <span className="text-orange font-bold">30% {t("off")}</span>. {t("limitedTimeOffer")}
-          </motion.p>
-
-         
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex lg:flex-row sm:flex-col sm:gap-8 items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4"
-          >
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <PrimaryBtn
-                text={t("shopNow")}
-                href="/shop"
-                customClass="px-6 py-3 rounded-full text-base font-semibold shadow-md hover:shadow-lg transition-all duration-300 bg-orange text-white hover:bg-primary border border-orange hover:border-primary"
-              />
-            </motion.div>
-            <button className="text-foreground/70 hover:text-orange transition-colors duration-300 font-medium text-base">
-              {t("viewCollection")}
-            </button>
-          </motion.div>
-
-       
-        </motion.div>
-
-        {/* Image - Right Side */}
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative w-full h-[350px] lg:h-[500px] order-first lg:order-last"
-        >
-          <div className="relative w-full h-full rounded-2xl overflow-hidden">
-            <Image
-              src={assets.girl8}
-              alt="Fashion Collection - Special Offer"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover object-center"
-              priority
-              quality={90}
-            />
-            {/* Overlay for better contrast */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-background/20"></div>
-          </div>
-
-          {/* Simple Sale Badge */}
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="absolute top-4 right-4 bg-orange text-white px-3 py-2 rounded-lg shadow-md font-semibold text-sm"
-          >
-            -30% OFF
-          </motion.div>
-
-          {/* Subtle Floating Elements */}
-          <motion.div
-            animate={{ y: [0, -5, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-8 left-8 w-3 h-3 bg-orange/40 rounded-full"
-          />
-          <motion.div
-            animate={{ y: [0, 5, 0] }}
+            key={`sparkle-${i}`}
+            animate={{
+              opacity: [0, 1, 0],
+              scale: [0.5, 1, 0.5],
+              rotate: [0, 180, 360],
+            }}
             transition={{
-              duration: 3,
+              duration: 3 + i * 0.5,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: 1,
+              delay: i * 0.3,
             }}
-            className="absolute bottom-8 right-8 w-2 h-2 bg-primary/40 rounded-full"
-          />
+            className={`absolute ${
+              i === 0
+                ? "top-1/4 right-1/4"
+                : i === 1
+                ? "top-1/2 left-1/4"
+                : i === 2
+                ? "bottom-1/3 right-1/3"
+                : i === 3
+                ? "top-1/3 left-1/2"
+                : i === 4
+                ? "bottom-1/4 left-1/3"
+                : "top-2/3 right-1/2"
+            } text-white/50`}
+          >
+            <Sparkles className="w-4 h-4 md:w-6 md:h-6" />
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center text-center py-6 px-4 md:py-8 md:px-8">
+        {/* Hero Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mb-3 md:mb-4"
+        >
+          <span className="inline-flex items-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight uppercase drop-shadow-lg">
+            {t("heroBadge") || "Winter Is Here"} !!!
+          </span>
+        </motion.div>
+
+        {/* Main Heading */}
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-4 md:mb-6 leading-tight px-2 drop-shadow-md max-w-3xl"
+        >
+          {t("largestSale") || "The largest sale of the year is here!"}
+        </motion.h1>
+
+        {/* Promo Code Badge */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="w-full max-w-md"
+        >
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 md:gap-3 bg-white/95 backdrop-blur-sm px-4 md:px-6 py-2.5 md:py-3 rounded-full shadow-xl border-2 border-white/50">
+            <span className=" font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">
+              {t("useCode") || "Use code:"}
+            </span>
+            <div className="flex items-center gap-1 md:gap-2">
+              <code className=" text-black px-2 md:px-3 py-1 rounded-lg font-bold text-sm sm:text-base md:text-lg tracking-wider ">
+                BFRIDAY
+              </code>
+              <button
+                onClick={handleCopyCode}
+                className="p-1 md:p-1.5 hover:bg-primary-100 rounded-lg transition-colors"
+                aria-label="Copy code"
+                title="Copy code"
+              >
+                {copied ? (
+                  <Check className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
+                ) : (
+                  <Copy className="w-4 h-4 md:w-5 md:h-5 text-black" />
+                )}
+              </button>
+            </div>
+            <span className=" font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">
+              {t("forDiscount") || "for 25% OFF"}
+            </span>
+          </div>
         </motion.div>
       </div>
     </div>

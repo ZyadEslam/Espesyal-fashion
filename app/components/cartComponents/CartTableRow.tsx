@@ -11,6 +11,12 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
   const [quantity, setQuantity] = useState(product.quantityInCart || 1);
   const [imageError, setImageError] = useState(false);
   const { removeFromCart, updateQuantity } = useCart();
+  const maxAvailable =
+    product.maxAvailable ??
+    product.variants?.find((variant) => variant._id === product.selectedVariantId)
+      ?.quantity ??
+    product.totalStock ??
+    undefined;
 
   useEffect(() => {
     const newPrice = product.price * quantity;
@@ -20,14 +26,15 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
   const handleQuantityChange = useCallback(
     (newQuantity: number) => {
       if (newQuantity < 1) return;
+      if (maxAvailable && newQuantity > maxAvailable) return;
 
       setQuantity(newQuantity);
 
       if (updateQuantity) {
-        updateQuantity(product._id as string, newQuantity);
+        updateQuantity(product._id as string, product.selectedVariantId, newQuantity);
       }
     },
-    [product._id, updateQuantity]
+    [product._id, product.selectedVariantId, updateQuantity, maxAvailable]
   );
 
   const incrementQuantity = useCallback(() => {
@@ -41,8 +48,8 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
   }, [quantity, handleQuantityChange]);
 
   const removeFromCartHandler = useCallback(() => {
-    removeFromCart(product._id as string);
-  }, [product._id, removeFromCart]);
+    removeFromCart(product._id as string, product.selectedVariantId);
+  }, [product._id, product.selectedVariantId, removeFromCart]);
 
   const handleImageError = useCallback(() => {
     setImageError(true);
@@ -83,6 +90,15 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
             <p className="text-lg font-bold text-gray-900 mt-1">
               ${productPrice.toFixed(2)}
             </p>
+            {(product.selectedColor || product.selectedSize) && (
+              <p className="text-xs text-gray-500 mt-1">
+                {product.selectedColor && (
+                  <span>Color: {product.selectedColor}</span>
+                )}
+                {product.selectedColor && product.selectedSize && " · "}
+                {product.selectedSize && <span>Size: {product.selectedSize}</span>}
+              </p>
+            )}
           </div>
 
           {/* Remove Button */}
@@ -111,6 +127,7 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
               </span>
               <button
                 onClick={incrementQuantity}
+                disabled={maxAvailable ? quantity >= maxAvailable : false}
                 className="p-2 hover:bg-gray-100 transition-colors duration-200"
               >
                 <Plus className="w-4 h-4" />
@@ -152,6 +169,15 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
             <p className="text-sm text-gray-500 mt-1">
               ${product.price.toFixed(2)} each
             </p>
+            {(product.selectedColor || product.selectedSize) && (
+              <p className="text-xs text-gray-500 mt-1">
+                {product.selectedColor && (
+                  <span>Color: {product.selectedColor}</span>
+                )}
+                {product.selectedColor && product.selectedSize && " · "}
+                {product.selectedSize && <span>Size: {product.selectedSize}</span>}
+              </p>
+            )}
           </div>
         </div>
 
@@ -170,6 +196,7 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
             </span>
             <button
               onClick={incrementQuantity}
+              disabled={maxAvailable ? quantity >= maxAvailable : false}
               className="p-2 hover:bg-gray-100 transition-colors duration-200"
             >
               <Plus className="w-4 h-4" />

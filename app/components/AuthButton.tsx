@@ -5,12 +5,10 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 import { useCart } from "../hooks/useCart";
-import { useWishlist } from "../hooks/useWishlist";
 
 export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
   const { data: session } = useSession();
   const { manualSync: syncCart } = useCart();
-  const { manualSync: syncWishlist } = useWishlist();
   const t = useTranslations("nav");
   const handleSignIn = async () => {
     try {
@@ -28,7 +26,6 @@ export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
     console.log("🚪 Sign out button clicked");
     try {
       await syncCart();
-      await syncWishlist();
       await signOut({ callbackUrl: "/" });
     } catch (error) {
       console.error("❌ SignOut error:", error);

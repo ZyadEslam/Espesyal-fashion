@@ -3,14 +3,103 @@ import Order from "../../models/order";
 import dbConnect from "@/lib/mongoose";
 import { sseManager } from "@/lib/sse";
 import User from "@/app/models/user";
-import { Types } from "mongoose";
+import mongoose from "mongoose";
+import Product from "@/app/models/product";
 
-// Type for user from Mongoose lean()
-interface UserLean {
-  _id: Types.ObjectId;
-  name?: string;
-  email?: string;
+interface IncomingOrderProduct {
+  _id?: string;
+  productId?: string;
+  variantId?: string;
+  selectedVariantId?: string;
+  size?: string;
+  selectedSize?: string;
+  color?: string;
+  selectedColor?: string;
+  quantityInCart?: number;
+  quantity?: number;
+  price?: number;
+  variantSku?: string;
+  sku?: string;
 }
+
+const normalizeOrderItems = (items: unknown[]): {
+  product: mongoose.Types.ObjectId;
+  variantId?: mongoose.Types.ObjectId;
+  size?: string;
+  color?: string;
+  sku?: string;
+  quantity: number;
+  price: number;
+}[] => {
+  if (!Array.isArray(items)) return [];
+
+  return items
+    .map((item) => {
+      if (!item) return null;
+
+      if (typeof item === "string" && mongoose.Types.ObjectId.isValid(item)) {
+        return {
+          product: new mongoose.Types.ObjectId(item),
+          quantity: 1,
+          price: 0,
+        };
+      }
+
+      if (typeof item !== "object") {
+        return null;
+      }
+
+      const {
+        _id,
+        productId,
+        variantId,
+        selectedVariantId,
+        size,
+        selectedSize,
+        color,
+        selectedColor,
+        quantityInCart,
+        quantity,
+        price,
+        variantSku,
+        sku,
+      } = item as IncomingOrderProduct;
+
+      const resolvedProductId = productId || _id;
+
+      if (!resolvedProductId || !mongoose.Types.ObjectId.isValid(resolvedProductId)) {
+        return null;
+      }
+
+      const variantIdValue = variantId || selectedVariantId;
+      const resolvedVariantId =
+        variantIdValue && mongoose.Types.ObjectId.isValid(variantIdValue)
+          ? new mongoose.Types.ObjectId(variantIdValue)
+          : undefined;
+
+      const resolvedQuantity = Number(quantityInCart ?? quantity ?? 1);
+
+      return {
+        product: new mongoose.Types.ObjectId(resolvedProductId),
+        ...(resolvedVariantId && { variantId: resolvedVariantId }),
+        ...((size || selectedSize) && { size: size || selectedSize }),
+        ...((color || selectedColor) && { color: color || selectedColor }),
+        ...(variantSku && { sku: variantSku }),
+        ...(!variantSku && sku && { sku }),
+        quantity: resolvedQuantity > 0 ? resolvedQuantity : 1,
+        price: Number(price) || 0,
+      };
+    })
+    .filter(Boolean) as {
+    product: mongoose.Types.ObjectId;
+    variantId?: mongoose.Types.ObjectId;
+    size?: string;
+    color?: string;
+    sku?: string;
+    quantity: number;
+    price: number;
+  }[];
+};
 
 export async function POST(req: Request) {
   try {
@@ -41,27 +130,81 @@ export async function POST(req: Request) {
       );
     }
 
-    const newOrder = new Order({
-      userId,
-      addressId,
-      products,
-      totalPrice: +totalPrice,
-      date: new Date().toISOString(),
-      orderState: "Pending",
-      paymentMethod: paymentMethod || "cash_on_delivery",
-      paymentStatus:
-        paymentMethod === "stripe" && stripePaymentIntentId
-          ? "paid"
-          : "pending",
-      ...(promoCode && { promoCode }),
-      ...(discountAmount !== undefined && { discountAmount: +discountAmount }),
-      ...(discountPercentage !== undefined && { discountPercentage: +discountPercentage }),
-      ...(stripePaymentIntentId && { stripePaymentIntentId }),
-    });
-    await newOrder.save();
+    const normalizedProducts = normalizeOrderItems(products);
+
+    if (!normalizedProducts.length) {
+      return NextResponse.json(
+        { success: false, message: "Order must include valid products" },
+        { status: 400 }
+      );
+    }
+
+    const session = await mongoose.startSession();
+    let newOrder;
+    try {
+      session.startTransaction();
+
+      for (const item of normalizedProducts) {
+        const productDoc = await Product.findById(item.product).session(session);
+
+        if (!productDoc) {
+          throw new Error("One of the products in the order no longer exists.");
+        }
+
+        if (productDoc.variants?.length) {
+          if (!item.variantId) {
+            throw new Error("Missing variant selection for a product.");
+          }
+          const variantSubdoc = productDoc.variants.id(item.variantId);
+          if (!variantSubdoc) {
+            throw new Error("Selected variant no longer exists.");
+          }
+          if (variantSubdoc.quantity < item.quantity) {
+            throw new Error(
+              `Insufficient stock for ${productDoc.name} (${variantSubdoc.color} ${variantSubdoc.size}).`
+            );
+          }
+          variantSubdoc.quantity -= item.quantity;
+        } else {
+          // If no variants exist, we currently allow the order without stock checks.
+          // This can be extended to handle global stock if needed.
+        }
+
+        await productDoc.save({ session });
+      }
+
+      newOrder = new Order({
+        userId,
+        addressId,
+        products: normalizedProducts,
+        totalPrice: +totalPrice,
+        date: new Date().toISOString(),
+        orderState: "Pending",
+        paymentMethod: paymentMethod || "cash_on_delivery",
+        paymentStatus:
+          paymentMethod === "stripe" && stripePaymentIntentId
+            ? "paid"
+            : "pending",
+        ...(promoCode && { promoCode }),
+        ...(discountAmount !== undefined && { discountAmount: +discountAmount }),
+        ...(discountPercentage !== undefined && {
+          discountPercentage: +discountPercentage,
+        }),
+        ...(stripePaymentIntentId && { stripePaymentIntentId }),
+      });
+      await newOrder.save({ session });
+
+      await session.commitTransaction();
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
 
     // Get user info for broadcast
-    const user = await User.findById(userId).select("name email").lean() as unknown as UserLean | null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user = (await User.findById(userId).select("name email").lean()) as any;
 
     // Broadcast new order via SSE to all connected admin clients
     sseManager.broadcast("new-order", {
@@ -86,9 +229,15 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     console.error("Error placing order:", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to place order";
+    const statusCode =
+      message.includes("Insufficient") || message.includes("variant")
+        ? 400
+        : 500;
     return NextResponse.json(
-      { success: false, message: "Failed to place order" },
-      { status: 500 }
+      { success: false, message },
+      { status: statusCode }
     );
   }
 }

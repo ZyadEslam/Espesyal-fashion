@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Plus } from "lucide-react";
-import { ProductFormData } from "@/app/hooks/useProducts";
+import { ProductFormData, ProductFormVariant } from "@/app/hooks/useProducts";
 import { Category } from "@/app/hooks/useProducts";
 import QuickCategoryForm from "./QuickCategoryForm";
+import ProductVariantInputs from "./ProductVariantInputs";
 
 interface ProductEditFormProps {
   formData: ProductFormData;
@@ -25,12 +26,15 @@ const ProductEditForm: React.FC<ProductEditFormProps> = ({
 }) => {
   const [showCategoryForm, setShowCategoryForm] = useState(false);
 
-  const handleChange = (field: keyof ProductFormData, value: string) => {
+  const handleChange = <K extends keyof ProductFormData>(
+    field: K,
+    value: ProductFormData[K]
+  ) => {
     if (field === "category") {
       const selectedCategory = categories.find((c) => c._id === value);
       onChange({
         ...formData,
-        category: value,
+        category: value as string,
         categoryName: selectedCategory?.name || formData.categoryName,
       });
     } else {
@@ -39,6 +43,13 @@ const ProductEditForm: React.FC<ProductEditFormProps> = ({
         [field]: value,
       });
     }
+  };
+
+  const handleVariantsChange = (variants: ProductFormVariant[]) => {
+    onChange({
+      ...formData,
+      variants,
+    });
   };
 
   const handleCategoryCreated = async (categoryId: string, categoryName: string) => {
@@ -225,6 +236,32 @@ const ProductEditForm: React.FC<ProductEditFormProps> = ({
             />
           </div>
         )}
+      </div>
+
+      <div className="space-y-4">
+        <ProductVariantInputs
+          variants={formData.variants}
+          onChange={handleVariantsChange}
+        />
+      </div>
+
+      <div className="pt-4 border-t border-gray-200">
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={formData.hideFromHome ?? false}
+            onChange={(e) => handleChange("hideFromHome", e.target.checked)}
+            className="w-5 h-5 text-orange border-gray-300 rounded focus:ring-2 focus:ring-orange focus:ring-offset-2"
+          />
+          <div>
+            <span className="text-sm font-medium text-gray-700">
+              Hide from home page
+            </span>
+            <p className="text-xs text-gray-500 mt-1">
+              When enabled, this product will not appear on the home page but will still be visible in category pages and search results.
+            </p>
+          </div>
+        </label>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 pt-4">

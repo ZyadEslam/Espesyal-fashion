@@ -24,7 +24,7 @@ const ProductsProvider = ({ children }: ProductsProviderProps) => {
           setProducts(serverProducts);
           setIsLoading(false);
         } catch (error) {
-          console.error("Error migrating wishlist:", error);
+          console.error("Error fetching products:", error);
           setError(
             error instanceof Error ? error.message : "Error Fetching Products"
           );

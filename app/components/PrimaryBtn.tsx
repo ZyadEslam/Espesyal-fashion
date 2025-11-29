@@ -13,7 +13,7 @@ const PrimaryBtn = ({
   return (
     <Link
       href={href}
-      className={`bg-orange text-white ${customClass}`}
+      className={`bg-orange  ${customClass}`}
     >
       {text}
     </Link>

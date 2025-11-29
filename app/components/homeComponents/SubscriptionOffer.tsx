@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import { Instagram, Facebook, Twitter } from "lucide-react";
+import { Instagram, Facebook, Twitter, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 const SubscriptionOffer = () => {
@@ -13,6 +13,9 @@ const SubscriptionOffer = () => {
       href: "#",
       followers: "25K+",
       description: "Daily Fashion Inspiration",
+      gradient: "from-pink-500 via-purple-500 to-pink-600",
+      hoverGradient:
+        "hover:from-pink-600 hover:via-purple-600 hover:to-pink-700",
     },
     {
       name: "Facebook",
@@ -20,6 +23,8 @@ const SubscriptionOffer = () => {
       href: "#",
       followers: "15K+",
       description: "Community & Updates",
+      gradient: "from-blue-500 to-blue-600",
+      hoverGradient: "hover:from-blue-600 hover:to-blue-700",
     },
     {
       name: "Twitter",
@@ -27,115 +32,84 @@ const SubscriptionOffer = () => {
       href: "#",
       followers: "8K+",
       description: "Latest News & Trends",
+      gradient: "from-sky-400 to-sky-500",
+      hoverGradient: "hover:from-sky-500 hover:to-sky-600",
     },
   ];
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: 0.5 }}
       viewport={{ once: true }}
-      className="py-16 px-4"
+      className="relative "
     >
-      <div className="max-w-4xl mx-auto text-center">
-        {/* Header */}
+      <div className="max-full mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
           viewport={{ once: true }}
-          className="mb-12"
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-black via-black/90 to-black/80 px-6 py-5 md:px-8 md:py-6"
         >
-          <h1 className="text-3xl sm:text-4xl font-bold  mb-4">
-            {t("followUsForOffers")} <span className="text-orange">{t("exclusiveOffers")}</span>
-          </h1>
-          <p className="text-lg max-w-2xl mx-auto">
-            {t("joinSocialMedia")}
-          </p>
-        </motion.div>
+          {/* Subtle grid like HeroSection */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.08]"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, white 1px, transparent 1px),
+                linear-gradient(to bottom, white 1px, transparent 1px)
+              `,
+              backgroundSize: "32px 32px",
+            }}
+          />
 
-        {/* Social Media Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12"
-        >
-          {socialLinks.map((social) => (
-            <motion.a
-              key={social.name}
-              href={social.href}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-orange/20"
-            >
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-orange/10 transition-colors duration-300">
-                  <social.icon className="w-8 h-8 text-gray-600 group-hover:text-orange transition-colors duration-300" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  {social.name}
-                </h3>
-                <div className="text-2xl font-bold text-orange mb-2">
-                  {social.followers}
-                </div>
-                <p className="text-gray-600 text-sm">{social.description}</p>
+          <div className="relative z-10 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-between">
+            {/* Text side - smaller, simple */}
+            <div className="text-center md:text-left max-w-xl">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 mb-2">
+                <Sparkles className="h-4 w-4 text-orange" />
+                <span className="text-xs font-medium uppercase tracking-wide text-white/70">
+                  {t("followUsNow")}
+                </span>
               </div>
-            </motion.a>
-          ))}
-        </motion.div>
-
-        {/* Benefits */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          viewport={{ once: true }}
-          className="grid sm:grid-cols-1 md:grid-cols-3 gap-8 text-center"
-        >
-          <div className="text-gray-900">
-            <div className="text-2xl font-bold text-orange mb-2">
-              {t("exclusiveAccess")}
+              <h2 className="text-lg md:text-xl font-semibold text-white leading-snug">
+                {t("followUsForOffers")}{" "}
+                <span className="bg-gradient-to-r from-orange via-orange-400 to-orange-500 bg-clip-text text-transparent">
+                  {t("exclusiveOffers")}
+                </span>
+              </h2>
+              <p className="mt-2 text-xs md:text-sm text-white/70">
+                {t("joinSocialMedia")}
+              </p>
             </div>
-            <div className=" text-sm">{t("firstAccess")}</div>
-          </div>
-          <div className="text-gray-900">
-            <div className="text-2xl font-bold text-orange mb-2">
-              {t("specialDiscounts")}
-            </div>
-            <div className="text-sm">{t("upToOff")}</div>
-          </div>
-          <div className="text-gray-900">
-            <div className="text-2xl font-bold text-orange mb-2">{t("community")}</div>
-            <div className="text-sm">{t("joinFashionCommunity")}</div>
-          </div>
-        </motion.div>
 
-        {/* Call to Action */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          viewport={{ once: true }}
-          className="mt-12"
-        >
-          <p className=" text-sm mb-6">
-            {t("followUsNow")}
-          </p>
-          <div className="flex justify-center space-x-4">
-            {socialLinks.map((social) => (
-              <motion.a
-                key={social.name}
-                href={social.href}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-orange hover:text-white transition-all duration-300"
-              >
-                <social.icon className="w-5 h-5 text-gray-600 hover:text-white transition-colors duration-300" />
-              </motion.a>
-            ))}
+            {/* Social icons only */}
+            <div className="flex items-center gap-3 md:gap-4">
+              {socialLinks.map((social, index) => (
+                <motion.a
+                  key={social.name}
+                  href={social.href}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{
+                    duration: 0.35,
+                    delay: 0.15 + index * 0.05,
+                    type: "spring",
+                    stiffness: 220,
+                  }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  whileTap={{ scale: 0.96 }}
+                  className={`relative flex h-10 w-10 md:h-11 md:w-11 items-center justify-center rounded-full bg-gradient-to-br ${social.gradient} shadow-lg hover:shadow-xl transition-all duration-200`}
+                  aria-label={social.name}
+                  title={social.description}
+                >
+                  <social.icon className="h-5 w-5 text-white" />
+                </motion.a>
+              ))}
+            </div>
           </div>
         </motion.div>
       </div>

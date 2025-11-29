@@ -22,13 +22,6 @@ const userSchema = new mongoose.Schema({
       default: [],
     },
   ],
-  wishlist: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-      default: [],
-    },
-  ],
   // Optional: You can also store address references in user
   addresses: [
     {

@@ -16,6 +16,10 @@ interface Product {
   price?: number;
   quantityInCart?: number;
   quantity?: number;
+  selectedVariantId?: string;
+  selectedColor?: string;
+  selectedSize?: string;
+  variantSku?: string;
 }
 
 interface CheckoutData {

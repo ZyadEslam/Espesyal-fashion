@@ -1,5 +1,6 @@
 import { getSession } from "next-auth/react";
 import { getBaseUrl } from "./api";
+import { sanitizeVariants } from "./variantUtils";
 
 export const addProduct = async (formData: FormData) => {
   try {
@@ -20,6 +21,17 @@ export const addProduct = async (formData: FormData) => {
     const buffer4 = Buffer.from(image4Buffer);
     const imgFiles = [buffer1, buffer2, buffer3, buffer4].filter(Boolean);
 
+    let variantsPayload: unknown = [];
+    const variantsField = formData.get("variants");
+
+    if (variantsField) {
+      try {
+        variantsPayload = JSON.parse(variantsField as string);
+      } catch (error) {
+        console.error("Failed to parse variants payload:", error);
+      }
+    }
+
     const product = {
       name: formData.get("name"),
       description: formData.get("description"),
@@ -34,6 +46,7 @@ export const addProduct = async (formData: FormData) => {
       category: formData.get("category"),
       brand: formData.get("brand"),
       imgSrc: imgFiles,
+      variants: sanitizeVariants(variantsPayload),
     };
 
     const res = await fetch("/api/product", {

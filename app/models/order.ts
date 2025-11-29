@@ -1,4 +1,45 @@
 import mongoose from "mongoose";
+
+const orderItemSchema = new mongoose.Schema(
+  {
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      required: [true, "Order item must reference a product"],
+    },
+    variantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false,
+    },
+    size: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    color: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    sku: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    quantity: {
+      type: Number,
+      required: [true, "Order item quantity is required"],
+      min: [1, "Order item quantity must be at least 1"],
+    },
+    price: {
+      type: Number,
+      required: [true, "Order item price is required"],
+      min: [0, "Order item price cannot be negative"],
+    },
+  },
+  { _id: true }
+);
+
 const orderSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -9,12 +50,16 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  products: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Product",
-    required: [true, "Order Products are required"],
-    default:[]
-  }],
+  products: {
+    type: [orderItemSchema],
+    default: [],
+    validate: [
+      {
+        validator: (items: unknown[]) => Array.isArray(items) && items.length > 0,
+        message: "Order must include at least one product",
+      },
+    ],
+  },
   addressId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Address",

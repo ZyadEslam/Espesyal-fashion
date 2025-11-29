@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import Product from "@/app/models/product";
+import Category from "@/app/models/category";
 import connectDB from "@/app/utils/db";
 import { StaticImageData } from "next/image";
+import { sanitizeVariants, VariantInput } from "@/app/utils/variantUtils";
 
 // Define the params type
 interface Params {
@@ -16,9 +18,12 @@ interface ProductUpdateData {
   oldPrice?: number;
   discount?: number;
   category?: string;
+  categoryName?: string;
   brand?: string;
   color?: string;
   imgSrc?: StaticImageData[]; // Use a more specific type if you know the structure
+  hideFromHome?: boolean;
+  variants?: VariantInput[];
 }
 
 export async function GET(request: NextRequest, { params }: Params) {
@@ -35,7 +40,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     }
 
     // Convert to plain object and keep the image data
-    const productObj = product.toObject();
+    const productObj = product.toObject({ virtuals: true });
 
     // Instead of converting to base64, we'll use the image API endpoint
     productObj.imgSrc = productObj.imgSrc.map(
@@ -59,31 +64,23 @@ export async function POST(request: NextRequest, { params }: Params) {
   try {
     await connectDB();
     const { id } = await params;
-    const {
-      name,
-      description,
-      price,
-      oldPrice,
-      discount,
-      category,
-      brand,
-      color,
-      imgSrc,
-    }: ProductUpdateData = await request.json();
+    const updateData: ProductUpdateData = await request.json();
+
+    if (updateData.variants) {
+      updateData.variants = sanitizeVariants(updateData.variants);
+    }
+
+    // If category is provided but categoryName is not, fetch it from the category
+    if (updateData.category && !updateData.categoryName) {
+      const category = await Category.findById(updateData.category);
+      if (category) {
+        updateData.categoryName = category.name;
+      }
+    }
 
     const product = await Product.findByIdAndUpdate(
       id,
-      {
-        name,
-        description,
-        price,
-        oldPrice,
-        discount,
-        category,
-        brand,
-        color,
-        imgSrc,
-      },
+      updateData,
       { new: true }
     );
 
@@ -137,31 +134,23 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   try {
     await connectDB();
     const { id } = await params;
-    const {
-      name,
-      description,
-      price,
-      oldPrice,
-      discount,
-      category,
-      brand,
-      color,
-      imgSrc,
-    }: ProductUpdateData = await request.json();
+    const updateData: ProductUpdateData = await request.json();
+
+    if (updateData.variants) {
+      updateData.variants = sanitizeVariants(updateData.variants);
+    }
+
+    // If category is provided but categoryName is not, fetch it from the category
+    if (updateData.category && !updateData.categoryName) {
+      const category = await Category.findById(updateData.category);
+      if (category) {
+        updateData.categoryName = category.name;
+      }
+    }
 
     const product = await Product.findByIdAndUpdate(
       id,
-      {
-        name,
-        description,
-        price,
-        oldPrice,
-        discount,
-        category,
-        brand,
-        color,
-        imgSrc,
-      },
+      updateData,
       { new: true }
     );
 

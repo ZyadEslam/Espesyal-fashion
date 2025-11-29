@@ -1,5 +1,13 @@
 import { StaticImageData } from "next/image";
 
+export interface ProductVariant {
+  _id?: string;
+  color: string;
+  size: string;
+  quantity: number;
+  sku?: string;
+}
+
 export interface ProductCardProps {
   _id?: string;
   name: string;
@@ -14,6 +22,13 @@ export interface ProductCardProps {
   color?: string;
   quantity?: number;
   quantityInCart?: number;
+  variants?: ProductVariant[];
+  totalStock?: number;
+  selectedVariantId?: string;
+  selectedColor?: string;
+  selectedSize?: string;
+  maxAvailable?: number;
+  variantSku?: string;
   imgSrc: StaticImageData[];
 }
 

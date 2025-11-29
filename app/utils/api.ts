@@ -29,16 +29,16 @@ export const api = {
     }
   },
   getProduct: async (id: string) => {
+    const url = `${API_BASE_URL}/product/${id}`;
     try {
       const data = await cachedFetchJson<{ product: ProductCardProps }>(
-        `/api/product/${id}`,
+        url,
         cacheStrategies.products()
       );
       return data.product;
-    } catch {
-      throw new NextResponse(`Failed to fetch Products`, {
-        status: 500,
-      });
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      throw new Error("Failed to fetch product data");
     }
   },
   getUser: async (id: string) => {
@@ -51,41 +51,6 @@ export const api = {
     } catch (err) {
       console.log(err);
       return null;
-    }
-  },
-  getWishlist: async (userId: string): Promise<{ wishlist: ProductCardProps[] }> => {
-    try {
-      const res = await cachedFetchJson<{ wishlist: ProductCardProps[] }>(
-        `${API_BASE_URL}/user/${userId}/wishlist`,
-        cacheStrategies.userData()
-      );
-      console.log("Wishlist response:", res);
-      return res;
-    } catch (err) {
-      console.error("Error fetching wishlist:", err);
-      // Return empty wishlist on error instead of NextResponse
-      return { wishlist: [] };
-    }
-  },
-  mergeWishlist: async (
-    wishlistToAdd: ProductCardProps[],
-    userId: string | undefined
-  ) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/user/${userId}/wishlist`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          wishlistToAdd,
-        }),
-      });
-      const res = await response.json();
-      console.log("Wishlist response:", res);
-      return res;
-    } catch (err) {
-      return NextResponse.json(err, { status: 401 });
     }
   },
   getCart: async (userId: string): Promise<{ cart: ProductCardProps[] }> => {

@@ -43,11 +43,11 @@
     "about": "About",
     "contact": "Contact",
     "cart": "Cart",
-    "wishlist": "Wishlist",
     "dashboard": "Dashboard",
     "signIn": "Sign In",
     "signOut": "Sign Out",
-    "myAccount": "My Account"
+    "myAccount": "My Account",
+    "menu": "Menu"
   },
   "shop": {
     "title": "Shop",
@@ -72,8 +72,6 @@
   },
   "product": {
     "addToCart": "Add to Cart",
-    "addToWishlist": "Add to Wishlist",
-    "removeFromWishlist": "Remove from Wishlist",
     "viewDetails": "View Details",
     "description": "Description",
     "specifications": "Specifications",
@@ -204,6 +202,11 @@
     "copyright": "Copyright 2025 © Zyad Elbehiry All Right Reserved."
   },
   "home": {
+    "allProducts": "All Products",
+    "heroBadge": "Winter Is Here",
+    "largestSale": "The largest sale of the year is here!",
+    "useCode": "Use code:",
+    "forDiscount": "for 25% OFF",
     "featuredProducts": "FEATURED PRODUCTS",
     "handpickedSelections": "Handpicked",
     "selections": "Selections",
@@ -222,6 +225,7 @@
     "discoverMostLoved": "Discover our most loved products that customers can't get enough of",
     "quickView": "Quick View",
     "viewAllBestSellers": "View All Best Sellers",
+    "viewAll": "View All",
     "newCollections": "NEW COLLECTIONS",
     "freshArrivals": "Fresh",
     "arrivals": "Arrivals",
@@ -397,6 +401,7 @@
         "brand": "Brand",
         "images": "Images",
         "category": "Category",
+        "priority": "Priority",
         "rating": "Rating",
         "stock": "Stock",
         "status": "Status",

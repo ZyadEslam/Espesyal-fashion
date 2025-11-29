@@ -55,6 +55,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
               <th className={thClass}>{t("table.brand")}</th>
               <th className={thClass}>{t("table.price")}</th>
               <th className={thClass}>{t("table.rating")}</th>
+              <th className={thClass}>Stock</th>
               <th className={thClass}>{t("table.images")}</th>
               <th className={thClass}>{t("table.actions")}</th>
             </tr>
@@ -99,6 +100,16 @@ const ProductTable: React.FC<ProductTableProps> = ({
                     </span>
                     <span className="text-yellow-400">★</span>
                   </div>
+                </td>
+                <td className={tdClass}>
+                  <span className="text-sm text-gray-900">
+                    {(product as Product & { totalStock?: number }).totalStock ??
+                      product.variants?.reduce(
+                        (sum, variant) => sum + (variant.quantity || 0),
+                        0
+                      ) ??
+                      0}
+                  </span>
                 </td>
                 <td className={tdClass}>
                   <span className="text-sm text-gray-600">
@@ -166,6 +177,17 @@ const ProductTable: React.FC<ProductTableProps> = ({
                 <span className="text-gray-500">{t("table.rating")}:</span>
                 <span className="ml-1 font-medium text-gray-900">
                   {product.rating} ★
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500">Stock:</span>
+                <span className="ml-1 font-medium text-gray-900">
+                  {(product as Product & { totalStock?: number }).totalStock ??
+                    product.variants?.reduce(
+                      (sum, variant) => sum + (variant.quantity || 0),
+                      0
+                    ) ??
+                    0}
                 </span>
               </div>
               <div>

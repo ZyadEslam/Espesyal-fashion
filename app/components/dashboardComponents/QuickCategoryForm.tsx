@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { Plus, X, Loader2, CheckCircle2 } from "lucide-react";
 
 interface QuickCategoryFormProps {
@@ -14,6 +16,14 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
 
   const handleSubmit = async (e?: React.MouseEvent | React.KeyboardEvent) => {
     if (e) {
@@ -68,79 +78,23 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
   };
 
   return (
-    <div 
-      className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-[100] p-4"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-gray-900">Quick Add Category</h3>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
-          disabled={creating}
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div
+        className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative"
+          onClick={(e) => e.stopPropagation()}
         >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-
-      <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
-        <div>
-          <input
-            type="text"
-            value={categoryName}
-            onChange={(e) => {
-              setCategoryName(e.target.value);
-              setError(null);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                e.stopPropagation();
-                handleSubmit(e);
-              }
-            }}
-            placeholder="e.g., T-Shirts, Summer, Women..."
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange"
-            disabled={creating || success}
-            autoFocus
-          />
-          {error && (
-            <p className="mt-1 text-xs text-red-600">{error}</p>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleSubmit(e);
-            }}
-            disabled={creating || success || !categoryName.trim()}
-            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm bg-orange text-white rounded-lg hover:bg-orange/90 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {creating ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Creating...</span>
-              </>
-            ) : success ? (
-              <>
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Created!</span>
-              </>
-            ) : (
-              <>
-                <Plus className="w-4 h-4" />
-                <span>Add Category</span>
-              </>
-            )}
-          </button>
+          {/* Close Button */}
           <button
             type="button"
             onClick={(e) => {
@@ -148,14 +102,99 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
               e.stopPropagation();
               onClose();
             }}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
             disabled={creating}
-            className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
           >
-            Cancel
+            <X className="w-5 h-5" />
           </button>
+
+          {/* Header */}
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold text-gray-900">Add New Category</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Create a new category for your products
+            </p>
+          </div>
+
+          {/* Form */}
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="category-name"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Category Name *
+              </label>
+              <input
+                id="category-name"
+                type="text"
+                value={categoryName}
+                onChange={(e) => {
+                  setCategoryName(e.target.value);
+                  setError(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleSubmit(e);
+                  }
+                }}
+                placeholder="e.g., T-Shirts, Summer, Women..."
+                className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange outline-none transition-colors"
+                disabled={creating || success}
+                autoFocus
+              />
+              {error && (
+                <p className="mt-1.5 text-xs text-red-600">{error}</p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSubmit(e);
+                }}
+                disabled={creating || success || !categoryName.trim()}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium bg-orange text-white rounded-lg hover:bg-orange/90 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                {creating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Creating...</span>
+                  </>
+                ) : success ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Created!</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    <span>Add Category</span>
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onClose();
+                }}
+                disabled={creating}
+                className="px-4 py-2.5 text-sm font-medium border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

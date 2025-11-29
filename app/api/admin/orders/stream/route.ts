@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/adminAuth";
 import { createSSEStream } from "@/lib/sse";
 import { randomUUID } from "crypto";
@@ -7,8 +6,7 @@ import { randomUUID } from "crypto";
  * GET: Server-Sent Events endpoint for real-time order updates
  * Only accessible by admins
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     // Check admin access
     const session = await requireAdmin();

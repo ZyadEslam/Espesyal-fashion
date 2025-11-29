@@ -1,12 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import Product from "@/app/models/product";
+import Category from "@/app/models/category";
 import connectDB from "@/app/utils/db";
+import { sanitizeVariants } from "@/app/utils/variantUtils";
 
 const POST = async (req: NextRequest) => {
   try {
     await connectDB();
     const productData = await req.json();
     console.log("Received product data:", productData);
+
+    if (productData.variants) {
+      productData.variants = sanitizeVariants(productData.variants);
+    }
+
+    // If category is provided but categoryName is not, fetch it from the category
+    if (productData.category && !productData.categoryName) {
+      const category = await Category.findById(productData.category);
+      if (category) {
+        productData.categoryName = category.name;
+      }
+    }
+
+    // Set default hideFromHome if not provided
+    if (productData.hideFromHome === undefined || productData.hideFromHome === null) {
+      productData.hideFromHome = false;
+    }
 
     const product = await Product.create(productData);
 
@@ -28,8 +47,10 @@ const GET = async () => {
     await connectDB();
     // Only select the fields we need for the product list
     const products = await Product.find()
-      .select("name description price oldPrice discount rating brand category categoryName imgSrc createdAt updatedAt")
-      .lean()
+      .select(
+        "name description price oldPrice discount rating brand category categoryName imgSrc hideFromHome variants createdAt updatedAt totalStock"
+      )
+      .lean({ virtuals: true })
       .exec();
     
     console.log(`Fetched ${products.length} products from the database.`);
@@ -41,6 +62,8 @@ const GET = async () => {
       // Replace image buffers with image count
       productObj.imageCount = productObj.imgSrc?.length || 0;
       delete productObj.imgSrc;
+      // Ensure hideFromHome is set (default to false)
+      productObj.hideFromHome = productObj.hideFromHome ?? false;
       return productObj;
     });
 

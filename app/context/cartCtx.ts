@@ -9,11 +9,11 @@ export interface CartContextProps {
   calculateTotals: () => void; // Changed: no parameters needed
   setCart: React.Dispatch<React.SetStateAction<ProductCardProps[]>>;
   addToCart: (product: ProductCardProps) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeFromCart: (productId: string, variantId?: string) => void;
+  updateQuantity: (productId: string, variantId: string | undefined, quantity: number) => void;
   clearCart: () => void;
   getCartItemCount: () => number;
-  isInCart: (productId: string) => boolean;
+  isInCart: (productId: string, variantId?: string) => boolean;
   manualSync: () => Promise<void>;
   removeUserCart: () => void;
 }
