@@ -237,12 +237,12 @@ export async function cachedFetchJson<T = unknown>(
 
   if (!response.ok) {
     let errorMessage = `HTTP ${response.status}`;
-    let errorDetails: any = {};
 
     try {
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
-        errorDetails = await response.json();
+        const errorDetails: { message?: string; error?: string } =
+          await response.json();
         errorMessage =
           errorDetails.message || errorDetails.error || errorMessage;
       } else {

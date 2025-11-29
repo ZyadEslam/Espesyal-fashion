@@ -61,7 +61,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-mono: var(--font-outfit400);
-  --font-brand: "Playfair Display", serif;
+  /* --font-brand is set by Next.js font loader in layout.tsx */
 }
 
 body {
