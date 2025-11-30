@@ -116,12 +116,14 @@ const UserNav = memo(() => {
 
   return (
     <nav
-      className={`sticky top-0 z-[100] transition-all duration-300 ${
+      className={`sticky top-0 transition-all duration-300 ${
         isDashboard
-          ? "bg-background backdrop-blur-md shadow-sm border-b border-black/20"
-          : isScrolled
-          ? "bg-background backdrop-blur-md shadow-sm border-b border-black/20"
-          : "bg-background border-b border-black/20"
+          ? "z-40 bg-background backdrop-blur-md shadow-sm border-b border-black/20"
+          : `z-[100] ${
+              isScrolled
+                ? "bg-background backdrop-blur-md shadow-sm border-b border-black/20"
+                : "bg-background border-b border-black/20"
+            }`
       }`}
     >
       <div className={`container mx-auto px-4 max-w-7xl`}>

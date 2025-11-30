@@ -159,18 +159,42 @@ export async function POST(req: Request) {
         }
 
         if (productDoc.variants?.length) {
-          if (!item.variantId) {
-            throw new Error("Missing variant selection for a product.");
+          let variantSubdoc = null;
+
+          // First, try to find variant by variantId if provided
+          if (item.variantId) {
+            variantSubdoc = productDoc.variants.id(item.variantId);
           }
-          const variantSubdoc = productDoc.variants.id(item.variantId);
-          if (!variantSubdoc) {
-            throw new Error("Selected variant no longer exists.");
-          }
-          if (variantSubdoc.quantity < item.quantity) {
-            throw new Error(
-              `Insufficient stock for ${productDoc.name} (${variantSubdoc.color} ${variantSubdoc.size}).`
+
+          // If variantId not found or not provided, try to find by size and color
+          if (!variantSubdoc && (item.size || item.color)) {
+            variantSubdoc = productDoc.variants.find(
+              (v: { size: string; color: string }) => {
+                const sizeMatch = item.size ? v.size === item.size : true;
+                const colorMatch = item.color ? v.color === item.color : true;
+                return sizeMatch && colorMatch;
+              }
             );
           }
+
+          // If still not found, throw error
+          if (!variantSubdoc) {
+            throw new Error(
+              `Missing or invalid variant selection for product "${productDoc.name}". Please ensure you've selected a valid size and color combination.`
+            );
+          }
+
+          // Check stock availability
+          if (variantSubdoc.quantity < item.quantity) {
+            throw new Error(
+              `Insufficient stock for ${productDoc.name} (${variantSubdoc.color} ${variantSubdoc.size}). Available: ${variantSubdoc.quantity}, Requested: ${item.quantity}`
+            );
+          }
+
+          // Update the item with the found variantId for consistency
+          item.variantId = variantSubdoc._id;
+
+          // Deduct stock
           variantSubdoc.quantity -= item.quantity;
         } else {
           // If no variants exist, we currently allow the order without stock checks.

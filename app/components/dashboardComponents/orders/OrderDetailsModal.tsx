@@ -1,8 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { Loader2, CheckCircle2, X } from "lucide-react";
-import { Order, OrderFormData } from "@/app/types/orders";
+import { Order, OrderFormData, OrderProduct } from "@/app/types/orders";
 import { formatOrderFullDate, formatPrice } from "@/app/utils/orderUtils";
 
 interface OrderDetailsModalProps {
@@ -203,37 +202,105 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 </div>
               )}
 
-              {/* Products */}
+              {/* Products - Preparation View */}
               {displayOrder.products && displayOrder.products.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    Products
+                  <h3 className="text-sm font-medium text-gray-500 mb-3">
+                    Products to Prepare
                   </h3>
-                  <div className="space-y-2">
-                    {displayOrder.products.map((product, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-4 bg-gray-50 rounded-lg p-4"
-                      >
-                        {product.images && product.images[0] && (
-                          <Image
-                            src={product.images[0]}
-                            alt={product.name}
-                            width={64}
-                            height={64}
-                            className="w-16 h-16 object-cover rounded"
-                          />
-                        )}
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-900">
-                            {product.name}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {formatPrice(product.price)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    {displayOrder.products.map(
+                      (
+                        product: OrderProduct & {
+                          quantity?: number;
+                          size?: string;
+                          color?: string;
+                          sku?: string;
+                        },
+                        idx: number
+                      ) => {
+                        const quantity = product.quantity || 1;
+                        const size = product.size;
+                        const color = product.color;
+                        const sku = product.sku;
+                        const itemPrice = product.price || 0;
+                        const totalItemPrice = itemPrice * quantity;
+
+                        return (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                          >
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-1 min-w-0">
+                                {/* Product Name */}
+                                <p className="font-semibold text-gray-900 text-base mb-2">
+                                  {product.name}
+                                </p>
+
+                                {/* Quantity - Prominently displayed */}
+                                <div className="flex items-center gap-4 flex-wrap mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-medium text-gray-500 uppercase">
+                                      Qty:
+                                    </span>
+                                    <span className="px-3 py-1 bg-orange/10 text-orange font-bold text-lg rounded-md border border-orange/20">
+                                      {quantity}
+                                    </span>
+                                  </div>
+
+                                  {/* Size */}
+                                  {size && (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-medium text-gray-500 uppercase">
+                                        Size:
+                                      </span>
+                                      <span className="px-2 py-1 bg-gray-200 text-gray-800 font-medium text-sm rounded">
+                                        {size}
+                                      </span>
+                                    </div>
+                                  )}
+
+                                  {/* Color */}
+                                  {color && (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-medium text-gray-500 uppercase">
+                                        Color:
+                                      </span>
+                                      <span className="px-2 py-1 bg-gray-200 text-gray-800 font-medium text-sm rounded">
+                                        {color}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* SKU */}
+                                {sku && (
+                                  <div className="mb-2">
+                                    <span className="text-xs font-medium text-gray-500 uppercase">
+                                      SKU:
+                                    </span>
+                                    <span className="ml-2 text-sm font-mono text-gray-700">
+                                      {sku}
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* Price */}
+                                <div className="flex items-center gap-2 mt-2">
+                                  <span className="text-sm text-gray-600">
+                                    {formatPrice(itemPrice)} × {quantity} =
+                                  </span>
+                                  <span className="font-semibold text-gray-900">
+                                    {formatPrice(totalItemPrice)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                    )}
                   </div>
                 </div>
               )}

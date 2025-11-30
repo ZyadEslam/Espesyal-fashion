@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   FolderTree,
+  Home,
 } from "lucide-react";
 import { cachedFetch } from "@/app/utils/cachedFetch";
 import { useLocale } from "next-intl";
@@ -52,6 +53,12 @@ const sideNavLinks = [
     icon: Users,
     label: "Admin Management",
     labelAr: "إدارة المشرفين",
+  },
+  {
+    href: "/dashboard/hero-section",
+    icon: Home,
+    label: "Hero Section",
+    labelAr: "قسم البطل",
   },
 ];
 

@@ -53,7 +53,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
         select: "name phone address city state",
       })
       .populate({
-        path: "products",
+        path: "products.product",
         select: "name price images",
       })
       .lean();
@@ -65,6 +65,41 @@ export async function GET(_req: NextRequest, { params }: Params) {
     // Format order response to match expected structure
     // Convert through unknown first to handle Mongoose type mismatch
     const orderTyped = order as unknown as OrderWithPopulated;
+
+    // Format products with order item details (quantity, size, color, sku)
+    type OrderItem = {
+      product?: {
+        _id?: { toString: () => string };
+        name?: string;
+        price?: number;
+        images?: unknown[];
+      };
+      _id?: { toString: () => string };
+      price?: number;
+      quantity?: number;
+      size?: string;
+      color?: string;
+      sku?: string;
+      variantId?: { toString: () => string };
+    };
+
+    const formattedProducts = ((orderTyped.products || []) as OrderItem[]).map(
+      (item: OrderItem) => {
+        const product = item.product;
+        return {
+          _id: product?._id?.toString() || item._id?.toString(),
+          name: product?.name || "Unknown Product",
+          price: item.price || product?.price || 0,
+          quantity: item.quantity || 1,
+          size: item.size || null,
+          color: item.color || null,
+          sku: item.sku || null,
+          variantId: item.variantId?.toString() || null,
+          images: product?.images || [],
+        };
+      }
+    );
+
     const formattedOrder = {
       _id: orderTyped._id.toString(),
       orderNumber: orderTyped._id.toString().slice(-8).toUpperCase(),
@@ -77,7 +112,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       userName: orderTyped.userId?.name || "Unknown",
       userEmail: orderTyped.userId?.email || "Unknown",
       address: orderTyped.addressId, // Map addressId to address
-      products: orderTyped.products || [],
+      products: formattedProducts,
       trackingNumber: orderTyped.trackingNumber,
       estimatedDeliveryDate: orderTyped.estimatedDeliveryDate,
       shippedDate: orderTyped.shippedDate,
@@ -183,7 +218,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         select: "name phone address city state",
       })
       .populate({
-        path: "products",
+        path: "products.product",
         select: "name price images",
       })
       .lean();
@@ -202,6 +237,40 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       updatedAt: new Date().toISOString(),
     });
 
+    // Format products with order item details (quantity, size, color, sku)
+    type OrderItem = {
+      product?: {
+        _id?: { toString: () => string };
+        name?: string;
+        price?: number;
+        images?: unknown[];
+      };
+      _id?: { toString: () => string };
+      price?: number;
+      quantity?: number;
+      size?: string;
+      color?: string;
+      sku?: string;
+      variantId?: { toString: () => string };
+    };
+
+    const formattedProducts = ((orderTyped.products || []) as OrderItem[]).map(
+      (item: OrderItem) => {
+        const product = item.product;
+        return {
+          _id: product?._id?.toString() || item._id?.toString(),
+          name: product?.name || "Unknown Product",
+          price: item.price || product?.price || 0,
+          quantity: item.quantity || 1,
+          size: item.size || null,
+          color: item.color || null,
+          sku: item.sku || null,
+          variantId: item.variantId?.toString() || null,
+          images: product?.images || [],
+        };
+      }
+    );
+
     // Format order response to match expected structure
     const formattedOrder = {
       _id: orderTyped._id.toString(),
@@ -215,7 +284,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       userName: orderTyped.userId?.name || "Unknown",
       userEmail: orderTyped.userId?.email || "Unknown",
       address: orderTyped.addressId, // Map addressId to address
-      products: orderTyped.products || [],
+      products: formattedProducts,
       trackingNumber: orderTyped.trackingNumber,
       estimatedDeliveryDate: orderTyped.estimatedDeliveryDate,
       shippedDate: orderTyped.shippedDate,

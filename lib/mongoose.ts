@@ -16,13 +16,16 @@ const registerModels = async () => {
     await import("../app/models/user");
   }
   if (!mongoose.models.Product) {
-    await import("../app/models/product");  
+    await import("../app/models/product");
   }
   if (!mongoose.models.Order) {
     await import("../app/models/order");
   }
   if (!mongoose.models.Address) {
     await import("../app/models/address");
+  }
+  if (!mongoose.models.HeroSection) {
+    await import("../app/models/heroSection");
   }
 };
 
@@ -45,12 +48,12 @@ async function dbConnect(): Promise<typeof mongoose> {
     await registerModels();
     return cachedMongoose.conn;
   }
-  
+
   if (!cachedMongoose.promise) {
     const opts = {
       bufferCommands: false,
     };
-    
+
     cachedMongoose.promise = mongoose
       .connect(MONGODB_URI, opts)
       .then(async (mongoose) => {
@@ -58,14 +61,14 @@ async function dbConnect(): Promise<typeof mongoose> {
         return mongoose;
       });
   }
-  
+
   try {
     cachedMongoose.conn = await cachedMongoose.promise;
   } catch (e) {
     cachedMongoose.promise = null;
     throw e;
   }
-  
+
   return cachedMongoose.conn;
 }
 

@@ -1,15 +1,50 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Copy, Check, Sparkles } from "lucide-react";
+
+interface HeroContent {
+  heroBadge: string;
+  largestSale: string;
+  useCode: string;
+  forDiscount: string;
+  promoCode: string;
+}
 
 const HeroSection = () => {
   const t = useTranslations("home");
+  const locale = useLocale();
   const [copied, setCopied] = useState(false);
+  const [heroContent, setHeroContent] = useState<HeroContent | null>(null);
+
+  // Fetch hero content from API
+  useEffect(() => {
+    const fetchHeroContent = async () => {
+      try {
+        const response = await fetch(`/api/hero-section?locale=${locale}`);
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          setHeroContent(result.data);
+        }
+      } catch (error) {
+        console.error("Error fetching hero section:", error);
+      }
+    };
+
+    fetchHeroContent();
+  }, [locale]);
+
+  // Use API content if available, otherwise fallback to translations
+  const heroBadge = heroContent?.heroBadge || t("heroBadge");
+  const largestSale = heroContent?.largestSale || t("largestSale");
+  const useCode = heroContent?.useCode || t("useCode");
+  const forDiscount = heroContent?.forDiscount || t("forDiscount");
+  const promoCode = heroContent?.promoCode || "BFRIDAY";
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText("BFRIDAY");
+    navigator.clipboard.writeText(promoCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -74,7 +109,7 @@ const HeroSection = () => {
           className="mb-3 md:mb-4"
         >
           <span className="inline-flex items-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight uppercase drop-shadow-lg">
-            {t("heroBadge")} !!!
+            {heroBadge} !!!
           </span>
         </motion.div>
 
@@ -85,7 +120,7 @@ const HeroSection = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-4 md:mb-6 leading-tight px-2 drop-shadow-md max-w-3xl"
         >
-          {t("largestSale")}
+          {largestSale}
         </motion.h1>
 
         {/* Promo Code Badge */}
@@ -97,11 +132,11 @@ const HeroSection = () => {
         >
           <div className="inline-flex flex-wrap items-center justify-center gap-2 md:gap-3 bg-white/95 backdrop-blur-sm px-4 md:px-6 py-2.5 md:py-3 rounded-full shadow-xl border-2 border-white/50">
             <span className=" font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">
-              {t("useCode")}
+              {useCode}
             </span>
             <div className="flex items-center gap-1 md:gap-2">
               <code className=" text-black px-2 md:px-3 py-1 rounded-lg font-bold text-sm sm:text-base md:text-lg tracking-wider ">
-                BFRIDAY
+                {promoCode}
               </code>
               <button
                 onClick={handleCopyCode}
@@ -117,7 +152,7 @@ const HeroSection = () => {
               </button>
             </div>
             <span className=" font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">
-              {t("forDiscount")}
+              {forDiscount}
             </span>
           </div>
         </motion.div>
