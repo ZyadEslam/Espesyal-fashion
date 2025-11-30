@@ -153,7 +153,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                   viewport={{ once: true }}
                   className="category-card w-[calc(50vw-1.5rem)] min-w-[220px] max-w-[260px] sm:w-60 md:w-64 lg:w-72 flex-shrink-0 snap-start"
                 >
-                  <ProductCard product={product} />
+                  <ProductCard product={product} showCartButton={false} />
                 </motion.div>
               ))}
             </div>

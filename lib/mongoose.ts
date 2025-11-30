@@ -27,6 +27,9 @@ const registerModels = async () => {
   if (!mongoose.models.HeroSection) {
     await import("../app/models/heroSection");
   }
+  if (!mongoose.models.Settings) {
+    await import("../app/models/settings");
+  }
 };
 
 let cached = global.mongoose as

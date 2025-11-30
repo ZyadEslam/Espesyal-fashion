@@ -1,5 +1,5 @@
 "use client";
-import React, { memo } from "react";
+import React, { memo, useState, useEffect } from "react";
 import OrderForm from "./OrderForm";
 import { useCart } from "@/app/hooks/useCart";
 import { useTranslations } from "next-intl";
@@ -14,6 +14,27 @@ const OrderSummary = memo(() => {
   const tCheckout = useTranslations("checkout");
   const { status } = useSession();
   const locale = useLocale();
+  const [shippingFee, setShippingFee] = useState<number>(0);
+
+  // Fetch shipping fee on component mount
+  useEffect(() => {
+    const fetchShippingFee = async () => {
+      try {
+        const response = await fetch("/api/settings");
+        const result = await response.json();
+        if (result.success) {
+          setShippingFee(result.shippingFee || 0);
+        }
+      } catch (error) {
+        console.error("Error fetching shipping fee:", error);
+        setShippingFee(0);
+      }
+    };
+    fetchShippingFee();
+  }, []);
+
+  // Calculate total with shipping
+  const totalWithShipping = totalPrice + shippingFee;
 
   const handleSignIn = async () => {
     try {
@@ -63,7 +84,9 @@ const OrderSummary = memo(() => {
           <div className="flex justify-between items-center py-2">
             <span className="text-gray-600">{tCheckout("shipping")}</span>
             <span className="font-semibold text-green-600">
-              {tCart("freeShipping")}
+              {shippingFee > 0
+                ? `$${shippingFee.toFixed(2)}`
+                : tCart("freeShipping")}
             </span>
           </div>
 
@@ -74,7 +97,7 @@ const OrderSummary = memo(() => {
               {tCart("total")}
             </span>
             <span className="text-xl font-bold text-gray-900">
-              ${totalPrice.toFixed(2)}
+              ${totalWithShipping.toFixed(2)}
             </span>
           </div>
         </div>

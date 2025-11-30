@@ -13,6 +13,7 @@ import {
   X,
   FolderTree,
   Home,
+  Truck,
 } from "lucide-react";
 import { cachedFetch } from "@/app/utils/cachedFetch";
 import { useLocale } from "next-intl";
@@ -59,6 +60,12 @@ const sideNavLinks = [
     icon: Home,
     label: "Hero Section",
     labelAr: "قسم البطل",
+  },
+  {
+    href: "/dashboard/shipping-settings",
+    icon: Truck,
+    label: "Shipping Settings",
+    labelAr: "إعدادات الشحن",
   },
 ];
 

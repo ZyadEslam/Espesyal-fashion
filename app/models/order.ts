@@ -55,7 +55,8 @@ const orderSchema = new mongoose.Schema({
     default: [],
     validate: [
       {
-        validator: (items: unknown[]) => Array.isArray(items) && items.length > 0,
+        validator: (items: unknown[]) =>
+          Array.isArray(items) && items.length > 0,
         message: "Order must include at least one product",
       },
     ],
@@ -73,7 +74,7 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
     required: [true, "Order State is required"],
-    default: "Pending"
+    default: "Pending",
   },
   promoCode: {
     type: String,
@@ -117,6 +118,12 @@ const orderSchema = new mongoose.Schema({
   deliveredDate: {
     type: Date,
     required: false,
+  },
+  shippingFee: {
+    type: Number,
+    required: false,
+    default: 0,
+    min: [0, "Shipping fee cannot be negative"],
   },
 });
 

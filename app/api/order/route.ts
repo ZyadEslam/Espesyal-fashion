@@ -119,6 +119,7 @@ export async function POST(req: Request) {
       discountPercentage,
       paymentMethod,
       stripePaymentIntentId,
+      shippingFee,
     } = await req.json();
     if (
       !userId ||
@@ -224,6 +225,7 @@ export async function POST(req: Request) {
           discountPercentage: +discountPercentage,
         }),
         ...(stripePaymentIntentId && { stripePaymentIntentId }),
+        ...(shippingFee !== undefined && { shippingFee: +shippingFee }),
       });
       await newOrder.save({ session });
 

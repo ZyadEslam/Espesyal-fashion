@@ -38,6 +38,7 @@ interface CheckoutData {
   discountAmount: number;
   discountPercentage: number;
   subtotal: number;
+  shippingFee?: number;
 }
 
 const CheckoutPage = () => {
@@ -99,6 +100,9 @@ const CheckoutPage = () => {
         }),
         ...(checkoutData.discountPercentage && {
           discountPercentage: checkoutData.discountPercentage,
+        }),
+        ...(checkoutData.shippingFee !== undefined && {
+          shippingFee: checkoutData.shippingFee,
         }),
       };
 
@@ -162,6 +166,9 @@ const CheckoutPage = () => {
         }),
         ...(checkoutData.discountPercentage && {
           discountPercentage: checkoutData.discountPercentage,
+        }),
+        ...(checkoutData.shippingFee !== undefined && {
+          shippingFee: checkoutData.shippingFee,
         }),
       };
 
@@ -380,7 +387,11 @@ const CheckoutPage = () => {
 
                   <div className="flex justify-between">
                     <span className="text-gray-600">{t("shipping")}</span>
-                    <span className="font-semibold text-green-600">Free</span>
+                    <span className="font-semibold text-green-600">
+                      {checkoutData.shippingFee && checkoutData.shippingFee > 0
+                        ? `$${checkoutData.shippingFee.toFixed(2)}`
+                        : "Free"}
+                    </span>
                   </div>
 
                   {checkoutData.promoCode &&

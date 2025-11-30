@@ -406,7 +406,8 @@
         "productList": "Products List",
         "orders": "Orders",
         "promoCodes": "Promo Codes",
-        "adminManagement": "Admin Management"
+        "adminManagement": "Admin Management",
+        "shippingSettings": "Shipping Settings"
       }
     },
     "addProduct": {
@@ -543,6 +544,16 @@
         "successDelete": "Promo code deleted successfully",
         "error": "An error occurred, please try again"
       }
+    },
+    "shippingSettings": {
+      "title": "Shipping Settings",
+      "subtitle": "Manage shipping fees for orders",
+      "currentShippingFee": "Current Shipping Fee",
+      "shippingFeeHint": "Set the shipping fee that will be applied to all orders. Set to 0 for free shipping.",
+      "updateButton": "Update Shipping Fee",
+      "updating": "Updating...",
+      "updateSuccess": "Shipping fee updated successfully",
+      "updateError": "Failed to update shipping fee. Please try again."
     },
     "adminManagement": {
       "title": "Admin Management",

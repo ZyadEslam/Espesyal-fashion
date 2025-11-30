@@ -1,16 +1,19 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import RatingStars from "../RatingStars";
 import Toast from "../../UI/Toast";
 import { ProductCardProps } from "../../types/types";
 import { Plus, Minus, ShoppingCart, Check, Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 import { useCart } from "../../hooks/useCart";
 
 const ProductDetails = ({ data }: { data: ProductCardProps }) => {
   const { addToCart, removeFromCart, isInCart } = useCart();
   const t = useTranslations("product");
+  const router = useRouter();
+  const locale = useLocale();
   const [showToast, setShowToast] = useState({ show: false, message: "" });
   const [isAdding, setIsAdding] = useState(false);
 
@@ -116,6 +119,13 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
           quantityInCart: quantity,
         });
         handleShowToast(true, t("addedToCart"));
+        setIsAdding(false);
+
+        // Wait 2 seconds then redirect to cart
+        setTimeout(() => {
+          router.push(`/${locale}/cart`);
+        }, 2000);
+        return;
       } else {
         removeFromCart(data._id as string, selectedVariant._id);
         handleShowToast(true, t("removedFromCart"));
@@ -132,6 +142,13 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
         maxAvailable: data.totalStock,
       });
       handleShowToast(true, t("addedToCart"));
+      setIsAdding(false);
+
+      // Wait 2 seconds then redirect to cart
+      setTimeout(() => {
+        router.push(`/${locale}/cart`);
+      }, 2000);
+      return;
     } else {
       removeFromCart(data._id as string);
       handleShowToast(true, t("removedFromCart"));

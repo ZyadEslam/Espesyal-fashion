@@ -23,6 +23,9 @@ const OrderForm = () => {
   const [promoError, setPromoError] = useState("");
   const [validatingPromo, setValidatingPromo] = useState(false);
 
+  // Shipping fee state
+  const [shippingFee, setShippingFee] = useState<number>(0);
+
   const isOrderValidToPlace =
     selectedAddress && cart.length > 0 && session.status === "authenticated";
 
@@ -32,11 +35,29 @@ const OrderForm = () => {
     }, 0);
   }, [cart]);
 
-  // Calculate final price with discount
+  // Fetch shipping fee on component mount
+  useEffect(() => {
+    const fetchShippingFee = async () => {
+      try {
+        const response = await fetch("/api/settings");
+        const result = await response.json();
+        if (result.success) {
+          setShippingFee(result.shippingFee || 0);
+        }
+      } catch (error) {
+        console.error("Error fetching shipping fee:", error);
+        setShippingFee(0);
+      }
+    };
+    fetchShippingFee();
+  }, []);
+
+  // Calculate final price with discount and shipping
   const finalPrice = useMemo(() => {
     const subtotal = totalPrice;
-    return Math.max(subtotal - discountAmount, 0);
-  }, [totalPrice, discountAmount]);
+    const discountedPrice = Math.max(subtotal - discountAmount, 0);
+    return discountedPrice + shippingFee;
+  }, [totalPrice, discountAmount, shippingFee]);
 
   useEffect(() => {
     // Recalculate discount when total price or percentage changes
@@ -116,6 +137,7 @@ const OrderForm = () => {
       discountAmount: discountAmount,
       discountPercentage: discountPercentage,
       subtotal: totalPrice,
+      shippingFee: shippingFee,
     };
 
     sessionStorage.setItem("checkoutData", JSON.stringify(orderData));
@@ -200,7 +222,11 @@ const OrderForm = () => {
         </div>
         <div className="flex justify-between">
           <p className="text-gray-500">{tCart("shippingFee")}</p>
-          <p>{tCart("freeShipping")}</p>
+          <p>
+            {shippingFee > 0
+              ? `$${shippingFee.toFixed(2)}`
+              : tCart("freeShipping")}
+          </p>
         </div>
         {appliedPromoCode && discountAmount > 0 && (
           <div className="flex justify-between text-green-600">

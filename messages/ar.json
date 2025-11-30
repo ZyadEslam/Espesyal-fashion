@@ -403,7 +403,8 @@
         "productList": "قائمة المنتجات",
         "orders": "الطلبات",
         "promoCodes": "أكواد الخصم",
-        "adminManagement": "إدارة المشرفين"
+        "adminManagement": "إدارة المشرفين",
+        "shippingSettings": "إعدادات الشحن"
       }
     },
     "addProduct": {
@@ -539,6 +540,16 @@
         "successDelete": "تم حذف الكود بنجاح",
         "error": "حدث خطأ، يرجى المحاولة مرة أخرى"
       }
+    },
+    "shippingSettings": {
+      "title": "إعدادات الشحن",
+      "subtitle": "إدارة رسوم الشحن للطلبات",
+      "currentShippingFee": "رسوم الشحن الحالية",
+      "shippingFeeHint": "قم بتعيين رسوم الشحن التي سيتم تطبيقها على جميع الطلبات. اضبط على 0 للشحن المجاني.",
+      "updateButton": "تحديث رسوم الشحن",
+      "updating": "جاري التحديث...",
+      "updateSuccess": "تم تحديث رسوم الشحن بنجاح",
+      "updateError": "فشل تحديث رسوم الشحن. يرجى المحاولة مرة أخرى."
     },
     "adminManagement": {
       "title": "إدارة المشرفين",
