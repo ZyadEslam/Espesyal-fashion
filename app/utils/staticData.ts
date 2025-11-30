@@ -1,28 +1,27 @@
-
 export const team = [
   {
-    name: "Zyad Elbehiry",
+    name: "Taghreed Elsayed",
     role: "Founder & CEO",
     description: "Visionary leader with 10+ years in e-commerce",
-    image: "/downloaded/profileWhiteCover.jpg",
+    image: "/espesyal/product6.jpg",
   },
   {
-    name: "Zyad Eslam",
+    name: "Taghreed Elsayed",
     role: "CTO",
     description: "Tech innovator passionate about user experience",
-    image: "/downloaded/profileYellowCover.jpg",
+    image: "/espesyal/product7.jpg",
   },
   {
-    name: "Zyad Eslam",
+    name: "Taghreed Elsayed",
     role: "Head of Design",
     description: "Award-winning designer with an eye for detail",
-    image: "/downloaded/profileYellowCover.jpg",
+    image: "/espesyal/product8.jpg",
   },
   {
-    name: "Zyad Elbehiry",
+    name: "Taghreed Elsayed",
     role: "Customer Success",
     description: "Dedicated to ensuring customer satisfaction",
-    image: "/downloaded/profileWhiteCover.jpg",
+    image: "/espesyal/product9.jpg",
   },
 ];
 

@@ -8,6 +8,8 @@ import {
   generateCanonicalUrl,
 } from "@/app/utils/seo";
 import { ProductSchema, Breadcrumb } from "@/app/components/seo/SEOComponents";
+import { getTranslations } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 
 const ProductImagesSlider = lazy(
   () => import("../../../components/productComponents/ProductImagesSlider")
@@ -17,7 +19,7 @@ const ProductDetails = lazy(
 );
 
 type Props = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
@@ -72,7 +74,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const resolvedParams = await params;
-  const { id } = resolvedParams;
+  const { id, locale } = resolvedParams;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: "product" });
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+  const tCommon = await getTranslations({ locale, namespace: "common" });
 
   let product: ProductCardProps | null = null;
   let error: string | null = null;
@@ -98,7 +104,7 @@ export default async function ProductPage({ params }: Props) {
     return (
       <div className="w-full px-4 sm:px-[5%] md:px-[8.5%] py-4 sm:py-6 md:py-8">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          Error: {error}
+          {tCommon("errorLabel")} {error}
         </div>
       </div>
     );
@@ -109,11 +115,9 @@ export default async function ProductPage({ params }: Props) {
       <div className="w-full px-4 sm:px-[5%] md:px-[8.5%] py-4 sm:py-6 md:py-8">
         <div className="text-center py-12">
           <h1 className="text-2xl font-bold text-gray-900">
-            Product not found
+            {tCommon("productNotFound")}
           </h1>
-          <p className="mt-2 text-gray-600">
-            The product you are looking for does not exist.
-          </p>
+          <p className="mt-2 text-gray-600">{tCommon("productNotFoundDesc")}</p>
         </div>
       </div>
     );
@@ -128,15 +132,15 @@ export default async function ProductPage({ params }: Props) {
     ) || [];
 
   const breadcrumbItems = [
-    { name: "Home", url: "/" },
-    { name: "Shop", url: "/shop" },
+    { name: tNav("home"), url: `/${locale}` },
+    { name: tNav("shop"), url: `/${locale}/shop` },
     {
-      name: product.categoryName || "Category",
-      url: `/shop?category=${
+      name: product.categoryName || t("category"),
+      url: `/${locale}/shop?category=${
         product.categoryName?.toLowerCase() || "category"
       }`,
     },
-    { name: product.name, url: `/product/${id}`, current: true },
+    { name: product.name, url: `/${locale}/product/${id}`, current: true },
   ];
 
   const productSEOData = {

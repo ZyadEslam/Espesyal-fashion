@@ -2,7 +2,10 @@
   "common": {
     "loading": "Loading...",
     "error": "Error",
+    "errorLabel": "Error:",
     "success": "Success",
+    "productNotFound": "Product not found",
+    "productNotFoundDesc": "The product you are looking for does not exist.",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -47,7 +50,9 @@
     "signIn": "Sign In",
     "signOut": "Sign Out",
     "myAccount": "My Account",
-    "menu": "Menu"
+    "menu": "Menu",
+    "exitDashboard": "Exit Dashboard",
+    "shoppingCart": "Shopping Cart"
   },
   "shop": {
     "title": "Shop",
@@ -72,6 +77,13 @@
   },
   "product": {
     "addToCart": "Add to Cart",
+    "removeFromCart": "Remove From Cart",
+    "adding": "Adding...",
+    "addedToCart": "Added To Cart",
+    "removedFromCart": "Removed From Cart",
+    "addedToCartShort": "Added to cart",
+    "removedFromCartShort": "Removed from cart",
+    "selectSizeColor": "Select size & color to add this item",
     "viewDetails": "View Details",
     "description": "Description",
     "specifications": "Specifications",
@@ -79,7 +91,14 @@
     "rating": "Rating",
     "inStock": "In Stock",
     "outOfStock": "Out of Stock",
-    "quickView": "Quick View"
+    "quickView": "Quick View",
+    "selectedOptions": "Selected Options",
+    "size": "Size",
+    "color": "Color",
+    "quantity": "Quantity",
+    "brand": "Brand",
+    "category": "Category",
+    "itemsAvailable": "items available"
   },
   "cart": {
     "title": "Shopping Cart",
@@ -115,6 +134,11 @@
     "loginToOrder": "Please login to place orders",
     "cartEmptyShort": "Cart is empty",
     "promoRemove": "Remove promo code",
+    "signInToSave": "Sign in to save your addresses, track orders, and enjoy",
+    "signInWithGoogle": "Sign in with Google",
+    "unlockExclusiveBenefits": "Unlock Exclusive Benefits",
+    "fasterCheckout": "faster checkout!",
+    "quickSecure": "Quick & secure • No password needed",
     "table": {
       "productDetails": "Product Details",
       "quantity": "Quantity",
@@ -199,7 +223,19 @@
     "getInTouch": "Get in touch",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
-    "copyright": "Copyright 2025 © Zyad Elbehiry All Right Reserved."
+    "copyright": "Copyright 2025 © Zyad Elbehiry All Right Reserved.",
+    "links": "Links",
+    "services": "Services",
+    "fastShipping": "Fast Shipping & Easy Returns",
+    "styleAdvice": "Personalized Style Advice",
+    "giftCards": "Gift Cards & Vouchers",
+    "sizeGuide": "Comprehensive Size Guide",
+    "orderTracking": "Real-Time Order Tracking",
+    "loyaltyProgram": "Reward Points & Loyalty Program",
+    "customerSupport": "Customer Support",
+    "paymentMethods": "Payment Methods",
+    "cashOnDelivery": "Cash on Delivery",
+    "allRightsReserved": "All rights reserved."
   },
   "home": {
     "allProducts": "All Products",
@@ -290,7 +326,11 @@
     "contactUs": {
       "title": "Join Our Journey",
       "description": "We're always looking for passionate individuals to join our team and help shape the future of e-commerce.",
-      "button": "Contact Us"
+      "button": "Contact Us",
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "whatsapp": "WhatsApp",
+      "followUsOn": "Follow us on"
     }
   },
   "contact": {
@@ -388,7 +428,10 @@
       "discountLabel": "Discount",
       "ratingLabel": "Rating",
       "pricePlaceholder": "0.00",
-      "submit": "Add Product"
+      "submit": "Add Product",
+      "creatingProduct": "Creating product...",
+      "productCreated": "Product created successfully!",
+      "errorCreating": "Error creating product. Please try again."
     },
     "productList": {
       "title": "Products Management",

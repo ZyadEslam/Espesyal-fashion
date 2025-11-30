@@ -100,7 +100,7 @@ const OrderSummary = memo(() => {
                     Unlock Exclusive Benefits
                   </h3>
                   <p className="text-sm text-gray-600 leading-relaxed">
-                    Sign in to save your addresses, track orders, and enjoy
+                    {tCart("signInToSave")}
                     faster checkout!
                   </p>
                 </div>
@@ -109,11 +109,11 @@ const OrderSummary = memo(() => {
                 onClick={handleSignIn}
                 className="w-full mt-3 flex items-center justify-center gap-2 bg-gradient-to-r from-orange to-orange/90 hover:from-orange/90 hover:to-orange text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
               >
-                <span>Sign in with Google</span>
+                <span>{tCart("signInWithGoogle")}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               <p className="text-xs text-gray-500 text-center mt-2">
-                Quick & secure • No password needed
+                {tCart("quickSecure")}
               </p>
             </div>
           </div>

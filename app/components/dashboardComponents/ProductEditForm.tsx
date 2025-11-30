@@ -4,6 +4,7 @@ import { ProductFormData, ProductFormVariant } from "@/app/hooks/useProducts";
 import { Category } from "@/app/hooks/useProducts";
 import QuickCategoryForm from "./QuickCategoryForm";
 import ProductVariantInputs from "./ProductVariantInputs";
+import { useTranslations } from "next-intl";
 
 interface ProductEditFormProps {
   formData: ProductFormData;
@@ -24,6 +25,7 @@ const ProductEditForm: React.FC<ProductEditFormProps> = ({
   onCategoryCreated,
   submitting,
 }) => {
+  const t = useTranslations("dashboard.productList.editModal");
   const [showCategoryForm, setShowCategoryForm] = useState(false);
 
   const handleChange = <K extends keyof ProductFormData>(
@@ -52,7 +54,10 @@ const ProductEditForm: React.FC<ProductEditFormProps> = ({
     });
   };
 
-  const handleCategoryCreated = async (categoryId: string, categoryName: string) => {
+  const handleCategoryCreated = async (
+    categoryId: string,
+    categoryName: string
+  ) => {
     try {
       // Notify parent to refresh categories list first
       if (onCategoryCreated) {
@@ -227,7 +232,7 @@ const ProductEditForm: React.FC<ProductEditFormProps> = ({
             <Plus className="w-4 h-4" />
           </button>
         </div>
-        
+
         {showCategoryForm && (
           <div className="relative">
             <QuickCategoryForm
@@ -255,10 +260,10 @@ const ProductEditForm: React.FC<ProductEditFormProps> = ({
           />
           <div>
             <span className="text-sm font-medium text-gray-700">
-              Hide from home page
+              {t("hideFromHome")}
             </span>
             <p className="text-xs text-gray-500 mt-1">
-              When enabled, this product will not appear on the home page but will still be visible in category pages and search results.
+              {t("hideFromHomeDesc")}
             </p>
           </div>
         </label>
@@ -292,4 +297,3 @@ const ProductEditForm: React.FC<ProductEditFormProps> = ({
 };
 
 export default ProductEditForm;
-

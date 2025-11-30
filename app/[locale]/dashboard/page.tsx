@@ -38,6 +38,8 @@ const DashboardPage = memo(() => {
   const [variants, setVariants] = useState<ProductFormVariant[]>([
     createVariantRow(),
   ]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [formResetKey, setFormResetKey] = useState<number>(0);
 
   const handleImageChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, imageKey: string) => {
@@ -74,6 +76,22 @@ const DashboardPage = memo(() => {
     [variants]
   );
 
+  const handleFormReset = useCallback(() => {
+    // Reset images to default
+    setImages({
+      image1: assets.upload_area,
+      image2: assets.upload_area,
+      image3: assets.upload_area,
+      image4: assets.upload_area,
+    });
+    // Reset variants to one empty row
+    setVariants([createVariantRow()]);
+    // Reset category
+    setSelectedCategory("");
+    // Increment reset key to trigger file input clearing
+    setFormResetKey((prev) => prev + 1);
+  }, []);
+
   return (
     <div className="max-w-6xl ">
       <div className="mb-6 sm:mb-8">
@@ -97,11 +115,12 @@ const DashboardPage = memo(() => {
 
       <div className="bg-white rounded-lg sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="p-4 sm:p-6 lg:p-8">
-          <ProductForm>
+          <ProductForm onFormReset={handleFormReset}>
             <ImageUploader
               images={images}
               onImageChange={handleImageChange}
               onRemoveImage={removeImageHandler}
+              resetKey={formResetKey}
             />
 
             <div className="space-y-6">
@@ -134,6 +153,8 @@ const DashboardPage = memo(() => {
                   placeholder={t("categoryPlaceholder")}
                   required
                   direction={direction as "ltr" | "rtl"}
+                  value={selectedCategory}
+                  onChange={setSelectedCategory}
                 />
                 <FormInput
                   id="brand"
@@ -153,7 +174,11 @@ const DashboardPage = memo(() => {
                   variants={variants}
                   onChange={setVariants}
                 />
-                <input type="hidden" name="variants" value={serializedVariants} />
+                <input
+                  type="hidden"
+                  name="variants"
+                  value={serializedVariants}
+                />
               </div>
 
               <div className="pt-6 border-t border-gray-200">

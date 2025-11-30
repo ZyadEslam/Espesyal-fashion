@@ -1,24 +1,107 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { CheckCircle2, XCircle, ShoppingCart } from "lucide-react";
 
 interface toastProps {
   state: string;
   message: string;
+  autoHide?: boolean;
+  duration?: number;
+  onDismiss?: () => void;
 }
-const Toast = ({ state, message }: toastProps) => {
+
+const Toast = ({
+  state,
+  message,
+  autoHide = true,
+  duration = 3000,
+  onDismiss,
+}: toastProps) => {
+  const [isVisible, setIsVisible] = useState(true);
+  const isSuccess = state === "success";
+  const isAdded = message.toLowerCase().includes("added");
+  const onDismissRef = useRef(onDismiss);
+
+  // Update ref when onDismiss changes
+  useEffect(() => {
+    onDismissRef.current = onDismiss;
+  }, [onDismiss]);
+
+  const handleDismiss = () => {
+    setIsVisible(false);
+    onDismissRef.current?.();
+  };
+
+  useEffect(() => {
+    if (autoHide) {
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        onDismissRef.current?.();
+      }, duration);
+
+      return () => clearTimeout(timer);
+    }
+  }, [autoHide, duration]);
+
+  if (!isVisible) return null;
+
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ x: 100 }}
-        animate={{ x: 0 }}
-        exit={{ x: 100 }}
-        transition={{ duration: 0.2 }}
-        className={`${
-          state === "success" ? "bg-green-400" : "bg-red-500"
-        } toast`}
+        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.9 }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 30,
+          duration: 0.3,
+        }}
+        className={`fixed bottom-6 right-6 z-[9999] min-w-[280px] max-w-[400px] rounded-xl shadow-2xl overflow-hidden ${
+          isSuccess
+            ? "bg-gradient-to-r from-green-500 to-green-600"
+            : "bg-gradient-to-r from-red-500 to-red-600"
+        }`}
       >
-        {message}
+        <div className="flex items-center gap-3 px-4 py-3.5">
+          {/* Icon */}
+          <div className="flex-shrink-0">
+            {isSuccess ? (
+              isAdded ? (
+                <ShoppingCart className="w-5 h-5 text-white" />
+              ) : (
+                <CheckCircle2 className="w-5 h-5 text-white" />
+              )
+            ) : (
+              <XCircle className="w-5 h-5 text-white" />
+            )}
+          </div>
+
+          {/* Message */}
+          <p className="flex-1 text-white font-medium text-sm sm:text-base leading-tight">
+            {message}
+          </p>
+
+          {/* Close Button */}
+          <button
+            onClick={handleDismiss}
+            className="flex-shrink-0 p-1 rounded-lg hover:bg-white/20 transition-colors"
+            aria-label="Close notification"
+          >
+            <XCircle className="w-4 h-4 text-white opacity-80 hover:opacity-100" />
+          </button>
+        </div>
+
+        {/* Progress Bar */}
+        {autoHide && (
+          <motion.div
+            initial={{ width: "100%" }}
+            animate={{ width: "0%" }}
+            transition={{ duration: duration / 1000, ease: "linear" }}
+            className="h-1 bg-white/30"
+          />
+        )}
       </motion.div>
     </AnimatePresence>
   );

@@ -52,7 +52,7 @@ const AboutPage = async ({
   ];
 
   return (
-    <div className="min-h-screen bg-white mx-auto lg:max-w-7xl sm:w-[95%]">
+    <div className="min-h-screen mx-auto lg:max-w-7xl sm:w-[95%]">
       <Breadcrumb items={breadcrumbItems} />
 
       {/* Hero Section */}

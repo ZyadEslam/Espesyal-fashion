@@ -193,8 +193,14 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   }
 
   // Filter out failed images with their original indices
+  // Handle both string URLs and StaticImageData objects
   const validImagesWithIndices = product.imgSrc
-    .map((src, originalIndex) => ({ src, originalIndex }))
+    .map((img, originalIndex) => {
+      // If img is a string (URL), use it directly
+      // If img is an object with src property, use img.src
+      const src = typeof img === "string" ? img : (img as { src: string }).src;
+      return { src, originalIndex };
+    })
     .filter(({ originalIndex }) => !failedImages.has(originalIndex));
 
   if (validImagesWithIndices.length === 0) {

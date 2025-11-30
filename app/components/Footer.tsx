@@ -3,13 +3,15 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Phone, Mail } from "lucide-react";
 import { assets } from "@/public/assets/assets";
 
 const Footer = () => {
   const pathname = usePathname();
   const locale = useLocale();
+  const t = useTranslations("footer");
+  const tNav = useTranslations("nav");
   const isDashboard = pathname?.includes("/dashboard");
 
   if (isDashboard) return null;
@@ -72,14 +74,16 @@ const Footer = () => {
 
           {/* Column 2: Links */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Links</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {t("links")}
+            </h3>
             <ul className="space-y-3">
               <li>
                 <Link
                   href={getLocalizedPath("/")}
                   className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base"
                 >
-                  Home
+                  {tNav("home")}
                 </Link>
               </li>
               <li>
@@ -87,7 +91,7 @@ const Footer = () => {
                   href={getLocalizedPath("/about")}
                   className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base"
                 >
-                  About
+                  {tNav("about")}
                 </Link>
               </li>
               <li>
@@ -95,7 +99,7 @@ const Footer = () => {
                   href={getLocalizedPath("/shop")}
                   className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base"
                 >
-                  Shop
+                  {tNav("shop")}
                 </Link>
               </li>
             </ul>
@@ -104,7 +108,7 @@ const Footer = () => {
           {/* Column 3: Services */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Services
+              {t("services")}
             </h3>
             <ul className="space-y-3">
               <li>
@@ -112,7 +116,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base block"
                 >
-                  Fast Shipping & Easy Returns
+                  {t("fastShipping")}
                 </a>
               </li>
               <li>
@@ -120,7 +124,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base block"
                 >
-                  Personalized Style Advice
+                  {t("styleAdvice")}
                 </a>
               </li>
               <li>
@@ -128,7 +132,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base block"
                 >
-                  Gift Cards & Vouchers
+                  {t("giftCards")}
                 </a>
               </li>
               <li>
@@ -136,7 +140,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base block"
                 >
-                  Comprehensive Size Guide
+                  {t("sizeGuide")}
                 </a>
               </li>
               <li>
@@ -144,7 +148,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base block"
                 >
-                  Real-Time Order Tracking
+                  {t("orderTracking")}
                 </a>
               </li>
               <li>
@@ -152,7 +156,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base block"
                 >
-                  Reward Points & Loyalty Program
+                  {t("loyaltyProgram")}
                 </a>
               </li>
               <li>
@@ -160,7 +164,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base block"
                 >
-                  Customer Support
+                  {t("customerSupport")}
                 </a>
               </li>
             </ul>
@@ -174,7 +178,7 @@ const Footer = () => {
             <div className="flex items-center justify-center w-16 h-10 bg-white border border-black/20 rounded px-2">
               <span className="text-2xl font-bold text-[#1A1F71]">VISA</span>
             </div>
-            
+
             {/* Cash on Delivery */}
             <div className="flex items-center justify-center w-20 h-10 bg-white border border-black/20 rounded px-2">
               <span className="text-xs font-semibold text-gray-700">CASH</span>
@@ -185,7 +189,7 @@ const Footer = () => {
         {/* Third Row: Copyright */}
         <div className="pt-8">
           <p className="text-center text-sm text-gray-600">
-            © {new Date().getFullYear()} Espesyal Shop. All rights reserved.
+            © {new Date().getFullYear()} Espesyal Shop. {t("allRightsReserved")}
           </p>
         </div>
       </div>

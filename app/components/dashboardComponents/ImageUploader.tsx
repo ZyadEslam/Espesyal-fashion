@@ -17,10 +17,11 @@ interface ImageUploaderProps {
     imageKey: string
   ) => void;
   onRemoveImage: (imageKey: string) => void;
+  resetKey?: number; // Used to reset file inputs when form is cleared
 }
 
 const ImageUploaderComponent: React.FC<ImageUploaderProps> = React.memo(
-  ({ images, onImageChange, onRemoveImage }) => {
+  ({ images, onImageChange, onRemoveImage, resetKey }) => {
     const t = useTranslations("dashboard.addProduct");
     const fileInputRefs = {
       image1: useRef<HTMLInputElement>(null),
@@ -28,6 +29,18 @@ const ImageUploaderComponent: React.FC<ImageUploaderProps> = React.memo(
       image3: useRef<HTMLInputElement>(null),
       image4: useRef<HTMLInputElement>(null),
     };
+
+    // Clear file inputs when resetKey changes
+    React.useEffect(() => {
+      if (resetKey !== undefined) {
+        Object.values(fileInputRefs).forEach((ref) => {
+          if (ref.current) {
+            ref.current.value = "";
+          }
+        });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [resetKey]);
 
     const handleImageClick = useCallback(
       (inputRef: React.RefObject<HTMLInputElement | null>) => {

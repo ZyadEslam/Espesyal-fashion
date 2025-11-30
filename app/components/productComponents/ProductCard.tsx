@@ -6,6 +6,7 @@ import React, {
   useState,
   memo,
   useCallback,
+  useRef,
 } from "react";
 // import Image from "next/image";
 // import { assets } from "@/public/assets/assets";
@@ -13,6 +14,7 @@ import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { ProductCardProps } from "../../types/types";
 import { useCart } from "../../hooks/useCart";
+import { useTranslations } from "next-intl";
 const Toast = lazy(() => import("../../UI/Toast"));
 const ProductImage = lazy(() => import("./ProductImage"));
 
@@ -22,14 +24,26 @@ const ProductCard = memo(({ product }: { product: ProductCardProps }) => {
   const [imageSrc, setImageSrc] = useState("");
   const [showToast, setShowToast] = useState({ show: false, message: "" });
   const { addToCart, removeFromCart, isInCart: checkInCart } = useCart();
+  const t = useTranslations("product");
+
+  // Check if product is in cart - use a ref to track previous state to prevent unnecessary updates
+  const prevInCartRef = useRef(inCart);
 
   useEffect(() => {
-    setInCart(checkInCart(product._id as string));
+    const currentlyInCart = checkInCart(product._id as string);
+    // Only update state if the value actually changed
+    if (currentlyInCart !== prevInCartRef.current) {
+      prevInCartRef.current = currentlyInCart;
+      setInCart(currentlyInCart);
+    }
+  }, [product._id, checkInCart]);
 
+  // Set image source only once
+  useEffect(() => {
     if (product._id) {
       setImageSrc(`/api/product/image/${product._id}?index=0`);
     }
-  }, [product._id, checkInCart]);
+  }, [product._id]);
 
   const handleShowToast = useCallback((showState: boolean, message: string) => {
     setShowToast(() => {
@@ -51,21 +65,21 @@ const ProductCard = memo(({ product }: { product: ProductCardProps }) => {
       e.stopPropagation();
 
       if (product.variants?.length) {
-        handleShowToast(true, "Select size & color to add this item");
+        handleShowToast(true, t("selectSizeColor"));
         return;
       }
 
       if (!inCart) {
         addToCart(product);
-        handleShowToast(true, "Added to cart");
+        handleShowToast(true, t("addedToCartShort"));
         setInCart(true);
       } else {
         removeFromCart(product._id as string);
-        handleShowToast(true, "Removed from cart");
+        handleShowToast(true, t("removedFromCartShort"));
         setInCart(false);
       }
     },
-    [inCart, addToCart, removeFromCart, product, handleShowToast]
+    [inCart, addToCart, removeFromCart, product, handleShowToast, t]
   );
 
   const handleImageError = useCallback(() => {
@@ -139,7 +153,7 @@ const ProductCard = memo(({ product }: { product: ProductCardProps }) => {
                   ? "bg-orange text-white shadow-md hover:shadow-lg"
                   : "bg-gray-100 text-gray-600 hover:bg-orange/10 hover:text-orange hover:shadow-md"
               }`}
-              aria-label={inCart ? "Remove from cart" : "Add to cart"}
+              aria-label={inCart ? t("removeFromCart") : t("addToCart")}
             >
               {
                 <ShoppingCart

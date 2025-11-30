@@ -74,7 +74,7 @@ const HeroSection = () => {
           className="mb-3 md:mb-4"
         >
           <span className="inline-flex items-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight uppercase drop-shadow-lg">
-            {t("heroBadge") || "Winter Is Here"} !!!
+            {t("heroBadge")} !!!
           </span>
         </motion.div>
 
@@ -85,7 +85,7 @@ const HeroSection = () => {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-4 md:mb-6 leading-tight px-2 drop-shadow-md max-w-3xl"
         >
-          {t("largestSale") || "The largest sale of the year is here!"}
+          {t("largestSale")}
         </motion.h1>
 
         {/* Promo Code Badge */}
@@ -97,7 +97,7 @@ const HeroSection = () => {
         >
           <div className="inline-flex flex-wrap items-center justify-center gap-2 md:gap-3 bg-white/95 backdrop-blur-sm px-4 md:px-6 py-2.5 md:py-3 rounded-full shadow-xl border-2 border-white/50">
             <span className=" font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">
-              {t("useCode") || "Use code:"}
+              {t("useCode")}
             </span>
             <div className="flex items-center gap-1 md:gap-2">
               <code className=" text-black px-2 md:px-3 py-1 rounded-lg font-bold text-sm sm:text-base md:text-lg tracking-wider ">
@@ -117,7 +117,7 @@ const HeroSection = () => {
               </button>
             </div>
             <span className=" font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">
-              {t("forDiscount") || "for 25% OFF"}
+              {t("forDiscount")}
             </span>
           </div>
         </motion.div>

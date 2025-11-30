@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { ProductCardProps } from "@/app/types/types";
 import { CartContext } from "../../context/cartCtx";
 import { useSession } from "next-auth/react"; // If using NextAuth
@@ -22,13 +22,10 @@ const CartProvider = ({ children }: CartProviderProps) => {
   const [error, setError] = useState<string>("");
   const [totalPrice, setTotalPrice] = useState(0);
   const [isCartHydrated, setIsCartHydrated] = useState(false);
+  const hasSyncedRef = useRef(false);
 
   const matchCartItem = useCallback(
-    (
-      item: ProductCardProps,
-      productId?: string,
-      variantId?: string | null
-    ) =>
+    (item: ProductCardProps, productId?: string, variantId?: string | null) =>
       item._id === productId &&
       (item.selectedVariantId || null) === (variantId || null),
     []
@@ -180,20 +177,25 @@ const CartProvider = ({ children }: CartProviderProps) => {
   );
 
   // Remove from cart
-  const removeFromCart = useCallback((productId: string, variantId?: string) => {
-    setCart((prevCart) =>
-      prevCart.filter(
-        (item) => !matchCartItem(item, productId, variantId || null)
-      )
-    );
-  }, [matchCartItem]);
+  const removeFromCart = useCallback(
+    (productId: string, variantId?: string) => {
+      setCart((prevCart) =>
+        prevCart.filter(
+          (item) => !matchCartItem(item, productId, variantId || null)
+        )
+      );
+    },
+    [matchCartItem]
+  );
 
   // Update quantity
   const updateQuantity = useCallback(
     (productId: string, variantId: string | undefined, quantity: number) => {
       if (quantity <= 0) {
         setCart((prevCart) =>
-          prevCart.filter((item) => !matchCartItem(item, productId, variantId || null))
+          prevCart.filter(
+            (item) => !matchCartItem(item, productId, variantId || null)
+          )
         );
         return;
       }
@@ -203,7 +205,8 @@ const CartProvider = ({ children }: CartProviderProps) => {
           if (!matchCartItem(item, productId, variantId || null)) {
             return item;
           }
-          const maxAvailable = item.maxAvailable ?? resolveVariantQuantity(item);
+          const maxAvailable =
+            item.maxAvailable ?? resolveVariantQuantity(item);
           const clampedQuantity = maxAvailable
             ? Math.min(quantity, maxAvailable)
             : quantity;
@@ -247,11 +250,17 @@ const CartProvider = ({ children }: CartProviderProps) => {
     [cart, matchCartItem]
   );
 
-  // Sync with server database on component mount
+  // Sync with server database on component mount (only when user ID changes)
   useEffect(() => {
+    // Prevent multiple syncs for the same user
+    if (hasSyncedRef.current && session?.user?.id) {
+      return;
+    }
+
     const syncCartWithServer = async () => {
       if (session?.user?.id && typeof window !== "undefined") {
         try {
+          hasSyncedRef.current = true;
           const anonymousKey = getCartStorageKey();
           const userKey = getCartStorageKey(session.user.id);
 
@@ -281,12 +290,19 @@ const CartProvider = ({ children }: CartProviderProps) => {
         } catch (err) {
           setError("Error Fetching Cart Please try again later ");
           console.error("Error syncing cart with server:", err);
+          hasSyncedRef.current = false; // Allow retry on error
         }
       }
     };
 
     syncCartWithServer();
-  }, [session?.user?.id, error]);
+    // Only sync when user ID changes, not on every error state change
+  }, [session?.user?.id]);
+
+  // Reset sync flag when user changes
+  useEffect(() => {
+    hasSyncedRef.current = false;
+  }, [session?.user?.id]);
 
   const contextValue = useMemo(
     () => ({

@@ -3,13 +3,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import RatingStars from "../RatingStars";
 import Toast from "../../UI/Toast";
 import { ProductCardProps } from "../../types/types";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Check, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { useCart } from "../../hooks/useCart";
 
 const ProductDetails = ({ data }: { data: ProductCardProps }) => {
   const { addToCart, removeFromCart, isInCart } = useCart();
+  const t = useTranslations("product");
   const [showToast, setShowToast] = useState({ show: false, message: "" });
+  const [isAdding, setIsAdding] = useState(false);
 
   // Product options state
   const variants = useMemo(() => data.variants || [], [data.variants]);
@@ -81,24 +84,25 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
     : data.totalStock ?? 0;
 
   const handleShowToast = (showState: boolean, message: string) => {
-    setShowToast(() => {
-      return {
-        show: showState,
-        message: message,
-      };
+    setShowToast({
+      show: showState,
+      message: message,
     });
-    setTimeout(() => {
-      setShowToast(() => {
-        return { show: false, message: "" };
-      });
-    }, 3000);
   };
 
-  const listHandler = (handlerType: string) => {
+  const listHandler = async (handlerType: string) => {
     if (handlerType !== "cart") return;
 
+    setIsAdding(true);
+
+    // Small delay for better UX
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     if (hasVariants) {
-      if (!selectedVariant) return;
+      if (!selectedVariant) {
+        setIsAdding(false);
+        return;
+      }
       const inCart = isInCart(data._id as string, selectedVariant._id);
 
       if (!inCart) {
@@ -111,11 +115,12 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
           variantSku: selectedVariant.sku,
           quantityInCart: quantity,
         });
-        handleShowToast(true, "Added To Cart");
+        handleShowToast(true, t("addedToCart"));
       } else {
         removeFromCart(data._id as string, selectedVariant._id);
-        handleShowToast(true, "Removed From Cart");
+        handleShowToast(true, t("removedFromCart"));
       }
+      setIsAdding(false);
       return;
     }
 
@@ -126,11 +131,12 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
         quantityInCart: quantity,
         maxAvailable: data.totalStock,
       });
-      handleShowToast(true, "Added To Cart");
+      handleShowToast(true, t("addedToCart"));
     } else {
       removeFromCart(data._id as string);
-      handleShowToast(true, "Removed From Cart");
+      handleShowToast(true, t("removedFromCart"));
     }
+    setIsAdding(false);
   };
 
   const handleQuantityChange = (newQuantity: number) => {
@@ -270,24 +276,28 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
         {selectedVariant && (
           <p className="text-xs text-gray-500 mt-1">
             {selectedVariant.quantity > 0
-              ? `${selectedVariant.quantity} items available`
-              : "Out of stock"}
+              ? `${selectedVariant.quantity} ${t("itemsAvailable")}`
+              : t("outOfStock")}
           </p>
         )}
       </div>
 
       <div className="md:space-y-1 text-[14px] sm:space-y-3 mb-4 sm:mb-6">
         <div className="flex">
-          <span className="w-20 text-gray-600 sm:w-24 font-medium">Brand:</span>
+          <span className="w-20 text-gray-600 sm:w-24 font-medium">
+            {t("brand")}:
+          </span>
           <span className="text-gray-400">{data.brand}</span>
         </div>
         <div className="flex">
-          <span className="w-20 text-gray-600 sm:w-24 font-medium">Color:</span>
+          <span className="w-20 text-gray-600 sm:w-24 font-medium">
+            {t("color")}:
+          </span>
           <span className="text-gray-400">{data.color}</span>
         </div>
         <div className="flex">
           <span className="w-20 text-gray-600 sm:w-24 font-medium">
-            Category:
+            {t("category")}:
           </span>
           <span className="text-gray-400">{data.category}</span>
         </div>
@@ -295,24 +305,52 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
 
       <div className="w-full flex sm:flex-col md:flex-row sm:gap-4 mt-4 sm:mt-6">
         <button
-          className={`sm:w-auto sm:px-6 md:px-8 py-2 sm:py-3 transition-colors text-sm sm:text-base ${
+          className={`group relative w-full sm:w-auto flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg ${
             isAddToCartDisabled
-              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-              : "bg-secondaryLight text-gray-600 hover:bg-gray-300"
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed shadow-none hover:shadow-none"
+              : hasVariants
+              ? selectedVariant &&
+                isInCart(data._id as string, selectedVariant._id)
+                ? "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700"
+                : "bg-gradient-to-r from-orange to-orange/90 text-white hover:from-orange/90 hover:to-orange"
+              : isInCart(data._id as string)
+              ? "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700"
+              : "bg-gradient-to-r from-orange to-orange/90 text-white hover:from-orange/90 hover:to-orange"
           }`}
           onClick={() => {
             listHandler("cart");
           }}
-          disabled={showToast.show || isAddToCartDisabled}
+          disabled={isAddToCartDisabled || isAdding}
         >
-          {hasVariants
-            ? selectedVariant &&
-              isInCart(data._id as string, selectedVariant._id)
-              ? "Remove From Cart"
-              : "Add to Cart"
-            : isInCart(data._id as string)
-            ? "Remove From Cart"
-            : "Add to Cart"}
+          {isAdding ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>{t("adding")}</span>
+            </>
+          ) : hasVariants ? (
+            selectedVariant &&
+            isInCart(data._id as string, selectedVariant._id) ? (
+              <>
+                <Check className="w-5 h-5" />
+                <span>{t("removeFromCart")}</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-5 h-5" />
+                <span>{t("addToCart")}</span>
+              </>
+            )
+          ) : isInCart(data._id as string) ? (
+            <>
+              <Check className="w-5 h-5" />
+              <span>{t("removeFromCart")}</span>
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="w-5 h-5" />
+              <span>{t("addToCart")}</span>
+            </>
+          )}
         </button>
       </div>
 
@@ -320,20 +358,33 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
       {(selectedSize || selectedColor) && (
         <div className="mt-4 p-3 bg-gray-50 rounded-lg">
           <h4 className="text-sm font-semibold text-gray-900 mb-2">
-            Selected Options:
+            {t("selectedOptions")}:
           </h4>
           <div className="text-sm text-gray-600">
-            {selectedSize && <p>Size: {selectedSize}</p>}
-            {selectedColor && <p>Color: {selectedColor}</p>}
-            <p>Quantity: {quantity}</p>
+            {selectedSize && (
+              <p>
+                {t("size")}: {selectedSize}
+              </p>
+            )}
+            {selectedColor && (
+              <p>
+                {t("color")}: {selectedColor}
+              </p>
+            )}
+            <p>
+              {t("quantity")}: {quantity}
+            </p>
           </div>
         </div>
       )}
 
       {showToast.show && (
         <Toast
+          key={showToast.message}
           state={showToast.message.includes("Added") ? "success" : "fail"}
           message={showToast.message}
+          autoHide={true}
+          duration={3000}
         />
       )}
     </div>

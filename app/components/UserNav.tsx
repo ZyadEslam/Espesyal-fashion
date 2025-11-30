@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, memo, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { assets } from "@/public/assets/assets";
@@ -19,10 +20,16 @@ const UserNav = memo(() => {
   const tOrders = useTranslations("orders");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const originalOverflowRef = useRef<string | null>(null);
   const { data: session } = useSession();
   const { getCartItemCount, manualSync: syncCart } = useCart();
   const cartItemCount = getCartItemCount();
+
+  // Ensure component is mounted before using portal
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSignout = async () => {
     try {
@@ -109,7 +116,7 @@ const UserNav = memo(() => {
 
   return (
     <nav
-      className={`sticky top-0 z-50 transition-all duration-300 ${
+      className={`sticky top-0 z-[100] transition-all duration-300 ${
         isDashboard
           ? "bg-background backdrop-blur-md shadow-sm border-b border-black/20"
           : isScrolled
@@ -162,7 +169,7 @@ const UserNav = memo(() => {
                 <Link
                   href={getLocalizedPath("/cart")}
                   className="relative p-2 text-gray-600 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5"
-                  title="Shopping Cart"
+                  title={t("shoppingCart")}
                 >
                   <ShoppingCart className="w-5 h-5" />
                   {cartItemCount > 0 && (
@@ -201,94 +208,98 @@ const UserNav = memo(() => {
                 )}
               </div>
 
-              {/* Menu Panel - Left Side (Mobile & Desktop) */}
-              <div
-                className={`mobile-menu fixed inset-0 z-40 transition-all duration-300 ${
-                  isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
-                }`}
-              >
-                {/* Backdrop */}
-                <div
-                  className="absolute inset-0 bg-black/20 backdrop-blur-sm"
-                  onClick={closeMenu}
-                />
+              {/* Menu Panel - Rendered via Portal to body */}
+              {isMounted &&
+                createPortal(
+                  <div
+                    className={`mobile-menu fixed inset-0 z-[99999] transition-all duration-300 ${
+                      isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                    }`}
+                  >
+                    {/* Backdrop - Fixed to cover entire viewport */}
+                    <div
+                      className="fixed inset-0 bg-black/20 backdrop-blur-sm"
+                      onClick={closeMenu}
+                    />
 
-                {/* Menu Panel - Slides from Left */}
-                <div
-                  className={`absolute top-0 left-0 h-full w-80 max-w-[85vw] lg:max-w-md bg-white shadow-2xl transform transition-transform duration-300 ${
-                    isMenuOpen ? "translate-x-0" : "-translate-x-full"
-                  }`}
-                >
-                  <div className="flex flex-col h-full">
-                    {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                      <span className="text-lg font-semibold text-gray-900">
-                        {t("menu") || "Menu"}
-                      </span>
-                      <button
-                        onClick={closeMenu}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                        aria-label="Close menu"
-                      >
-                        <svg
-                          className="w-5 h-5 text-gray-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                    </div>
+                    {/* Menu Panel - Slides from Left */}
+                    <div
+                      className={`fixed top-0 left-0 h-full w-80 max-w-[85vw] lg:max-w-md bg-white shadow-2xl transform transition-transform duration-300 ${
+                        isMenuOpen ? "translate-x-0" : "-translate-x-full"
+                      }`}
+                    >
+                      <div className="flex flex-col h-full">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                          <span className="text-lg font-semibold text-gray-900">
+                            {t("menu")}
+                          </span>
+                          <button
+                            onClick={closeMenu}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            aria-label="Close menu"
+                          >
+                            <svg
+                              className="w-5 h-5 text-gray-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
 
-                    {/* Navigation Links */}
-                    <div className="flex-1 px-6 py-8 space-y-4 overflow-y-auto">
-                      <Link
-                        href={getLocalizedPath("/")}
-                        className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
-                        onClick={closeMenu}
-                      >
-                        {t("home")}
-                      </Link>
-                      <Link
-                        href={getLocalizedPath("/shop")}
-                        className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
-                        onClick={closeMenu}
-                      >
-                        {t("shop")}
-                      </Link>
-                      <Link
-                        href={getLocalizedPath("/about")}
-                        className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
-                        onClick={closeMenu}
-                      >
-                        {t("about")}
-                      </Link>
+                        {/* Navigation Links */}
+                        <div className="flex-1 px-6 py-8 space-y-4 overflow-y-auto">
+                          <Link
+                            href={getLocalizedPath("/")}
+                            className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
+                            onClick={closeMenu}
+                          >
+                            {t("home")}
+                          </Link>
+                          <Link
+                            href={getLocalizedPath("/shop")}
+                            className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
+                            onClick={closeMenu}
+                          >
+                            {t("shop")}
+                          </Link>
+                          <Link
+                            href={getLocalizedPath("/about")}
+                            className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
+                            onClick={closeMenu}
+                          >
+                            {t("about")}
+                          </Link>
 
-                      {/* Dashboard Link */}
-                      {session?.user?.isAdmin && (
-                        <Link
-                          href={getLocalizedPath("/dashboard")}
-                          className="block w-full px-4 py-3 bg-gradient-to-r from-primary to-secondary text-white text-center font-semibold rounded-lg hover:shadow-lg transition-all duration-300 mt-4"
-                          onClick={closeMenu}
-                        >
-                          {t("dashboard")}
-                        </Link>
-                      )}
+                          {/* Dashboard Link */}
+                          {session?.user?.isAdmin && (
+                            <Link
+                              href={getLocalizedPath("/dashboard")}
+                              className="block w-full px-4 py-3 bg-gradient-to-r from-primary to-secondary text-white text-center font-semibold rounded-lg hover:shadow-lg transition-all duration-300 mt-4"
+                              onClick={closeMenu}
+                            >
+                              {t("dashboard")}
+                            </Link>
+                          )}
 
-                      {/* Auth Buttons */}
-                      <div className="pt-6 border-t border-gray-200 mt-6">
-                        <AuthButtons screen="mobile" />
+                          {/* Auth Buttons */}
+                          <div className="pt-6 border-t border-gray-200 mt-6">
+                            <AuthButtons screen="mobile" />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+                  </div>,
+                  document.body
+                )}
             </>
           ) : (
             <div className="flex items-center gap-4">
@@ -333,7 +344,7 @@ const UserNav = memo(() => {
                     d="M10 19l-7-7m0 0l7-7m-7 7h18"
                   />
                 </svg>
-                <span className="hidden sm:inline">Exit Dashboard</span>
+                <span className="hidden sm:inline">{t("exitDashboard")}</span>
                 <span className="sm:hidden">Exit</span>
               </Link>
             </div>
