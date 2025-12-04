@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Product from "@/app/models/product";
 import Category from "@/app/models/category";
 import connectDB from "@/app/utils/db";
-import { StaticImageData } from "next/image";
-import { sanitizeVariants, VariantInput } from "@/app/utils/variantUtils";
+import { sanitizeVariants } from "@/app/utils/variantUtils";
 import {
   getCachedData,
   setCachedData,
@@ -11,26 +10,16 @@ import {
   getProductCacheKey,
   CACHE_TTL,
 } from "@/lib/cache";
+import { requireAdminAccess } from "@/lib/security/authMiddleware";
+import { checkAdminRateLimit } from "@/lib/security/rateLimiter";
+import { productUpdateSchema, safeParseInput } from "@/lib/security/validator";
+import { createErrorResponse } from "@/lib/security/errorHandler";
+import { logAdminAction } from "@/lib/security/auditLogger";
+import { sanitizeObject, sanitizeObjectId } from "@/lib/security/sanitizer";
 
 // Define the params type
 interface Params {
   params: Promise<{ id: string }>;
-}
-
-// Define the product update type
-interface ProductUpdateData {
-  name?: string;
-  description?: string;
-  price?: number;
-  oldPrice?: number;
-  discount?: number;
-  category?: string;
-  categoryName?: string;
-  brand?: string;
-  color?: string;
-  imgSrc?: StaticImageData[]; // Use a more specific type if you know the structure
-  hideFromHome?: boolean;
-  variants?: VariantInput[];
 }
 
 export async function GET(request: NextRequest, { params }: Params) {
@@ -153,9 +142,67 @@ export async function GET(request: NextRequest, { params }: Params) {
 
 export async function POST(request: NextRequest, { params }: Params) {
   try {
-    await connectDB();
+    // 1. Require admin authentication
+    const adminSession = await requireAdminAccess();
+    if (!adminSession) {
+      return NextResponse.json(
+        {
+          message: "Unauthorized",
+          success: false,
+          error: "Admin access required",
+        },
+        { status: 403 }
+      );
+    }
+
+    // 2. Rate limiting
+    const rateLimitResult = await checkAdminRateLimit(
+      request,
+      adminSession.user.id
+    );
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          message: "Rate limit exceeded",
+          success: false,
+          error: "Too many requests",
+        },
+        { status: 429 }
+      );
+    }
+
+    // 3. Validate and sanitize product ID
     const { id } = await params;
-    const updateData: ProductUpdateData = await request.json();
+    const sanitizedId = sanitizeObjectId(id);
+    if (!sanitizedId) {
+      return NextResponse.json(
+        { message: "Invalid product ID", success: false },
+        { status: 400 }
+      );
+    }
+
+    // 4. Parse and validate input
+    const body = await request.json();
+    const sanitizedBody = sanitizeObject(body);
+    const validation = safeParseInput(productUpdateSchema, sanitizedBody);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          message: "Validation failed",
+          success: false,
+          error: "Invalid product data",
+          details: validation.errors.errors.map((e) => ({
+            path: e.path.join("."),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+    const updateData = validation.data;
 
     if (updateData.variants) {
       updateData.variants = sanitizeVariants(updateData.variants);
@@ -198,9 +245,47 @@ export async function POST(request: NextRequest, { params }: Params) {
 
 export async function DELETE(request: NextRequest, { params }: Params) {
   try {
-    await connectDB();
+    // 1. Require admin authentication
+    const adminSession = await requireAdminAccess();
+    if (!adminSession) {
+      return NextResponse.json(
+        {
+          message: "Unauthorized",
+          success: false,
+          error: "Admin access required",
+        },
+        { status: 403 }
+      );
+    }
+
+    // 2. Rate limiting
+    const rateLimitResult = await checkAdminRateLimit(
+      request,
+      adminSession.user.id
+    );
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          message: "Rate limit exceeded",
+          success: false,
+          error: "Too many requests",
+        },
+        { status: 429 }
+      );
+    }
+
+    // 3. Validate and sanitize product ID
     const { id } = await params;
-    const product = await Product.findByIdAndDelete(id);
+    const sanitizedId = sanitizeObjectId(id);
+    if (!sanitizedId) {
+      return NextResponse.json(
+        { message: "Invalid product ID", success: false },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+    const product = await Product.findById(sanitizedId);
 
     if (!product) {
       return NextResponse.json(
@@ -209,27 +294,102 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       );
     }
 
+    // Store product name for logging before deletion
+    const productName = product.name;
+
+    await Product.findByIdAndDelete(sanitizedId);
+
     // Invalidate caches
-    await invalidateProductCaches(id);
+    await invalidateProductCaches(sanitizedId);
+
+    // Log admin action
+    await logAdminAction(
+      adminSession.user.id,
+      adminSession.user.email || "",
+      "delete_product",
+      `/api/product/${sanitizedId}`,
+      request,
+      { productId: sanitizedId, productName }
+    );
 
     return NextResponse.json(
       { message: "Product deleted successfully", success: true },
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          "X-RateLimit-Remaining": String(rateLimitResult.remaining),
+        },
+      }
     );
   } catch (error) {
     console.error("Error deleting product:", error);
-    return NextResponse.json(
-      { message: error, success: false },
-      { status: 500 }
-    );
+    return createErrorResponse(error, "Failed to delete product");
   }
 }
 
 export async function PATCH(request: NextRequest, { params }: Params) {
   try {
-    await connectDB();
+    // 1. Require admin authentication
+    const adminSession = await requireAdminAccess();
+    if (!adminSession) {
+      return NextResponse.json(
+        {
+          message: "Unauthorized",
+          success: false,
+          error: "Admin access required",
+        },
+        { status: 403 }
+      );
+    }
+
+    // 2. Rate limiting
+    const rateLimitResult = await checkAdminRateLimit(
+      request,
+      adminSession.user.id
+    );
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          message: "Rate limit exceeded",
+          success: false,
+          error: "Too many requests",
+        },
+        { status: 429 }
+      );
+    }
+
+    // 3. Validate and sanitize product ID
     const { id } = await params;
-    const updateData: ProductUpdateData = await request.json();
+    const sanitizedId = sanitizeObjectId(id);
+    if (!sanitizedId) {
+      return NextResponse.json(
+        { message: "Invalid product ID", success: false },
+        { status: 400 }
+      );
+    }
+
+    // 4. Parse and validate input
+    const body = await request.json();
+    const sanitizedBody = sanitizeObject(body);
+    const validation = safeParseInput(productUpdateSchema, sanitizedBody);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          message: "Validation failed",
+          success: false,
+          error: "Invalid product data",
+          details: validation.errors.errors.map((e) => ({
+            path: e.path.join("."),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+    const updateData = validation.data;
 
     if (updateData.variants) {
       updateData.variants = sanitizeVariants(updateData.variants);

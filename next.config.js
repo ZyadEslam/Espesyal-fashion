@@ -65,6 +65,15 @@ const nextConfig = {
       );
     }
 
+    // Make validator optional - ignore if not installed
+    if (!checkPackage("validator")) {
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^validator$/,
+        })
+      );
+    }
+
     // Mark redis as external for server-side only (it's only used in API routes)
     if (isServer) {
       config.externals = config.externals || [];
@@ -86,55 +95,78 @@ const nextConfig = {
 
     return config;
   },
-  // compress: true,
-  // poweredByHeader: false,
-  // generateEtags: true,
-  // experimental: {
-  //   optimizePackageImports: ["framer-motion", "lucide-react"],
-  // },
-  // headers: async () => {
-  //   return [
-  //     {
-  //       source: "/(.*)",
-  //       headers: [
-  //         {
-  //           key: "X-Frame-Options",
-  //           value: "DENY",
-  //         },
-  //         {
-  //           key: "X-Content-Type-Options",
-  //           value: "nosniff",
-  //         },
-  //         {
-  //           key: "Referrer-Policy",
-  //           value: "origin-when-cross-origin",
-  //         },
-  //         {
-  //           key: "Permissions-Policy",
-  //           value: "camera=(), microphone=(), geolocation=()",
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       source: "/api/(.*)",
-  //       headers: [
-  //         {
-  //           key: "Cache-Control",
-  //           value: "public, max-age=3600, s-maxage=3600",
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       source: "/_next/static/(.*)",
-  //       headers: [
-  //         {
-  //           key: "Cache-Control",
-  //           value: "public, max-age=31536000, immutable",
-  //         },
-  //       ],
-  //     },
-  //   ];
-  // },
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: true,
+  experimental: {
+    optimizePackageImports: ["framer-motion", "lucide-react"],
+  },
+  headers: async () => {
+    const isProduction = process.env.NODE_ENV === "production";
+
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
+          },
+          ...(isProduction
+            ? [
+                {
+                  key: "Strict-Transport-Security",
+                  value: "max-age=31536000; includeSubDomains; preload",
+                },
+                {
+                  key: "Content-Security-Policy",
+                  value:
+                    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.stripe.com; frame-src https://js.stripe.com;",
+                },
+              ]
+            : []),
+        ],
+      },
+      {
+        source: "/api/(.*)",
+        headers: [
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+        ],
+      },
+      {
+        source: "/_next/static/(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   // webpack: (config, { isServer }) => {
   //   // Fix for framer-motion and other client-side libraries
   //   if (!isServer) {

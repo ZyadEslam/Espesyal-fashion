@@ -1,10 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Order from "../../models/order";
 import dbConnect from "@/lib/mongoose";
 import { sseManager } from "@/lib/sse";
 import User from "@/app/models/user";
 import mongoose from "mongoose";
 import Product from "@/app/models/product";
+import { requireAuth, verifyOwnership } from "@/lib/security/authMiddleware";
+import { checkOrderRateLimit } from "@/lib/security/rateLimiter";
+import { orderCreateSchema, safeParseInput } from "@/lib/security/validator";
+import { createErrorResponse } from "@/lib/security/errorHandler";
+import {
+  logSecurityEvent,
+  AuditEventType,
+  extractRequestInfo,
+} from "@/lib/security/auditLogger";
 
 interface IncomingOrderProduct {
   _id?: string;
@@ -106,9 +115,60 @@ const normalizeOrderItems = (
   }[];
 };
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    await dbConnect();
+    // 1. Require authentication
+    const session = await requireAuth();
+    if (!session) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized",
+          message: "Authentication required",
+        },
+        { status: 401 }
+      );
+    }
+
+    // 2. Rate limiting
+    const rateLimitResult = await checkOrderRateLimit(req, session.user.id);
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Too Many Requests",
+          message: "Order rate limit exceeded. Please try again later.",
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(
+              Math.ceil((rateLimitResult.reset - Date.now()) / 1000)
+            ),
+          },
+        }
+      );
+    }
+
+    // 3. Parse and validate input
+    const body = await req.json();
+    const validation = safeParseInput(orderCreateSchema, body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Validation Error",
+          message: "Invalid order data",
+          details: validation.errors.errors.map((e) => ({
+            path: e.path.join("."),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       userId,
       addressId,
@@ -120,21 +180,33 @@ export async function POST(req: Request) {
       paymentMethod,
       stripePaymentIntentId,
       shippingFee,
-    } = await req.json();
-    if (
-      !userId ||
-      !addressId ||
-      !products ||
-      products.length === 0 ||
-      !totalPrice
-    ) {
-      console.log(userId, addressId, products, totalPrice);
+    } = validation.data;
+
+    // 4. Verify user owns the order (userId must match session user)
+    if (!verifyOwnership(session.user.id, userId, session.user.isAdmin)) {
+      const { ipAddress, userAgent } = extractRequestInfo(req);
+      await logSecurityEvent(AuditEventType.UNAUTHORIZED_ACCESS, {
+        userId: session.user.id,
+        userEmail: session.user.email,
+        ipAddress,
+        userAgent,
+        resource: "/api/order",
+        action: "POST",
+        result: "blocked",
+        details: { attemptedUserId: userId },
+      });
 
       return NextResponse.json(
-        { success: false, message: "Missing required fields" },
-        { status: 400 }
+        {
+          success: false,
+          error: "Forbidden",
+          message: "Access denied",
+        },
+        { status: 403 }
       );
     }
+
+    await dbConnect();
 
     const normalizedProducts = normalizeOrderItems(products);
 
@@ -145,14 +217,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const session = await mongoose.startSession();
+    const dbSession = await mongoose.startSession();
     let newOrder;
     try {
-      session.startTransaction();
+      dbSession.startTransaction();
 
       for (const item of normalizedProducts) {
         const productDoc = await Product.findById(item.product).session(
-          session
+          dbSession
         );
 
         if (!productDoc) {
@@ -202,7 +274,7 @@ export async function POST(req: Request) {
           // This can be extended to handle global stock if needed.
         }
 
-        await productDoc.save({ session });
+        await productDoc.save({ session: dbSession });
       }
 
       newOrder = new Order({
@@ -227,14 +299,14 @@ export async function POST(req: Request) {
         ...(stripePaymentIntentId && { stripePaymentIntentId }),
         ...(shippingFee !== undefined && { shippingFee: +shippingFee }),
       });
-      await newOrder.save({ session });
+      await newOrder.save({ session: dbSession });
 
-      await session.commitTransaction();
+      await dbSession.commitTransaction();
     } catch (err) {
-      await session.abortTransaction();
+      await dbSession.abortTransaction();
       throw err;
     } finally {
-      session.endSession();
+      dbSession.endSession();
     }
 
     // Get user info for broadcast
@@ -262,25 +334,38 @@ export async function POST(req: Request) {
       createdAt: newOrder.date,
     });
 
+    // Log order creation
+    const { ipAddress, userAgent } = extractRequestInfo(req);
+    await logSecurityEvent(AuditEventType.ORDER_CREATED, {
+      userId: session.user.id,
+      userEmail: session.user.email,
+      ipAddress,
+      userAgent,
+      resource: "/api/order",
+      action: "POST",
+      result: "success",
+      details: {
+        orderId: newOrder._id.toString(),
+        totalPrice: newOrder.totalPrice,
+        paymentMethod: newOrder.paymentMethod,
+      },
+    });
+
     return NextResponse.json(
       {
         success: true,
         message: "Order placed successfully",
         orderId: newOrder._id,
       },
-      { status: 201 }
+      {
+        status: 201,
+        headers: {
+          "X-RateLimit-Remaining": String(rateLimitResult.remaining),
+        },
+      }
     );
   } catch (error) {
     console.error("Error placing order:", error);
-    const message =
-      error instanceof Error ? error.message : "Failed to place order";
-    const statusCode =
-      message.includes("Insufficient") || message.includes("variant")
-        ? 400
-        : 500;
-    return NextResponse.json(
-      { success: false, message },
-      { status: statusCode }
-    );
+    return createErrorResponse(error, "Failed to place order");
   }
 }

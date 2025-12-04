@@ -9,6 +9,16 @@ import {
   getCategoriesCacheKey,
   CACHE_TTL,
 } from "@/lib/cache";
+import { requireAdminAccess } from "@/lib/security/authMiddleware";
+import { checkAdminRateLimit } from "@/lib/security/rateLimiter";
+import {
+  categoryCreateSchema,
+  categoryUpdateSchema,
+  safeParseInput,
+} from "@/lib/security/validator";
+import { createErrorResponse } from "@/lib/security/errorHandler";
+import { logAdminAction } from "@/lib/security/auditLogger";
+import { sanitizeObject } from "@/lib/security/sanitizer";
 
 // GET all categories with their products
 export async function GET(request: NextRequest) {
@@ -106,10 +116,58 @@ export async function GET(request: NextRequest) {
 // POST create new category
 export async function POST(request: NextRequest) {
   try {
-    await connectDB();
+    // 1. Require admin authentication
+    const adminSession = await requireAdminAccess();
+    if (!adminSession) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Forbidden",
+          message: "Admin access required",
+        },
+        { status: 403 }
+      );
+    }
 
+    // 2. Rate limiting
+    const rateLimitResult = await checkAdminRateLimit(
+      request,
+      adminSession.user.id
+    );
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Too Many Requests",
+          message: "Rate limit exceeded",
+        },
+        { status: 429 }
+      );
+    }
+
+    // 3. Parse and validate input
     const body = await request.json();
-    const { name, description, image, isFeatured, sortOrder, isActive } = body;
+    const validation = safeParseInput(categoryCreateSchema, body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Validation Error",
+          message: "Invalid category data",
+          details: validation.errors.errors.map((e) => ({
+            path: e.path.join("."),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { name, description, image, isFeatured, sortOrder, isActive } =
+      validation.data;
+
+    await connectDB();
 
     if (!name) {
       return NextResponse.json(
@@ -143,11 +201,28 @@ export async function POST(request: NextRequest) {
     // Invalidate category caches
     await invalidateCategoryCaches(slug);
 
-    return NextResponse.json({
-      success: true,
-      data: category,
-      message: "Category created successfully",
-    });
+    // Log admin action
+    await logAdminAction(
+      adminSession.user.id,
+      adminSession.user.email || "",
+      "create_category",
+      "/api/categories",
+      request,
+      { categoryId: category._id.toString(), categoryName: category.name }
+    );
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: category,
+        message: "Category created successfully",
+      },
+      {
+        headers: {
+          "X-RateLimit-Remaining": String(rateLimitResult.remaining),
+        },
+      }
+    );
   } catch (error) {
     console.error("Error creating category:", error);
 
@@ -156,29 +231,87 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message: "Category with this name already exists",
+          error: "Duplicate category",
         },
         { status: 409 }
       );
     }
 
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to create category",
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
+    return createErrorResponse(error, "Failed to create category");
   }
 }
 
 // PATCH update existing category (e.g. active state and priority/sort order)
 export async function PATCH(request: NextRequest) {
   try {
-    await connectDB();
+    // 1. Require admin authentication
+    const adminSession = await requireAdminAccess();
+    if (!adminSession) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Forbidden",
+          message: "Admin access required",
+        },
+        { status: 403 }
+      );
+    }
 
+    // 2. Rate limiting
+    const rateLimitResult = await checkAdminRateLimit(
+      request,
+      adminSession.user.id
+    );
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Too Many Requests",
+          message: "Rate limit exceeded",
+        },
+        { status: 429 }
+      );
+    }
+
+    // 3. Parse and validate input
     const body = await request.json();
-    const { id, isActive, isFeatured, sortOrder, name, description } = body;
+    const { id, ...updateFields } = body;
+
+    // Validate id is provided
+    if (!id) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Validation Error",
+          message: "Category ID is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate and sanitize update fields
+    const sanitizedBody = sanitizeObject(updateFields);
+    const validation = safeParseInput(categoryUpdateSchema, sanitizedBody);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Validation Error",
+          message: "Invalid category data",
+          details: validation.errors.errors.map((e) => ({
+            path: e.path.join("."),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { isActive, isFeatured, sortOrder, name, description } =
+      validation.data;
+
+    await connectDB();
 
     if (!id) {
       return NextResponse.json(
@@ -236,6 +369,7 @@ export async function PATCH(request: NextRequest) {
         {
           success: false,
           message: "Category not found",
+          error: "Category not found",
         },
         { status: 404 }
       );
@@ -244,20 +378,30 @@ export async function PATCH(request: NextRequest) {
     // Invalidate category caches (use old slug if available, or new slug)
     await invalidateCategoryCaches(categorySlug || category.slug);
 
-    return NextResponse.json({
-      success: true,
-      data: category,
-      message: "Category updated successfully",
-    });
-  } catch (error) {
-    console.error("Error updating category:", error);
+    // Log admin action
+    await logAdminAction(
+      adminSession.user.id,
+      adminSession.user.email || "",
+      "update_category",
+      `/api/categories`,
+      request,
+      { categoryId: category._id.toString(), categoryName: category.name }
+    );
+
     return NextResponse.json(
       {
-        success: false,
-        message: "Failed to update category",
-        error: error instanceof Error ? error.message : "Unknown error",
+        success: true,
+        data: category,
+        message: "Category updated successfully",
       },
-      { status: 500 }
+      {
+        headers: {
+          "X-RateLimit-Remaining": String(rateLimitResult.remaining),
+        },
+      }
     );
+  } catch (error) {
+    console.error("Error updating category:", error);
+    return createErrorResponse(error, "Failed to update category");
   }
 }

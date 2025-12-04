@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 // Import your database client/ORM
 import dbConnect from "./mongoose"; // Adjust import path
 import User from "@/app/models/user";
+// Note: Login logging can be added in the NextAuth callbacks if needed
 
 console.log("🔧 Loading auth configuration...");
 console.log("Environment:", process.env.NODE_ENV);
@@ -24,20 +25,22 @@ export const authOptions: NextAuthOptions = {
           let dbUser = await User.findOne({
             email: user.email,
           });
-          
+
           // If th user does not exist Create a new user in your database
           if (!dbUser) {
             // Check if this email should be granted admin access on first sign-in
-            const firstAdminEmail = process.env.FIRST_ADMIN_EMAIL?.toLowerCase().trim();
+            const firstAdminEmail =
+              process.env.FIRST_ADMIN_EMAIL?.toLowerCase().trim();
             const userEmail = user.email?.toLowerCase().trim();
-            const shouldBeAdmin = firstAdminEmail && userEmail === firstAdminEmail;
+            const shouldBeAdmin =
+              firstAdminEmail && userEmail === firstAdminEmail;
 
             const newUser = {
               email: user.email,
               name: user.name,
               isAdmin: shouldBeAdmin || false,
-              cart:[],
-              addresses:[],
+              cart: [],
+              addresses: [],
               // image: user.image,
               // googleId: account.providerAccountId,
               // createdAt: new Date(),
@@ -45,9 +48,11 @@ export const authOptions: NextAuthOptions = {
 
             const result = await User.insertOne(newUser);
             dbUser = { ...newUser, _id: result.insertedId };
-            
+
             if (shouldBeAdmin) {
-              console.log(`✅ Admin access automatically granted to ${user.email}`);
+              console.log(
+                `✅ Admin access automatically granted to ${user.email}`
+              );
             }
           }
 
@@ -108,6 +113,23 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === "development",
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
+  },
+  cookies: {
+    sessionToken: {
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Secure-next-auth.session-token"
+          : "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+      },
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

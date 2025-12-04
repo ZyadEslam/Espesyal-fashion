@@ -10,12 +10,73 @@ import {
   getProductListCacheKey,
   CACHE_TTL,
 } from "@/lib/cache";
+import { requireAdminAccess } from "@/lib/security/authMiddleware";
+import { checkProductCreationRateLimit } from "@/lib/security/rateLimiter";
+import { productCreateSchema, safeParseInput } from "@/lib/security/validator";
+import { createErrorResponse } from "@/lib/security/errorHandler";
+import { logAdminAction } from "@/lib/security/auditLogger";
+import { sanitizeObject } from "@/lib/security/sanitizer";
 
 const POST = async (req: NextRequest) => {
   try {
+    // 1. Require admin authentication
+    const adminSession = await requireAdminAccess();
+    if (!adminSession) {
+      return NextResponse.json(
+        {
+          message: "Unauthorized",
+          success: false,
+          error: "Admin access required",
+        },
+        { status: 403 }
+      );
+    }
+
+    // 2. Rate limiting
+    const rateLimitResult = await checkProductCreationRateLimit(
+      req,
+      adminSession.user.id
+    );
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          message: "Rate limit exceeded",
+          success: false,
+          error: "Too many product creation requests",
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(
+              Math.ceil((rateLimitResult.reset - Date.now()) / 1000)
+            ),
+          },
+        }
+      );
+    }
+
+    // 3. Parse and validate input
+    const body = await req.json();
+    const sanitizedBody = sanitizeObject(body);
+    const validation = safeParseInput(productCreateSchema, sanitizedBody);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        {
+          message: "Validation failed",
+          success: false,
+          error: "Invalid product data",
+          details: validation.errors.errors.map((e) => ({
+            path: e.path.join("."),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
     await connectDB();
-    const productData = await req.json();
-    console.log("Received product data:", productData);
+    const productData = validation.data;
 
     if (productData.variants) {
       productData.variants = sanitizeVariants(productData.variants);
@@ -42,16 +103,28 @@ const POST = async (req: NextRequest) => {
     // Invalidate product list cache
     await invalidateProductCaches();
 
+    // Log admin action
+    await logAdminAction(
+      adminSession.user.id,
+      adminSession.user.email || "",
+      "create_product",
+      `/api/product`,
+      req,
+      { productId: product._id.toString(), productName: product.name }
+    );
+
     return NextResponse.json(
       { message: "Product created successfully", product, success: true },
-      { status: 201 }
+      {
+        status: 201,
+        headers: {
+          "X-RateLimit-Remaining": String(rateLimitResult.remaining),
+        },
+      }
     );
   } catch (error) {
     console.error("Error creating product:", error);
-    return NextResponse.json(
-      { message: error, success: false },
-      { status: 500 }
-    );
+    return createErrorResponse(error, "Failed to create product");
   }
 };
 
