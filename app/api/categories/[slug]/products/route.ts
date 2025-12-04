@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/app/utils/db";
 import Product from "@/app/models/product";
 import Category from "@/app/models/category";
+import {
+  getCachedData,
+  setCachedData,
+  getCategoryProductsCacheKey,
+  CACHE_TTL,
+} from "@/lib/cache";
 
 interface Params {
   params: Promise<{ slug: string }>;
@@ -14,7 +20,6 @@ function isValidObjectId(id: string): boolean {
 
 export async function GET(request: NextRequest, { params }: Params) {
   try {
-    await connectDB();
     const resolvedParams = await params;
     const slug = resolvedParams.slug;
 
@@ -35,6 +40,26 @@ export async function GET(request: NextRequest, { params }: Params) {
         { status: 400 }
       );
     }
+
+    // Check cache first
+    const cacheKey = getCategoryProductsCacheKey(slug, limit);
+    const cachedData = await getCachedData<{
+      success: boolean;
+      data: unknown[];
+      count: number;
+    }>(cacheKey);
+
+    if (cachedData) {
+      return NextResponse.json(cachedData, {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+          "X-Cache": "HIT",
+        },
+      });
+    }
+
+    // Cache miss - fetch from database
+    await connectDB();
 
     interface CategoryDoc {
       _id: { toString: () => string };
@@ -123,18 +148,21 @@ export async function GET(request: NextRequest, { params }: Params) {
       };
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: formattedProducts,
-        count: formattedProducts.length,
+    const responseData = {
+      success: true,
+      data: formattedProducts,
+      count: formattedProducts.length,
+    };
+
+    // Cache the result
+    await setCachedData(cacheKey, responseData, CACHE_TTL.CATEGORY_PRODUCTS);
+
+    return NextResponse.json(responseData, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        "X-Cache": "MISS",
       },
-      {
-        headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-        },
-      }
-    );
+    });
   } catch (error) {
     console.error("Error fetching products by category:", error);
     return NextResponse.json(

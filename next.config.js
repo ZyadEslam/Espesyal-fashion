@@ -33,7 +33,7 @@ const nextConfig = {
     // contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   trailingSlash: true,
-  webpack: (config, { dev }) => {
+  webpack: (config, { dev, isServer }) => {
     if (dev) {
       config.optimization.minimize = false;
       config.cache = false;
@@ -42,6 +42,48 @@ const nextConfig = {
         aggregateTimeout: 300,
       };
     }
+
+    // Make @vercel/kv optional - use IgnorePlugin to prevent webpack from trying to resolve it if not installed
+    const webpack = require("webpack");
+
+    // Check if @vercel/kv is installed
+    const checkPackage = (pkg) => {
+      try {
+        require.resolve(pkg);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    // Only add IgnorePlugin for @vercel/kv if it's NOT installed
+    if (!checkPackage("@vercel/kv")) {
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^@vercel\/kv$/,
+        })
+      );
+    }
+
+    // Mark redis as external for server-side only (it's only used in API routes)
+    if (isServer) {
+      config.externals = config.externals || [];
+      if (typeof config.externals === "function") {
+        const originalExternals = config.externals;
+        config.externals = [
+          originalExternals,
+          ({ request }, callback) => {
+            if (request === "redis") {
+              return callback(null, "commonjs " + request);
+            }
+            callback();
+          },
+        ];
+      } else if (Array.isArray(config.externals)) {
+        config.externals.push("redis");
+      }
+    }
+
     return config;
   },
   // compress: true,

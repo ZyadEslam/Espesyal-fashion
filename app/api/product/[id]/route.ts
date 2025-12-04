@@ -4,6 +4,13 @@ import Category from "@/app/models/category";
 import connectDB from "@/app/utils/db";
 import { StaticImageData } from "next/image";
 import { sanitizeVariants, VariantInput } from "@/app/utils/variantUtils";
+import {
+  getCachedData,
+  setCachedData,
+  invalidateProductCaches,
+  getProductCacheKey,
+  CACHE_TTL,
+} from "@/lib/cache";
 
 // Define the params type
 interface Params {
@@ -28,7 +35,33 @@ interface ProductUpdateData {
 
 export async function GET(request: NextRequest, { params }: Params) {
   try {
-    // Connect to database
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "Product ID is required", success: false },
+        { status: 400 }
+      );
+    }
+
+    // Check cache first
+    const cacheKey = getProductCacheKey(id);
+    const cachedData = await getCachedData<{
+      product: unknown;
+      success: boolean;
+    }>(cacheKey);
+
+    if (cachedData) {
+      return NextResponse.json(cachedData, {
+        status: 200,
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+          "X-Cache": "HIT",
+        },
+      });
+    }
+
+    // Cache miss - connect to database
     try {
       await connectDB();
     } catch (dbError) {
@@ -43,15 +76,6 @@ export async function GET(request: NextRequest, { params }: Params) {
               : "Database connection error",
         },
         { status: 500 }
-      );
-    }
-
-    const { id } = await params;
-
-    if (!id) {
-      return NextResponse.json(
-        { message: "Product ID is required", success: false },
-        { status: 400 }
       );
     }
 
@@ -92,15 +116,21 @@ export async function GET(request: NextRequest, { params }: Params) {
       ),
     };
 
-    return NextResponse.json(
-      { product: productObj, success: true },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-        },
-      }
-    );
+    const responseData = {
+      product: productObj,
+      success: true,
+    };
+
+    // Cache the result
+    await setCachedData(cacheKey, responseData, CACHE_TTL.PRODUCT_SINGLE);
+
+    return NextResponse.json(responseData, {
+      status: 200,
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        "X-Cache": "MISS",
+      },
+    });
   } catch (error) {
     console.error("Error fetching product:", error);
     const errorMessage =
@@ -150,6 +180,9 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
+    // Invalidate caches
+    await invalidateProductCaches(id);
+
     return NextResponse.json(
       { message: "Product updated successfully", product, success: true },
       { status: 200 }
@@ -175,6 +208,9 @@ export async function DELETE(request: NextRequest, { params }: Params) {
         { status: 404 }
       );
     }
+
+    // Invalidate caches
+    await invalidateProductCaches(id);
 
     return NextResponse.json(
       { message: "Product deleted successfully", success: true },
@@ -217,6 +253,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         { status: 404 }
       );
     }
+
+    // Invalidate caches
+    await invalidateProductCaches(id);
 
     return NextResponse.json(
       { message: "Product updated successfully", product, success: true },

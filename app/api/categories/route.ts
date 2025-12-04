@@ -2,17 +2,47 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/app/utils/db";
 import Category from "@/app/models/category";
 import Product from "@/app/models/product";
+import {
+  getCachedData,
+  setCachedData,
+  invalidateCategoryCaches,
+  getCategoriesCacheKey,
+  CACHE_TTL,
+} from "@/lib/cache";
 
 // GET all categories with their products
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
-
     const { searchParams } = new URL(request.url);
     const featured = searchParams.get("featured");
     const active = searchParams.get("active");
     const limit = searchParams.get("limit");
     const includeProducts = searchParams.get("includeProducts") === "true";
+
+    // Check cache first
+    const cacheKey = getCategoriesCacheKey({
+      featured,
+      active,
+      limit,
+      includeProducts,
+    });
+    const cachedData = await getCachedData<{
+      success: boolean;
+      data: unknown[];
+      count: number;
+    }>(cacheKey);
+
+    if (cachedData) {
+      return NextResponse.json(cachedData, {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+          "X-Cache": "HIT",
+        },
+      });
+    }
+
+    // Cache miss - fetch from database
+    await connectDB();
 
     const query: Record<string, unknown> = {};
 
@@ -45,18 +75,21 @@ export async function GET(request: NextRequest) {
     // Use .lean() for faster queries - returns plain objects instead of Mongoose documents
     const categories = await categoriesQuery.lean().exec();
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: categories,
-        count: categories.length,
+    const responseData = {
+      success: true,
+      data: categories,
+      count: categories.length,
+    };
+
+    // Cache the result
+    await setCachedData(cacheKey, responseData, CACHE_TTL.CATEGORIES);
+
+    return NextResponse.json(responseData, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        "X-Cache": "MISS",
       },
-      {
-        headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-        },
-      }
-    );
+    });
   } catch (error) {
     console.error("Error fetching categories:", error);
     return NextResponse.json(
@@ -106,6 +139,9 @@ export async function POST(request: NextRequest) {
     });
 
     await category.save();
+
+    // Invalidate category caches
+    await invalidateCategoryCaches(slug);
 
     return NextResponse.json({
       success: true,
@@ -187,6 +223,10 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Get the category before update to get the slug for cache invalidation
+    const existingCategory = await Category.findById(id);
+    const categorySlug = existingCategory?.slug;
+
     const category = await Category.findByIdAndUpdate(id, updateData, {
       new: true,
     });
@@ -200,6 +240,9 @@ export async function PATCH(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    // Invalidate category caches (use old slug if available, or new slug)
+    await invalidateCategoryCaches(categorySlug || category.slug);
 
     return NextResponse.json({
       success: true,

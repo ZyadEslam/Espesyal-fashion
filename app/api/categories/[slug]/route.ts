@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/app/utils/db";
 import Product from "@/app/models/product";
 import Category from "@/app/models/category";
+import { invalidateCategoryCaches } from "@/lib/cache";
 
 // GET products by category
 export async function GET(
@@ -12,7 +13,7 @@ export async function GET(
     await connectDB();
 
     const { slug } = await params;
-    
+
     // If the slug is "products", this route shouldn't handle it
     // It should be handled by [categoryId]/products route
     // This is a safeguard in case Next.js routing doesn't prioritize correctly
@@ -219,7 +220,14 @@ export async function PATCH(
 
     const { slug } = await params;
     const body = await request.json();
-    const { isActive, isFeatured, sortOrder, name, slug: newSlug, description } = body;
+    const {
+      isActive,
+      isFeatured,
+      sortOrder,
+      name,
+      slug: newSlug,
+      description,
+    } = body;
 
     const updateData: Record<string, unknown> = {};
 
@@ -271,6 +279,16 @@ export async function PATCH(
       );
     }
 
+    // Get the existing category to get the old slug for cache invalidation
+    let existingCategory;
+    if (isValidObjectId(slug)) {
+      existingCategory = await Category.findById(slug);
+    } else {
+      existingCategory = await Category.findOne({ slug });
+    }
+
+    const oldSlug = existingCategory?.slug || slug;
+
     // Check if slug is an ObjectId (categoryId) or a slug string
     let category;
     if (isValidObjectId(slug)) {
@@ -293,6 +311,12 @@ export async function PATCH(
         },
         { status: 404 }
       );
+    }
+
+    // Invalidate category caches (use old slug and new slug)
+    await invalidateCategoryCaches(oldSlug);
+    if (category.slug !== oldSlug) {
+      await invalidateCategoryCaches(category.slug);
     }
 
     return NextResponse.json({

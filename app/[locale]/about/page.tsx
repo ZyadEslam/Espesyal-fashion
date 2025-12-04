@@ -55,9 +55,6 @@ const AboutPage = async ({
     <div className="min-h-screen mx-auto lg:max-w-7xl sm:w-[95%]">
       <Breadcrumb items={breadcrumbItems} />
 
-      {/* Hero Section */}
-      {/* <HeroSection /> */}
-
       {/* Team Section */}
       <TeamSection />
 
