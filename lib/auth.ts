@@ -58,12 +58,16 @@ export const authOptions: NextAuthOptions = {
                 );
               }
               console.log(`✅ New user created: ${user.email}`);
-            } catch (createError: any) {
+            } catch (createError: unknown) {
               // Handle duplicate email error (race condition)
-              if (
-                createError.code === 11000 ||
-                createError.name === "MongoServerError"
-              ) {
+              // MongoDB duplicate key error code is 11000
+              const isDuplicateError =
+                createError &&
+                typeof createError === "object" &&
+                "code" in createError &&
+                (createError as { code: number }).code === 11000;
+
+              if (isDuplicateError) {
                 console.log(
                   `⚠️ User already exists (race condition), fetching existing user: ${user.email}`
                 );
@@ -87,14 +91,22 @@ export const authOptions: NextAuthOptions = {
             console.error("❌ User object is missing _id after creation/fetch");
             return false;
           }
-        } catch (error: any) {
-          console.error("❌ Error in signIn callback:", {
-            message: error?.message,
-            stack: error?.stack,
+        } catch (error: unknown) {
+          const errorDetails: Record<string, unknown> = {
             email: user?.email,
-            errorName: error?.name,
-            errorCode: error?.code,
-          });
+          };
+
+          if (error instanceof Error) {
+            errorDetails.message = error.message;
+            errorDetails.stack = error.stack;
+            errorDetails.errorName = error.name;
+          }
+
+          if (error && typeof error === "object" && "code" in error) {
+            errorDetails.errorCode = error.code;
+          }
+
+          console.error("❌ Error in signIn callback:", errorDetails);
           // Only deny access for critical errors, not transient issues
           // Return false to trigger AccessDenied error page
           return false;

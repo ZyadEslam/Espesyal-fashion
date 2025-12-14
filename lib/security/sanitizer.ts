@@ -14,7 +14,10 @@ function getValidator() {
     // This allows the code to work even if validator is not installed
     // The webpack.IgnorePlugin in next.config.js will prevent webpack from bundling it
     // eslint-disable-next-line no-eval
-    return eval('typeof require !== "undefined" ? require("validator") : null');
+    const validator = eval(
+      'typeof require !== "undefined" ? require("validator") : null'
+    );
+    return validator;
   } catch {
     // Validator not available, will use fallback validation
     return null;
