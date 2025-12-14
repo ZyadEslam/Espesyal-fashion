@@ -111,7 +111,9 @@ const DashboardSideNav = memo(() => {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white/95 backdrop-blur-md border border-gray-200 rounded-xl shadow-lg hover:shadow-xl hover:bg-white transition-all duration-300"
+        className={`lg:hidden fixed top-4 z-50 p-3 bg-white/95 backdrop-blur-md border border-gray-200 rounded-xl shadow-lg hover:shadow-xl hover:bg-white transition-all duration-300 ${
+          isArabic ? "right-4" : "left-4"
+        }`}
         aria-label="Toggle menu"
       >
         {isMobileMenuOpen ? (
@@ -124,18 +126,20 @@ const DashboardSideNav = memo(() => {
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300"
+          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-30 transition-opacity duration-300"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static h-screen w-64 bg-white/95 backdrop-blur-md border-r border-gray-200 shadow-xl z-40 transition-transform duration-300 ${
+        className={`fixed lg:static h-screen w-64 bg-white/95 backdrop-blur-md border-r border-gray-200 shadow-xl z-30 transition-transform duration-300 ${
           isMobileMenuOpen
             ? "translate-x-0"
+            : isArabic
+            ? "translate-x-full lg:translate-x-0"
             : "-translate-x-full lg:translate-x-0"
-        }`}
+        } ${isArabic ? "right-0" : "left-0"}`}
       >
         {/* Header */}
         <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-orange/5 to-transparent">

@@ -50,7 +50,9 @@
     "signIn": "تسجيل الدخول",
     "signOut": "تسجيل الخروج",
     "myAccount": "حسابي",
-    "menu": "القائمة"
+    "menu": "القائمة",
+    "exitDashboard": "الخروج من لوحة التحكم",
+    "shoppingCart": "سلة التسوق"
   },
   "shop": {
     "title": "المتجر",
@@ -236,7 +238,7 @@
     "allRightsReserved": "جميع الحقوق محفوظة."
   },
   "home": {
-    "heroBadge": "الشتاء هنا",
+    "heroBadge": "قسم العروض",
     "largestSale": "أكبر تخفيض في السنة هنا!",
     "useCode": "استخدم الكود:",
     "forDiscount": "للحصول على خصم 25%",

@@ -6,14 +6,14 @@ import { requireAdmin } from "@/lib/adminAuth";
 // Default values from translation files
 const defaultValues = {
   en: {
-    heroBadge: "Winter Is Here",
+    heroBadge: "offer section",
     largestSale: "The largest sale of the year is here!",
     useCode: "Use code:",
     forDiscount: "for 25% OFF",
     promoCode: "BFRIDAY",
   },
   ar: {
-    heroBadge: "الشتاء هنا",
+    heroBadge: "قسم العروض",
     largestSale: "أكبر تخفيض في السنة هنا!",
     useCode: "استخدم الكود:",
     forDiscount: "للحصول على خصم 25%",
