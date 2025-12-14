@@ -45,8 +45,10 @@ export async function GET(request: NextRequest) {
     if (cachedData) {
       return NextResponse.json(cachedData, {
         headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+          "Cache-Control":
+            "public, s-maxage=300, stale-while-revalidate=600, max-age=60",
           "X-Cache": "HIT",
+          Vary: "Accept-Encoding",
         },
       });
     }
@@ -96,8 +98,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(responseData, {
       headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+        "Cache-Control":
+          "public, s-maxage=300, stale-while-revalidate=600, max-age=60",
         "X-Cache": "MISS",
+        Vary: "Accept-Encoding",
       },
     });
   } catch (error) {

@@ -39,15 +39,28 @@ const nextConfig = {
   trailingSlash: true,
   // Target modern browsers only - reduces polyfills and legacy code
   compiler: {
-    removeConsole: process.env.NODE_ENV === "production" ? {
-      exclude: ["error", "warn"],
-    } : false,
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? {
+            exclude: ["error", "warn"],
+          }
+        : false,
   },
   // Exclude devtools from production build
   webpack: (config, { dev, isServer }) => {
     // Make webpack available for plugins
     const webpack = require("webpack");
-    
+
+    // Fix for "self is not defined" error - provide fallback for browser globals on server
+    if (isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+
     if (dev) {
       config.optimization.minimize = false;
       config.cache = false;
@@ -56,67 +69,106 @@ const nextConfig = {
         aggregateTimeout: 300,
       };
     } else {
-      // Production optimizations
-      config.optimization = {
-        ...config.optimization,
-        minimize: true,
-        usedExports: true,
-        sideEffects: false,
-        // Better code splitting
-        splitChunks: {
-          chunks: "all",
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Framework chunk
-            framework: {
-              name: "framework",
-              chunks: "all",
-              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
-              priority: 40,
-              enforce: true,
-            },
-            // Shared libs
-            lib: {
-              test(module) {
-                return (
-                  module.size() > 160000 &&
-                  /node_modules[/\\]/.test(module.identifier())
-                );
+      // Production optimizations - only apply splitChunks to client bundles
+      if (!isServer) {
+        config.optimization = {
+          ...config.optimization,
+          minimize: true,
+          usedExports: true,
+          sideEffects: false,
+          // Better code splitting for reduced initial bundle size
+          splitChunks: {
+            chunks: "all",
+            maxInitialRequests: 25,
+            minSize: 20000,
+            cacheGroups: {
+              default: false,
+              vendors: false,
+              // Framework chunk - React and core dependencies
+              framework: {
+                name: "framework",
+                chunks: "all",
+                test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+                priority: 40,
+                enforce: true,
               },
-              name(module) {
-                const hash = require("crypto").createHash("sha1");
-                hash.update(module.identifier());
-                return hash.digest("hex").substring(0, 8);
+              // Framer Motion - large library, separate chunk
+              framerMotion: {
+                name: "framer-motion",
+                test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
+                chunks: "all",
+                priority: 35,
+                enforce: true,
               },
-              priority: 30,
-              minChunks: 1,
-              reuseExistingChunk: true,
-            },
-            // Common chunk
-            commons: {
-              name: "commons",
-              minChunks: 2,
-              priority: 20,
-            },
-            // Shared chunk
-            shared: {
-              name(module, chunks) {
-                return (
-                  require("crypto")
+              // Next.js and Next.js related
+              nextjs: {
+                name: "nextjs",
+                test: /[\\/]node_modules[\\/](next|next-intl|next-auth)[\\/]/,
+                chunks: "all",
+                priority: 33,
+                enforce: true,
+              },
+              // UI libraries
+              ui: {
+                name: "ui-libs",
+                test: /[\\/]node_modules[\\/](lucide-react|@stripe)[\\/]/,
+                chunks: "all",
+                priority: 32,
+                minChunks: 1,
+              },
+              // Large vendor libraries
+              lib: {
+                test(module) {
+                  return (
+                    module.size() > 160000 &&
+                    /node_modules[/\\]/.test(module.identifier()) &&
+                    !/[\\/]node_modules[\\/](react|react-dom|framer-motion|next|next-intl|next-auth|lucide-react|@stripe)[\\/]/.test(
+                      module.identifier()
+                    )
+                  );
+                },
+                name(module) {
+                  const packageName = module
+                    .identifier()
+                    .match(/[\\/]node_modules[\\/](.+?)([\\/]|$)/);
+                  if (packageName) {
+                    return `lib-${packageName[1].replace(
+                      /[^a-zA-Z0-9]/g,
+                      "-"
+                    )}`;
+                  }
+                  const hash = require("crypto").createHash("sha1");
+                  hash.update(module.identifier());
+                  return `lib-${hash.digest("hex").substring(0, 8)}`;
+                },
+                priority: 30,
+                minChunks: 1,
+                reuseExistingChunk: true,
+              },
+              // Common chunk - shared code
+              commons: {
+                name: "commons",
+                minChunks: 2,
+                priority: 20,
+                reuseExistingChunk: true,
+              },
+              // Shared chunk - smaller shared modules
+              shared: {
+                name(module, chunks) {
+                  return require("crypto")
                     .createHash("sha1")
                     .update(chunks.reduce((acc, chunk) => acc + chunk.name, ""))
                     .digest("hex")
-                    .substring(0, 8)
-                );
+                    .substring(0, 8);
+                },
+                priority: 10,
+                minChunks: 2,
+                reuseExistingChunk: true,
               },
-              priority: 10,
-              minChunks: 2,
-              reuseExistingChunk: true,
             },
           },
-        },
-      };
+        };
+      }
     }
 
     // Make @vercel/kv optional - use IgnorePlugin to prevent webpack from trying to resolve it if not installed
@@ -244,7 +296,8 @@ const nextConfig = {
         ],
       },
       {
-        source: "/:path*\\.(js|css|json|xml|txt|svg|ico|png|jpg|jpeg|gif|webp|avif|woff|woff2|ttf|eot)",
+        source:
+          "/:path*\\.(js|css|json|xml|txt|svg|ico|png|jpg|jpeg|gif|webp|avif|woff|woff2|ttf|eot)",
         headers: [
           {
             key: "Cache-Control",

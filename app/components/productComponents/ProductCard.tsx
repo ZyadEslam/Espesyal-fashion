@@ -15,7 +15,7 @@ import { ShoppingCart } from "lucide-react";
 import { ProductCardProps } from "../../types/types";
 import { useCart } from "../../hooks/useCart";
 import { useTranslations } from "next-intl";
-import { getOptimizedImageUrl, getImageDimensions } from "../../utils/imageUtils";
+import { getOptimizedImageUrl } from "../../utils/imageUtils";
 const Toast = lazy(() => import("../../UI/Toast"));
 const ProductImage = lazy(() => import("./ProductImage"));
 
@@ -26,7 +26,11 @@ interface ProductCardComponentProps {
 }
 
 const ProductCard = memo(
-  ({ product, showCartButton = true, isLCP = false }: ProductCardComponentProps) => {
+  ({
+    product,
+    showCartButton = true,
+    isLCP = false,
+  }: ProductCardComponentProps) => {
     const [inCart, setInCart] = useState(false);
     const [imageError, setImageError] = useState(false);
     const [imageSrc, setImageSrc] = useState("");
@@ -46,15 +50,19 @@ const ProductCard = memo(
       }
     }, [product._id, checkInCart]);
 
-    // Set optimized image source with proper dimensions
+    // Set optimized image source with proper dimensions based on actual display size
+    // Product cards display at: mobile ~260px, sm: 320px, so request appropriate size
     useEffect(() => {
       if (product._id) {
-        const dimensions = getImageDimensions("product-card");
+        // Use smaller dimensions that match actual display size (260-320px)
+        // This prevents loading oversized images (587x781) for small displays
+        const displayWidth = 320; // Max display size for product cards
+        const displayHeight = 320;
         const optimizedUrl = getOptimizedImageUrl(
           product._id as string,
           0,
-          dimensions.width,
-          dimensions.height,
+          displayWidth,
+          displayHeight,
           85
         );
         setImageSrc(optimizedUrl);
@@ -119,7 +127,10 @@ const ProductCard = memo(
         {/* Product Link */}
         <Link href={`/product/${product._id}`} className="block">
           {/* Product Image Container */}
-          <div className="relative bg-secondaryLight rounded-t-2xl h-[260px] sm:h-[320px] flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
+          <div
+            className="relative bg-secondaryLight rounded-t-2xl h-[260px] sm:h-[320px] flex items-center justify-center overflow-hidden"
+            style={{ aspectRatio: "1 / 1" }}
+          >
             {imageSrc && !imageError ? (
               <Suspense
                 fallback={
@@ -135,8 +146,9 @@ const ProductCard = memo(
                   fetchPriority={isLCP ? "high" : "auto"}
                   loading={isLCP ? "eager" : "lazy"}
                   context="product-card"
-                  width={400}
-                  height={400}
+                  width={320}
+                  height={320}
+                  productId={product._id as string}
                 />
               </Suspense>
             ) : (

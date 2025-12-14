@@ -53,7 +53,14 @@ export async function GET(req: NextRequest) {
             locale: heroSection.locale,
           },
         },
-        { status: 200 }
+        {
+          status: 200,
+          headers: {
+            "Cache-Control":
+              "public, s-maxage=300, stale-while-revalidate=600, max-age=60",
+            Vary: "Accept-Encoding, Accept-Language",
+          },
+        }
       );
     }
 
@@ -66,7 +73,14 @@ export async function GET(req: NextRequest) {
           locale,
         },
       },
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          "Cache-Control":
+            "public, s-maxage=300, stale-while-revalidate=600, max-age=60",
+          Vary: "Accept-Encoding, Accept-Language",
+        },
+      }
     );
   } catch (error) {
     console.error("Error fetching hero section:", error);
@@ -82,7 +96,14 @@ export async function GET(req: NextRequest) {
           locale,
         },
       },
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          "Cache-Control":
+            "public, s-maxage=300, stale-while-revalidate=600, max-age=60",
+          Vary: "Accept-Encoding, Accept-Language",
+        },
+      }
     );
   }
 }

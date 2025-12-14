@@ -1,5 +1,5 @@
 import React from "react";
-import { getImageSizes } from "../../utils/imageUtils";
+import { getImageSizes, getImageSrcSet } from "../../utils/imageUtils";
 
 interface ProductImageProps {
   imageSrc: string;
@@ -10,6 +10,7 @@ interface ProductImageProps {
   context?: "product-card" | "product-detail" | "thumbnail" | "hero";
   width?: number;
   height?: number;
+  productId?: string;
 }
 
 const ProductImage = ({
@@ -21,8 +22,21 @@ const ProductImage = ({
   context = "product-card",
   width = 400,
   height = 400,
+  productId,
 }: ProductImageProps) => {
   const sizes = getImageSizes(context);
+
+  // Generate srcset for responsive images if productId is provided
+  const srcset =
+    productId && context !== "thumbnail"
+      ? getImageSrcSet(
+          productId,
+          0,
+          context === "product-card"
+            ? [220, 260, 320, 400]
+            : [400, 600, 800, 1200]
+        )
+      : undefined;
 
   // Use regular img tag for our custom API routes to bypass Next.js Image validation
   // Our API route handles all optimization (resizing, format conversion, etc.)
@@ -30,6 +44,7 @@ const ProductImage = ({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={imageSrc}
+      srcSet={srcset}
       alt={productName || "Product Image"}
       width={width}
       height={height}

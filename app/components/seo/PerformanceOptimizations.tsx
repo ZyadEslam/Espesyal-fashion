@@ -105,20 +105,12 @@ export function PerformanceMonitor() {
         const hints = [
           { rel: "dns-prefetch", href: "//fonts.googleapis.com" },
           { rel: "dns-prefetch", href: "//www.google-analytics.com" },
-          {
-            rel: "preconnect",
-            href: "https://fonts.gstatic.com",
-            crossorigin: "anonymous",
-          },
         ];
 
         hints.forEach((hint) => {
           const link = document.createElement("link");
           link.rel = hint.rel;
           link.href = hint.href;
-          if (hint.crossorigin) {
-            link.crossOrigin = hint.crossorigin;
-          }
           document.head.appendChild(link);
         });
       };

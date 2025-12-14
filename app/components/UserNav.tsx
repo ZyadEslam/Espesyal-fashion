@@ -338,12 +338,8 @@ const UserNav = memo(() => {
             </>
           ) : (
             <div className="flex items-center gap-4">
-              {/* Left Side - Dashboard Menu Toggle Button */}
-              <div
-                className={`flex items-center ${
-                  isDashboardMenuOpen ? "hidden" : ""
-                }`}
-              >
+              {/* Mobile Menu Toggle Button - Only visible on small screens */}
+              <div className="lg:hidden flex items-center">
                 <ToggleMenuBtn
                   isMenuOpen={isDashboardMenuOpen}
                   toggleMenu={toggleDashboardMenu}

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { Copy, Check, Sparkles } from "lucide-react";
+import { cachedFetchJson } from "../../utils/cachedFetch";
 
 interface HeroContent {
   heroBadge: string;
@@ -18,14 +19,20 @@ const HeroSection = () => {
   const [copied, setCopied] = useState(false);
   const [heroContent, setHeroContent] = useState<HeroContent | null>(null);
 
-  // Fetch hero content from API
+  // Fetch hero content from API with caching - prioritize initial render
   useEffect(() => {
+    // Use cached fetch for better performance
     const fetchHeroContent = async () => {
       try {
-        const response = await fetch(`/api/hero-section?locale=${locale}`);
-        const result = await response.json();
+        const result = await cachedFetchJson<{
+          success: boolean;
+          data: HeroContent;
+        }>(`/api/hero-section?locale=${locale}`, {
+          cache: "default",
+          revalidate: 300, // Cache for 5 minutes
+        });
 
-        if (result.success && result.data) {
+        if (result?.success && result.data) {
           setHeroContent(result.data);
         }
       } catch (error) {
@@ -33,7 +40,13 @@ const HeroSection = () => {
       }
     };
 
-    fetchHeroContent();
+    // Defer non-critical fetch to avoid blocking initial render
+    // Use requestIdleCallback if available, otherwise setTimeout
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      requestIdleCallback(fetchHeroContent, { timeout: 1000 });
+    } else {
+      setTimeout(fetchHeroContent, 0);
+    }
   }, [locale]);
 
   // Use API content if available, otherwise fallback to translations
@@ -65,10 +78,11 @@ const HeroSection = () => {
           }}
         />
 
-        {/* Sparkle Icons */}
+        {/* Sparkle Icons - Defer animation to reduce initial render cost */}
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={`sparkle-${i}`}
+            initial={{ opacity: 0 }}
             animate={{
               opacity: [0, 1, 0],
               scale: [0.5, 1, 0.5],
@@ -78,7 +92,7 @@ const HeroSection = () => {
               duration: 3 + i * 0.5,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: i * 0.3,
+              delay: i * 0.3 + 0.5, // Slight delay to prioritize content
             }}
             className={`absolute ${
               i === 0

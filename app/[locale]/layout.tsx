@@ -71,6 +71,37 @@ export default async function LocaleLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="shortcut icon" href="/favicon.ico" />
+        {/* DNS prefetch for external domains */}
+        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="//www.google-analytics.com" />
+        <link rel="dns-prefetch" href="//js.stripe.com" />
+        <link rel="dns-prefetch" href="//api.stripe.com" />
+        {/* Preconnect for critical third-party resources */}
+        <link
+          rel="preconnect"
+          href="https://js.stripe.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://api.stripe.com"
+          crossOrigin="anonymous"
+        />
+        {/* Preload critical fonts */}
+        <link
+          rel="preload"
+          href="/fonts/Tajawal/Tajawal-Regular.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+        {/* Prefetch critical API routes for faster navigation */}
+        <link
+          rel="prefetch"
+          href="/api/categories?featured=true"
+          as="fetch"
+          crossOrigin="anonymous"
+        />
       </head>
       <body
         className={`${outfit.variable} ${playfairDisplay.variable} antialiased`}

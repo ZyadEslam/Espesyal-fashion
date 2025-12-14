@@ -36,11 +36,11 @@ export const getOptimizedImageUrl = (
 ): string => {
   const baseUrl = `/api/product/image/${productId}?index=${index}`;
   const params = new URLSearchParams();
-  
+
   if (width) params.append("w", width.toString());
   if (height) params.append("h", height.toString());
   if (quality !== 85) params.append("q", quality.toString());
-  
+
   const queryString = params.toString();
   return queryString ? `${baseUrl}&${queryString}` : baseUrl;
 };
@@ -84,7 +84,11 @@ export const isLCPImage = (
  * @returns sizes attribute string
  */
 export const getImageSizes = (
-  context: "product-card" | "product-detail" | "thumbnail" | "hero" = "product-card"
+  context:
+    | "product-card"
+    | "product-detail"
+    | "thumbnail"
+    | "hero" = "product-card"
 ): string => {
   switch (context) {
     case "product-card":
@@ -106,11 +110,16 @@ export const getImageSizes = (
  * @returns Object with width and height
  */
 export const getImageDimensions = (
-  context: "product-card" | "product-detail" | "thumbnail" | "hero" = "product-card"
+  context:
+    | "product-card"
+    | "product-detail"
+    | "thumbnail"
+    | "hero" = "product-card"
 ): { width: number; height: number } => {
   switch (context) {
     case "product-card":
-      return { width: 400, height: 400 };
+      // Match actual display size: mobile ~260px, sm+ ~320px
+      return { width: 320, height: 320 };
     case "product-detail":
       return { width: 800, height: 800 };
     case "thumbnail":
@@ -118,6 +127,6 @@ export const getImageDimensions = (
     case "hero":
       return { width: 1920, height: 1080 };
     default:
-      return { width: 400, height: 400 };
+      return { width: 320, height: 320 };
   }
 };

@@ -67,14 +67,24 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
   const handleScroll = (direction: "prev" | "next") => {
     if (!scrollContainerRef.current) return;
-    const container = scrollContainerRef.current;
-    const card = container.querySelector(".category-card");
-    const cardWidth = card instanceof HTMLElement ? card.offsetWidth : 0;
-    const scrollAmount = cardWidth + 24; // include gap
 
-    container.scrollBy({
-      left: direction === "next" ? scrollAmount : -scrollAmount,
-      behavior: "smooth",
+    // Use requestAnimationFrame to batch DOM reads/writes and avoid forced reflows
+    requestAnimationFrame(() => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+
+      // Batch DOM reads - get all needed values at once
+      const card = container.querySelector(".category-card");
+      const cardWidth = card instanceof HTMLElement ? card.offsetWidth : 0;
+      const scrollAmount = cardWidth + 24; // include gap
+
+      // Batch DOM write - perform scroll in the same frame
+      requestAnimationFrame(() => {
+        container.scrollBy({
+          left: direction === "next" ? scrollAmount : -scrollAmount,
+          behavior: "smooth",
+        });
+      });
     });
   };
 
