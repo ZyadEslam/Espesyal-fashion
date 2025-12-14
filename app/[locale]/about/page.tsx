@@ -1,16 +1,15 @@
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-// import { Suspense, lazy } from "react";
-import {
-  // HeroSection,
-  MissionSection,
-  ValuesSection,
-  TeamSection,
-  ContactUsSection,
-} from "../../components";
-// import LoadingSpinner from "../UI/LoadingSpinner";
+import { Suspense, lazy } from "react";
+import LoadingSpinner from "../../UI/LoadingSpinner";
 import { generateMetadata as generateSEOMetadata } from "../../utils/seo";
 import { Breadcrumb } from "../../components/seo/SEOComponents";
+
+// Lazy load components that use framer-motion for better code splitting
+const MissionSection = lazy(() => import("../../components/aboutComponents/MissionSection"));
+const ValuesSection = lazy(() => import("../../components/aboutComponents/ValuesSection"));
+const TeamSection = lazy(() => import("../../components/aboutComponents/TeamSection"));
+const ContactUsSection = lazy(() => import("../../components/aboutComponents/ContactUsSection"));
 
 export async function generateMetadata({
   params,
@@ -56,16 +55,24 @@ const AboutPage = async ({
       <Breadcrumb items={breadcrumbItems} />
 
       {/* Team Section */}
-      <TeamSection />
+      <Suspense fallback={<LoadingSpinner />}>
+        <TeamSection />
+      </Suspense>
 
       {/* Mission Section */}
-      <MissionSection />
+      <Suspense fallback={<LoadingSpinner />}>
+        <MissionSection />
+      </Suspense>
 
       {/* Values Section */}
-      <ValuesSection />
+      <Suspense fallback={<LoadingSpinner />}>
+        <ValuesSection />
+      </Suspense>
 
       {/* Contact CTA */}
-      <ContactUsSection />
+      <Suspense fallback={<LoadingSpinner />}>
+        <ContactUsSection />
+      </Suspense>
     </div>
   );
 };

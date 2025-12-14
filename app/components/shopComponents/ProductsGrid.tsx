@@ -43,8 +43,12 @@ const ProductsGrid = memo(
 
     return (
       <div className={`grid ${gridClass} gap-4 sm:gap-6 ${className}`}>
-        {products.map((product: ProductCardProps) => (
-          <ProductCard key={product._id} product={product} />
+        {products.map((product: ProductCardProps, index: number) => (
+          <ProductCard 
+            key={product._id} 
+            product={product} 
+            isLCP={index === 0} // First product is LCP candidate
+          />
         ))}
       </div>
     );

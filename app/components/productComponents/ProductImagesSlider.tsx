@@ -128,8 +128,8 @@
 
 "use client";
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { ProductCardProps } from "../../types/types";
+import { getOptimizedImageUrl, getImageDimensions } from "../../utils/imageUtils";
 
 const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -222,10 +222,28 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   );
   const currentImage = validImagesWithIndices[safeSelectedIndex];
 
+  // Get optimized image URLs with proper dimensions
+  const mainImageDimensions = getImageDimensions("product-detail");
+  const thumbnailDimensions = getImageDimensions("thumbnail");
+  
+  // Generate optimized URLs using product ID directly
+  const getOptimizedMainImageUrl = (originalIndex: number) => {
+    if (product._id) {
+      return getOptimizedImageUrl(
+        product._id as string,
+        originalIndex,
+        mainImageDimensions.width,
+        mainImageDimensions.height,
+        90
+      );
+    }
+    return currentImage.src;
+  };
+
   return (
     <div className="w-full md:w-1/3 relative md:left-20">
       <div className="bg-secondaryLight rounded-lg mb-2 sm:mb-3 md:mb-4 p-2 sm:p-3 md:p-4">
-        <div className="relative w-full h-[300px]">
+        <div className="relative w-full h-[300px]" style={{ aspectRatio: "1 / 1" }}>
           {loadingImages.has(currentImage.originalIndex) && (
             <div className="absolute inset-0 animate-pulse bg-gray-200 rounded-lg"></div>
           )}
@@ -234,17 +252,17 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
               Image unavailable
             </div>
           ) : (
-            <Image
-              src={currentImage.src}
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={getOptimizedMainImageUrl(currentImage.originalIndex)}
               alt={product.name}
-              className={`w-full h-full object-contain transition-opacity duration-300 ${
-                loadingImages.has(currentImage.originalIndex)
-                  ? "opacity-0"
-                  : "opacity-100"
-              }`}
-              width={500}
-              height={500}
-              priority
+              className="w-full h-full object-contain"
+              width={mainImageDimensions.width}
+              height={mainImageDimensions.height}
+              sizes="(max-width: 768px) 100vw, 33vw"
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
               onError={() => handleImageError(currentImage.originalIndex)}
               onLoad={() => handleImageLoad(currentImage.originalIndex)}
             />
@@ -252,38 +270,56 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
         </div>
       </div>
       <div className="flex flex-wrap gap-2 sm:gap-3 mt-2 sm:mt-3 md:mt-4 justify-center sm:justify-start">
-        {validImagesWithIndices.map(({ src, originalIndex }, filteredIndex) => (
-          <div
-            key={originalIndex}
-            className={`rounded-lg cursor-pointer p-1 relative ${
-              safeSelectedIndex === filteredIndex
-                ? "border-2 border-orange"
-                : "bg-secondaryLight"
-            }`}
-            onClick={() => setSelectedImageIndex(filteredIndex)}
-          >
-            {loadingImages.has(originalIndex) && (
-              <div className="absolute inset-0 animate-pulse bg-gray-200 rounded-lg"></div>
-            )}
-            {failedImages.has(originalIndex) ? (
-              <div className="w-[60px] h-[60px] sm:w-[70px] sm:h-[70px] md:w-[80px] md:h-[80px] flex items-center justify-center text-xs text-gray-400 bg-gray-100 rounded">
-                N/A
-              </div>
-            ) : (
-              <Image
-                src={src}
-                alt={`${product.name} view ${filteredIndex + 1}`}
-                width={80}
-                height={80}
-                className={`w-[60px] h-[60px] sm:w-[70px] sm:h-[70px] md:w-[80px] md:h-[80px] object-cover rounded transition-opacity duration-300 ${
-                  loadingImages.has(originalIndex) ? "opacity-0" : "opacity-100"
-                }`}
-                // onError={() => handleImageError(originalIndex)}
-                onLoad={() => handleImageLoad(originalIndex)}
-              />
-            )}
-          </div>
-        ))}
+        {validImagesWithIndices.map(({ src, originalIndex }, filteredIndex) => {
+          // Generate optimized thumbnail URL using product ID directly
+          const getOptimizedThumbnailUrl = () => {
+            if (product._id) {
+              return getOptimizedImageUrl(
+                product._id as string,
+                originalIndex,
+                thumbnailDimensions.width,
+                thumbnailDimensions.height,
+                75
+              );
+            }
+            return src;
+          };
+
+          return (
+            <div
+              key={originalIndex}
+              className={`rounded-lg cursor-pointer p-1 relative ${
+                safeSelectedIndex === filteredIndex
+                  ? "border-2 border-orange"
+                  : "bg-secondaryLight"
+              }`}
+              onClick={() => setSelectedImageIndex(filteredIndex)}
+              style={{ width: `${thumbnailDimensions.width}px`, height: `${thumbnailDimensions.height}px` }}
+            >
+              {loadingImages.has(originalIndex) && (
+                <div className="absolute inset-0 animate-pulse bg-gray-200 rounded-lg"></div>
+              )}
+              {failedImages.has(originalIndex) ? (
+                <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 bg-gray-100 rounded">
+                  N/A
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={getOptimizedThumbnailUrl()}
+                  alt={`${product.name} view ${filteredIndex + 1}`}
+                  width={thumbnailDimensions.width}
+                  height={thumbnailDimensions.height}
+                  className="w-full h-full object-cover rounded"
+                  sizes="80px"
+                  loading="lazy"
+                  decoding="async"
+                  onLoad={() => handleImageLoad(originalIndex)}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

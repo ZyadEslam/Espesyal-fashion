@@ -79,6 +79,8 @@ const UserNav = memo(() => {
   }, [isMenuOpen]);
 
   useEffect(() => {
+    let ticking = false;
+
     const handleResize = () => {
       if (window.innerWidth >= 768) {
         setIsMenuOpen(false);
@@ -86,15 +88,31 @@ const UserNav = memo(() => {
     };
 
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 10);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", handleScroll);
+    // Throttle resize with requestAnimationFrame
+    let resizeTimeout: NodeJS.Timeout;
+    const throttledResize = () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        window.requestAnimationFrame(handleResize);
+      }, 150);
+    };
+
+    window.addEventListener("resize", throttledResize, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", throttledResize);
       window.removeEventListener("scroll", handleScroll);
+      if (resizeTimeout) clearTimeout(resizeTimeout);
     };
   }, []);
 
@@ -152,11 +170,12 @@ const UserNav = memo(() => {
                     <Image
                       src={assets.espesialLogo}
                       alt="Espesyal Shop Logo"
-                      width={200}
-                      height={60}
+                      width={120}
+                      height={45}
                       className="object-contain h-10 sm:h-12 lg:h-14 w-auto transition-transform duration-300 group-hover:scale-105 filter brightness-110 contrast-110"
                       priority
-                      quality={95}
+                      quality={85}
+                      sizes="(max-width: 640px) 80px, (max-width: 1024px) 100px, 120px"
                     />
                   </div>
                   <span className="brand-name text-xl sm:text-2xl lg:text-3xl transition-all duration-300 group-hover:scale-105">
@@ -182,7 +201,7 @@ const UserNav = memo(() => {
                 </Link>
 
                 {/* My Orders Icon - Hidden on mobile */}
-                {session?.user && (
+                {session && session.user && session.user.id && (
                   <Link
                     href={getLocalizedPath("/my-orders")}
                     className="hidden md:block p-2 text-gray-600 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5"
@@ -280,6 +299,18 @@ const UserNav = memo(() => {
                           >
                             {t("about")}
                           </Link>
+
+                          {/* My Orders Link - Only show when user is logged in */}
+                          {session && session.user && session.user.id && (
+                            <Link
+                              href={getLocalizedPath("/my-orders")}
+                              className="flex items-center gap-3 text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
+                              onClick={closeMenu}
+                            >
+                              <Package className="w-5 h-5" />
+                              <span>{tOrders("myOrders")}</span>
+                            </Link>
+                          )}
 
                           {/* Dashboard Link */}
                           {session?.user?.isAdmin && (

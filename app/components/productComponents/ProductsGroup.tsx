@@ -50,8 +50,12 @@ const ProductsGroup = ({
   return (
     <section className={`${customClassName}`}>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-6">
-        {productsToRender.map((product: ProductCardProps) => (
-          <ProductCard key={product._id} product={product} />
+        {productsToRender.map((product: ProductCardProps, index: number) => (
+          <ProductCard 
+            key={product._id} 
+            product={product} 
+            isLCP={index === 0} // First product is LCP candidate
+          />
         ))}
       </div>
     </section>

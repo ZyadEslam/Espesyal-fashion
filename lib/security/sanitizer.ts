@@ -7,11 +7,14 @@ function removeHtmlTags(input: string): string {
 }
 
 // Try to import validator dynamically, use fallback if not available
-// Using dynamic require to avoid webpack static analysis issues
+// Using eval to prevent webpack from analyzing the require call
 function getValidator() {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return require("validator");
+    // Use eval to prevent webpack static analysis
+    // This allows the code to work even if validator is not installed
+    // The webpack.IgnorePlugin in next.config.js will prevent webpack from bundling it
+    // eslint-disable-next-line no-eval
+    return eval('typeof require !== "undefined" ? require("validator") : null');
   } catch {
     // Validator not available, will use fallback validation
     return null;

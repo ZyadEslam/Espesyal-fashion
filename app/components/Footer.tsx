@@ -35,10 +35,12 @@ const Footer = () => {
               <Image
                 src={assets.espesialLogo}
                 alt="Espesyal Shop Logo"
-                width={200}
-                height={60}
+                width={120}
+                height={45}
                 className="object-contain h-10 sm:h-12 w-auto transition-transform duration-300 group-hover:scale-105"
                 priority
+                quality={85}
+                sizes="(max-width: 640px) 80px, 120px"
               />
               <span className="brand-name text-xl sm:text-2xl font-semibold text-gray-900">
                 Espesyal

@@ -14,6 +14,8 @@ pnpm dev
 bun dev
 ```
 
+**Note:** The `dev-turbo` script has been configured to disable Next.js devtools to avoid Turbopack HMR conflicts. If you still encounter issues, you can use `npm run dev` (regular webpack mode) instead.
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.

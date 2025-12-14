@@ -31,13 +31,14 @@ const OrdersPage = () => {
     updateOrderInList,
   } = useOrders();
 
-  // SSE connection for real-time updates
+  // SSE connection for real-time updates - only enabled on dashboard
   const { isConnected } = useOrderSSE({
     statusFilter,
     onNewOrder: addOrder,
     onOrderUpdate: (orderId, orderState) => {
       updateOrderInList(orderId, { orderState });
     },
+    enabled: true, // Explicitly enable for dashboard
   });
 
   // Initial fetch

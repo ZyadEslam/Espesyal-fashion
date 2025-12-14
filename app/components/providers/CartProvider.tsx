@@ -218,9 +218,23 @@ const CartProvider = ({ children }: CartProviderProps) => {
   );
 
   // Clear cart
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
+    // Clear cart state first
     setCart([]);
-  };
+    // Also clear localStorage immediately - do this synchronously before any useEffect runs
+    if (typeof window !== "undefined") {
+      const storageKey = getCartStorageKey(session?.user?.id);
+      // Clear all possible cart storage keys
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem("cart-anonymous");
+      localStorage.removeItem("cart");
+      // Set empty array to ensure it's cleared
+      localStorage.setItem(storageKey, JSON.stringify([]));
+      localStorage.setItem("cart", JSON.stringify([]));
+      // Keep sync flag as true to prevent reloading from server after manual clear
+      // (Only reset on user change, not on manual clear)
+    }
+  }, [session?.user?.id]);
 
   const removeUserCart = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -270,6 +284,18 @@ const CartProvider = ({ children }: CartProviderProps) => {
             session?.user?.id as string
           );
           console.log("Server Cart: ", serverCart);
+
+          // Don't sync if local cart is explicitly empty (was manually cleared)
+          const localCartData = userCart
+            ? JSON.parse(userCart)
+            : anonymousCart
+            ? JSON.parse(anonymousCart)
+            : [];
+          if (localCartData.length === 0 && serverCart.length === 0) {
+            // Both are empty, nothing to sync
+            return;
+          }
+
           if (anonymousCart && !userCart) {
             if (serverCart.length > 0) {
               const uniqueItems = uniqueListItems([
@@ -284,8 +310,15 @@ const CartProvider = ({ children }: CartProviderProps) => {
               localStorage.setItem(userKey, anonymousCart);
               localStorage.removeItem(anonymousKey);
             }
-          } else if (userCart && userCart.length > 0) {
-            setCart(uniqueListItems([...serverCart, ...JSON.parse(userCart)]));
+          } else if (userCart) {
+            const parsedUserCart = JSON.parse(userCart);
+            // Only merge if local cart has items (not manually cleared)
+            if (parsedUserCart.length > 0) {
+              setCart(uniqueListItems([...serverCart, ...parsedUserCart]));
+            } else if (serverCart.length > 0) {
+              // Local is empty but server has items - use server (unless it was just cleared)
+              setCart(serverCart);
+            }
           }
         } catch (err) {
           setError("Error Fetching Cart Please try again later ");
@@ -332,6 +365,7 @@ const CartProvider = ({ children }: CartProviderProps) => {
       removeUserCart,
       updateQuantity,
       removeFromCart,
+      clearCart,
     ]
   );
 

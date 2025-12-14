@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Playfair_Display } from "next/font/google";
 import "../style/globals.css";
+import "../instrumentation-client";
 import AuthProvider from "../components/providers/AuthProvider";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../lib/auth";

@@ -63,8 +63,12 @@ const ProductsGroup = memo(
     return (
       <section className={customClassName}>
         <div className={`grid ${gridClass} gap-3 md:gap-6`}>
-          {productsToRender.map((product: ProductCardProps) => (
-            <ProductCard key={product._id} product={product} />
+          {productsToRender.map((product: ProductCardProps, index: number) => (
+            <ProductCard 
+              key={product._id} 
+              product={product} 
+              isLCP={index === 0} // First product is LCP candidate
+            />
           ))}
         </div>
       </section>

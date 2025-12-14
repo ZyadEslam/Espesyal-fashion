@@ -152,9 +152,52 @@ export async function POST(req: NextRequest) {
 
     // 3. Parse and validate input
     const body = await req.json();
-    const validation = safeParseInput(orderCreateSchema, body);
+
+    // Pre-process products to normalize cart item structure before validation
+    // Cart items might have quantityInCart instead of quantity, and price might be missing
+    const processedBody = {
+      ...body,
+      products: Array.isArray(body.products)
+        ? body.products.map((item: unknown) => {
+            if (typeof item !== "object" || item === null) return item;
+            const product = item as Record<string, unknown>;
+            // Ensure quantity field exists (use quantityInCart if quantity is missing)
+            if (
+              product.quantity === undefined &&
+              product.quantityInCart !== undefined
+            ) {
+              product.quantity = product.quantityInCart;
+            }
+            // Ensure price field exists (default to 0 if missing, will be fetched from product during normalization)
+            if (product.price === undefined || product.price === null) {
+              product.price = 0;
+            }
+            // Ensure productId exists if _id is present (for validation)
+            if (product.productId === undefined && product._id !== undefined) {
+              product.productId = product._id;
+            }
+            return product;
+          })
+        : body.products,
+    };
+
+    // Log the incoming data for debugging (only in development)
+    if (process.env.NODE_ENV === "development") {
+      console.log(
+        "📦 Incoming order data:",
+        JSON.stringify(processedBody, null, 2)
+      );
+    }
+
+    const validation = safeParseInput(orderCreateSchema, processedBody);
 
     if (!validation.success) {
+      // Log detailed validation errors
+      console.error(
+        "❌ Order validation failed:",
+        JSON.stringify(validation.errors.errors, null, 2)
+      );
+
       return NextResponse.json(
         {
           success: false,
@@ -163,6 +206,7 @@ export async function POST(req: NextRequest) {
           details: validation.errors.errors.map((e) => ({
             path: e.path.join("."),
             message: e.message,
+            code: e.code,
           })),
         },
         { status: 400 }
@@ -208,6 +252,7 @@ export async function POST(req: NextRequest) {
 
     await dbConnect();
 
+    // Normalize products - this handles various field name variations
     const normalizedProducts = normalizeOrderItems(products);
 
     if (!normalizedProducts.length) {

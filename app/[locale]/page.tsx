@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import HeroSection from "../components/homeComponents/HeroSection";
-import CategorySection from "../components/homeComponents/CategorySection";
-import SubscriptionOffer from "../components/homeComponents/SubscriptionOffer";
+import React, { useEffect, useState, Suspense, lazy } from "react";
 import CategoriesLoadingSection from "../components/homeComponents/CategoriesLoadingSection";
+import LoadingSpinner from "../UI/LoadingSpinner";
 import { cachedFetchJson, cacheStrategies } from "../utils/cachedFetch";
+
+// Lazy load heavy components for better code splitting
+const HeroSection = lazy(() => import("../components/homeComponents/HeroSection"));
+const CategorySection = lazy(() => import("../components/homeComponents/CategorySection"));
+const SubscriptionOffer = lazy(() => import("../components/homeComponents/SubscriptionOffer"));
 
 interface Category {
   _id: string;
@@ -63,7 +66,9 @@ export default function Home() {
       {/* Black Friday Campaign Hero Section */}
       <section className="section-spacing">
         <div className="container mx-auto px-4 md:px-6 lg:px-8">
-          <HeroSection />
+          <Suspense fallback={<LoadingSpinner />}>
+            <HeroSection />
+          </Suspense>
         </div>
       </section>
 
@@ -72,19 +77,22 @@ export default function Home() {
         <CategoriesLoadingSection />
       ) : (
         categories.map((category) => (
-          <CategorySection
-            key={category._id}
-            categoryId={category._id}
-            categoryName={category.name}
-            categorySlug={category.slug}
-          />
+          <Suspense key={category._id} fallback={<LoadingSpinner />}>
+            <CategorySection
+              categoryId={category._id}
+              categoryName={category.name}
+              categorySlug={category.slug}
+            />
+          </Suspense>
         ))
       )}
 
       {/* Subscription Offer */}
       <section className="py-12 w-[95%] mx-auto">
         <div className="container mx-auto border border-orange/20">
-          <SubscriptionOffer />
+          <Suspense fallback={<LoadingSpinner />}>
+            <SubscriptionOffer />
+          </Suspense>
         </div>
       </section>
     </main>

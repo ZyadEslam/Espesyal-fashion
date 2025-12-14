@@ -17,6 +17,7 @@ import ActionNotification from "@/app/UI/ActionNotification";
 import StripePaymentForm from "@/app/components/checkoutComponents/StripePaymentForm";
 import { api } from "@/app/utils/api";
 import { signIn } from "next-auth/react";
+import { useCart } from "@/app/hooks/useCart";
 
 interface Product {
   _id?: string;
@@ -46,6 +47,7 @@ const CheckoutPage = () => {
   const locale = useLocale();
   const router = useRouter();
   const session = useSession();
+  const { clearCart } = useCart();
   const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null);
 
   const handleSignIn = async () => {
@@ -120,14 +122,12 @@ const CheckoutPage = () => {
         setOrderStatus({ success: true, message: t("orderPlaced") });
         // Clear checkout data
         sessionStorage.removeItem("checkoutData");
-        // Clear cart
-        if (typeof window !== "undefined") {
-          localStorage.setItem("cart", JSON.stringify([]));
-        }
-        // Clear server cart
+        // Clear server cart FIRST (before clearing local cart to prevent sync from reloading)
         if (session.data?.user?.id) {
           await api.clearCart(session.data.user.id);
         }
+        // Then clear cart from context (updates UI immediately and clears localStorage)
+        clearCart();
         // Redirect to order confirmation page
         setTimeout(() => {
           router.push(`/${locale}/order-confirmation/${result.orderId}`);
@@ -151,6 +151,9 @@ const CheckoutPage = () => {
 
     setIsProcessing(true);
     setOrderStatus(null);
+
+    // Clear cart immediately when payment succeeds
+    clearCart();
 
     try {
       const orderData = {
@@ -184,14 +187,14 @@ const CheckoutPage = () => {
 
       if (result.success) {
         setOrderStatus({ success: true, message: t("orderPlaced") });
+        // Clear checkout data
         sessionStorage.removeItem("checkoutData");
-        if (typeof window !== "undefined") {
-          localStorage.setItem("cart", JSON.stringify([]));
-        }
-        // Clear server cart
+        // Clear server cart FIRST (before clearing local cart to prevent sync from reloading)
         if (session.data?.user?.id) {
           await api.clearCart(session.data.user.id);
         }
+        // Then clear cart from context (updates UI immediately and clears localStorage)
+        clearCart();
         // Redirect to order confirmation page
         setTimeout(() => {
           router.push(`/${locale}/order-confirmation/${result.orderId}`);

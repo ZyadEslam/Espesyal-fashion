@@ -12,8 +12,8 @@ declare global {
 
 export function PerformanceMonitor() {
   useEffect(() => {
-    // Only run in production and in browser
-    if (process.env.NODE_ENV !== "production" || typeof window === "undefined")
+    // Only run in development and in browser
+    if (process.env.NODE_ENV === "production" || typeof window === "undefined")
       return;
 
     try {
@@ -85,14 +85,15 @@ export function PerformanceMonitor() {
         fontLink.crossOrigin = "anonymous";
         document.head.appendChild(fontLink);
 
-        // Preload critical images
-        const criticalImages = ["/og-image.jpg", "/logo.png"];
+        // Preload critical images (only if they exist)
+        const criticalImages = ["/og-image.jpg"];
 
         criticalImages.forEach((src) => {
           const link = document.createElement("link");
           link.rel = "preload";
           link.href = src;
           link.as = "image";
+          // Only add if image exists (check will happen naturally via 404)
           document.head.appendChild(link);
         });
       };

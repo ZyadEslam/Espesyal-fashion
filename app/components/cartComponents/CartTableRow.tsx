@@ -1,7 +1,6 @@
 "use client";
 import React, { useCallback, useState, useEffect, memo } from "react";
 import { TableRowProps } from "../../types/types";
-import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/app/hooks/useCart";
 import { Minus, Plus, Trash2 } from "lucide-react";
@@ -64,12 +63,15 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
           <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
             <Link href={`/product/${product._id}`}>
               {!imageError ? (
-                <Image
-                  src={`/api/product/image/${product._id}?index=0`}
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={`/api/product/image/${product._id}?index=0&w=80&h=80`}
                   width={80}
                   height={80}
                   alt={product.name}
                   className="object-cover w-full h-full"
+                  loading="lazy"
+                  decoding="async"
                   onError={handleImageError}
                 />
               ) : (
@@ -144,12 +146,15 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
           <div className="relative w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
             <Link href={`/product/${product._id}`}>
               {!imageError ? (
-                <Image
-                  src={`/api/product/image/${product._id}?index=0`}
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={`/api/product/image/${product._id}?index=0&w=64&h=64`}
                   width={64}
                   height={64}
                   alt={product.name}
                   className="object-cover w-full h-full"
+                  loading="lazy"
+                  decoding="async"
                   onError={handleImageError}
                 />
               ) : (

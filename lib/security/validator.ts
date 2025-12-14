@@ -37,21 +37,63 @@ export const productCreateSchema = z.object({
 export const productUpdateSchema = productCreateSchema.partial();
 
 // Order validation schemas
-export const orderItemSchema = z.object({
-  _id: z.string().optional(),
-  productId: z.string().optional(),
-  variantId: objectIdSchema.optional(),
-  selectedVariantId: objectIdSchema.optional(),
-  size: z.string().max(50).optional(),
-  selectedSize: z.string().max(50).optional(),
-  color: z.string().max(50).optional(),
-  selectedColor: z.string().max(50).optional(),
-  quantity: z.number().int().positive(),
-  quantityInCart: z.number().int().positive().optional(),
-  price: z.number().positive(),
-  variantSku: z.string().max(100).optional(),
-  sku: z.string().max(100).optional(),
-});
+// Flexible schema that accepts cart items with various field names
+export const orderItemSchema = z
+  .object({
+    _id: z.string().optional(),
+    productId: z.string().optional(),
+    variantId: z.union([objectIdSchema, z.string()]).optional(),
+    selectedVariantId: z.union([objectIdSchema, z.string()]).optional(),
+    size: z.string().max(50).optional(),
+    selectedSize: z.string().max(50).optional(),
+    color: z.string().max(50).optional(),
+    selectedColor: z.string().max(50).optional(),
+    quantity: z
+      .union([
+        z.number().int().positive(),
+        z.string().transform((val) => Number(val)),
+      ])
+      .optional(),
+    quantityInCart: z
+      .union([
+        z.number().int().positive(),
+        z.string().transform((val) => Number(val)),
+      ])
+      .optional(),
+    price: z
+      .union([
+        z.number().nonnegative(),
+        z.string().transform((val) => Number(val)),
+      ])
+      .optional(),
+    variantSku: z.string().max(100).optional(),
+    sku: z.string().max(100).optional(),
+    // Allow any additional fields that might be in cart items (name, description, etc.)
+  })
+  .passthrough()
+  .refine(
+    (data) => {
+      // At least one of quantity or quantityInCart must be present and positive
+      const qty = data.quantity ?? data.quantityInCart;
+      if (qty === undefined) return false;
+      const numQty = typeof qty === "string" ? Number(qty) : qty;
+      return Number.isInteger(numQty) && numQty > 0;
+    },
+    {
+      message: "Quantity is required and must be a positive integer",
+      path: ["quantity"],
+    }
+  )
+  .refine(
+    (data) => {
+      // At least one product identifier must be present
+      return !!(data._id || data.productId);
+    },
+    {
+      message: "Product ID is required (_id or productId)",
+      path: ["_id"],
+    }
+  );
 
 export const orderCreateSchema = z.object({
   userId: objectIdSchema,

@@ -15,16 +15,18 @@ import { ShoppingCart } from "lucide-react";
 import { ProductCardProps } from "../../types/types";
 import { useCart } from "../../hooks/useCart";
 import { useTranslations } from "next-intl";
+import { getOptimizedImageUrl, getImageDimensions } from "../../utils/imageUtils";
 const Toast = lazy(() => import("../../UI/Toast"));
 const ProductImage = lazy(() => import("./ProductImage"));
 
 interface ProductCardComponentProps {
   product: ProductCardProps;
   showCartButton?: boolean;
+  isLCP?: boolean; // Indicates if this is an LCP candidate
 }
 
 const ProductCard = memo(
-  ({ product, showCartButton = true }: ProductCardComponentProps) => {
+  ({ product, showCartButton = true, isLCP = false }: ProductCardComponentProps) => {
     const [inCart, setInCart] = useState(false);
     const [imageError, setImageError] = useState(false);
     const [imageSrc, setImageSrc] = useState("");
@@ -44,10 +46,18 @@ const ProductCard = memo(
       }
     }, [product._id, checkInCart]);
 
-    // Set image source only once
+    // Set optimized image source with proper dimensions
     useEffect(() => {
       if (product._id) {
-        setImageSrc(`/api/product/image/${product._id}?index=0`);
+        const dimensions = getImageDimensions("product-card");
+        const optimizedUrl = getOptimizedImageUrl(
+          product._id as string,
+          0,
+          dimensions.width,
+          dimensions.height,
+          85
+        );
+        setImageSrc(optimizedUrl);
       }
     }, [product._id]);
 
@@ -109,7 +119,7 @@ const ProductCard = memo(
         {/* Product Link */}
         <Link href={`/product/${product._id}`} className="block">
           {/* Product Image Container */}
-          <div className="relative bg-secondaryLight rounded-t-2xl h-[260px] sm:h-[320px] flex items-center justify-center overflow-hidden">
+          <div className="relative bg-secondaryLight rounded-t-2xl h-[260px] sm:h-[320px] flex items-center justify-center overflow-hidden" style={{ aspectRatio: "1 / 1" }}>
             {imageSrc && !imageError ? (
               <Suspense
                 fallback={
@@ -122,6 +132,11 @@ const ProductCard = memo(
                   productName={product.name}
                   imageSrc={imageSrc}
                   handleImageError={handleImageError}
+                  fetchPriority={isLCP ? "high" : "auto"}
+                  loading={isLCP ? "eager" : "lazy"}
+                  context="product-card"
+                  width={400}
+                  height={400}
                 />
               </Suspense>
             ) : (

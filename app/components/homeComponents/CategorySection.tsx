@@ -153,7 +153,11 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                   viewport={{ once: true }}
                   className="category-card w-[calc(50vw-1.5rem)] min-w-[220px] max-w-[260px] sm:w-60 md:w-64 lg:w-72 flex-shrink-0 snap-start"
                 >
-                  <ProductCard product={product} showCartButton={false} />
+                  <ProductCard 
+                    product={product} 
+                    showCartButton={false} 
+                    isLCP={index === 0} // First product in each category section is LCP candidate
+                  />
                 </motion.div>
               ))}
             </div>

@@ -9,17 +9,24 @@ interface UseOrderSSEOptions {
   statusFilter: string;
   onNewOrder: (order: Order) => void;
   onOrderUpdate: (orderId: string, orderState: Order["orderState"]) => void;
+  enabled?: boolean; // Add option to conditionally enable SSE
 }
 
 export const useOrderSSE = ({
   statusFilter,
   onNewOrder,
   onOrderUpdate,
+  enabled = true, // Default to enabled for backward compatibility
 }: UseOrderSSEOptions): UseOrderSSEReturn => {
   const [isConnected, setIsConnected] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
+    // Don't connect if disabled
+    if (!enabled) {
+      return;
+    }
+
     const connectSSE = () => {
       try {
         const eventSource = new EventSource("/api/admin/orders/stream");
@@ -90,7 +97,7 @@ export const useOrderSSE = ({
         eventSourceRef.current = null;
       }
     };
-  }, [statusFilter, onNewOrder, onOrderUpdate]);
+  }, [statusFilter, onNewOrder, onOrderUpdate, enabled]);
 
   return { isConnected };
 };

@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import OrderStatusTimeline from "@/app/components/orderComponents/OrderStatusTimeline";
 import LoadingSpinner from "@/app/UI/LoadingSpinner";
-import Image from "next/image";
 
 interface Product {
   _id?: string;
@@ -210,12 +209,15 @@ const OrderDetailPage = () => {
                   <div key={index} className="p-6 flex gap-4">
                     <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                       {product._id ? (
-                        <Image
-                          src={`/api/product/image/${product._id}?index=0`}
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={`/api/product/image/${product._id}?index=0&w=80&h=80`}
                           alt={product.name || "Product"}
                           width={80}
                           height={80}
                           className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.style.display = "none";

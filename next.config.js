@@ -5,11 +5,19 @@ const nextConfig = {
   reactStrictMode: false,
   images: {
     domains: ["localhost"],
+    // Keep unoptimized: true since we handle optimization in our custom API route with Sharp
+    // This prevents Next.js from trying to optimize images from /api/product/image/** routes
     unoptimized: true,
+    formats: ["image/webp", "image/avif"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 31536000, // 1 year cache
+    // Allow our API routes with any query parameters
+    // Note: pathname doesn't include query strings, but ** matches any path
+    // Query strings are automatically allowed when pathname matches
     localPatterns: [
       {
         pathname: "/api/product/image/**",
-        search: "**",
       },
     ],
     remotePatterns: [
@@ -27,13 +35,19 @@ const nextConfig = {
         search: "**",
       },
     ],
-    // formats: ["image/webp", "image/avif"],
-    // minimumCacheTTL: 60,
-    // dangerouslyAllowSVG: true,
-    // contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   trailingSlash: true,
+  // Target modern browsers only - reduces polyfills and legacy code
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? {
+      exclude: ["error", "warn"],
+    } : false,
+  },
+  // Exclude devtools from production build
   webpack: (config, { dev, isServer }) => {
+    // Make webpack available for plugins
+    const webpack = require("webpack");
+    
     if (dev) {
       config.optimization.minimize = false;
       config.cache = false;
@@ -41,10 +55,71 @@ const nextConfig = {
         poll: 1000,
         aggregateTimeout: 300,
       };
+    } else {
+      // Production optimizations
+      config.optimization = {
+        ...config.optimization,
+        minimize: true,
+        usedExports: true,
+        sideEffects: false,
+        // Better code splitting
+        splitChunks: {
+          chunks: "all",
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Framework chunk
+            framework: {
+              name: "framework",
+              chunks: "all",
+              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
+            // Shared libs
+            lib: {
+              test(module) {
+                return (
+                  module.size() > 160000 &&
+                  /node_modules[/\\]/.test(module.identifier())
+                );
+              },
+              name(module) {
+                const hash = require("crypto").createHash("sha1");
+                hash.update(module.identifier());
+                return hash.digest("hex").substring(0, 8);
+              },
+              priority: 30,
+              minChunks: 1,
+              reuseExistingChunk: true,
+            },
+            // Common chunk
+            commons: {
+              name: "commons",
+              minChunks: 2,
+              priority: 20,
+            },
+            // Shared chunk
+            shared: {
+              name(module, chunks) {
+                return (
+                  require("crypto")
+                    .createHash("sha1")
+                    .update(chunks.reduce((acc, chunk) => acc + chunk.name, ""))
+                    .digest("hex")
+                    .substring(0, 8)
+                );
+              },
+              priority: 10,
+              minChunks: 2,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      };
     }
 
     // Make @vercel/kv optional - use IgnorePlugin to prevent webpack from trying to resolve it if not installed
-    const webpack = require("webpack");
 
     // Check if @vercel/kv is installed
     const checkPackage = (pkg) => {
@@ -65,14 +140,13 @@ const nextConfig = {
       );
     }
 
-    // Make validator optional - ignore if not installed
-    if (!checkPackage("validator")) {
-      config.plugins.push(
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^validator$/,
-        })
-      );
-    }
+    // Make validator optional - always ignore to prevent webpack from trying to resolve it
+    // The sanitizer uses eval() to dynamically require it at runtime
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^validator$/,
+      })
+    );
 
     // Mark redis as external for server-side only (it's only used in API routes)
     if (isServer) {
@@ -98,8 +172,10 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
+  swcMinify: true, // Use SWC for minification (faster and better)
   experimental: {
     optimizePackageImports: ["framer-motion", "lucide-react"],
+    instrumentationHook: true,
   },
   headers: async () => {
     const isProduction = process.env.NODE_ENV === "production";
@@ -154,10 +230,21 @@ const nextConfig = {
             key: "X-Frame-Options",
             value: "DENY",
           },
+          // Note: Content-Encoding is automatically set by Next.js when compress: true
+          // Don't set it manually as it causes ERR_CONTENT_DECODING_FAILED
         ],
       },
       {
         source: "/_next/static/(.*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/:path*\\.(js|css|json|xml|txt|svg|ico|png|jpg|jpeg|gif|webp|avif|woff|woff2|ttf|eot)",
         headers: [
           {
             key: "Cache-Control",

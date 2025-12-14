@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Product from "@/app/models/product";
 import connectDB from "@/app/utils/db";
+import sharp from "sharp";
+import { createHash } from "crypto";
 
 export async function GET(
   request: NextRequest,
@@ -11,8 +13,31 @@ export async function GET(
     const { id } = await params;
     const url = new URL(request.url);
     const imageIndex = parseInt(url.searchParams.get("index") || "0");
-
-    console.log(`Fetching image for product ${id}, index ${imageIndex}`);
+    
+    // Parse query parameters for image optimization
+    const width = url.searchParams.get("w")
+      ? parseInt(url.searchParams.get("w")!)
+      : null;
+    const height = url.searchParams.get("h")
+      ? parseInt(url.searchParams.get("h")!)
+      : null;
+    const quality = url.searchParams.get("q")
+      ? parseInt(url.searchParams.get("q")!)
+      : 85; // Default quality
+    
+    // Check Accept header for format preference
+    const acceptHeader = request.headers.get("accept") || "";
+    const prefersWebP = acceptHeader.includes("image/webp");
+    const prefersAVIF = acceptHeader.includes("image/avif");
+    
+    // Determine output format - preserve PNG if original is PNG and no format preference
+    let outputFormat: "jpeg" | "png" | "webp" | "avif" = "jpeg";
+    if (prefersAVIF) {
+      outputFormat = "avif";
+    } else if (prefersWebP) {
+      outputFormat = "webp";
+    }
+    // Note: PNG format will be determined later based on original content type if needed
 
     // Validate ObjectId format
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
@@ -48,11 +73,11 @@ export async function GET(
     }
 
     // Convert base64 to buffer with better error handling
-    let imageBuffer;
-    let contentType = "image/jpeg"; // default
+    let imageBuffer: Buffer | undefined;
+    let originalContentType = "image/jpeg"; // default
 
     try {
-      let base64String;
+      let base64String: string | undefined;
 
       // Handle different possible formats of imageData
       if (typeof imageData === "string") {
@@ -78,7 +103,7 @@ export async function GET(
         // Extract content type from data URL if present
         const dataUrlMatch = base64String.match(/^data:image\/(\w+);base64,/);
         if (dataUrlMatch) {
-          contentType = `image/${dataUrlMatch[1]}`;
+          originalContentType = `image/${dataUrlMatch[1]}`;
           base64String = base64String.replace(/^data:image\/\w+;base64,/, "");
         }
 
@@ -106,45 +131,144 @@ export async function GET(
       // Basic image validation - check for common image headers
       const header = imageBuffer.subarray(0, 4);
       if (header[0] === 0xff && header[1] === 0xd8) {
-        contentType = "image/jpeg";
+        originalContentType = "image/jpeg";
       } else if (
         header[0] === 0x89 &&
         header[1] === 0x50 &&
         header[2] === 0x4e &&
         header[3] === 0x47
       ) {
-        contentType = "image/png";
+        originalContentType = "image/png";
       } else if (
         header[0] === 0x47 &&
         header[1] === 0x49 &&
         header[2] === 0x46
       ) {
-        contentType = "image/gif";
+        originalContentType = "image/gif";
       }
     } catch (error) {
       console.error(`Error processing image data for product ${id}:`, error);
-      console.error(`Image data type:`, typeof imageData);
-      console.error(
-        `Image data preview:`,
-        typeof imageData === "string"
-          ? imageData.substring(0, 100) + "..."
-          : JSON.stringify(imageData).substring(0, 100) + "..."
-      );
       return new NextResponse("Invalid image format", { status: 500 });
     }
 
-    console.log(
-      `Serving image for product ${id}, size: ${imageBuffer.length} bytes, type: ${contentType}`
-    );
-
-    // Return the image buffer
-    return new NextResponse(imageBuffer, {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000",
-        "Content-Length": imageBuffer.length.toString(),
-      },
-    });
+    // Process image with Sharp
+    try {
+      let sharpInstance = sharp(imageBuffer);
+      
+      // Get original image metadata
+      const metadata = await sharpInstance.metadata();
+      
+      // Determine resize dimensions
+      let resizeWidth = width;
+      let resizeHeight = height;
+      
+      // If only one dimension is provided, maintain aspect ratio
+      if (width && !height && metadata.height) {
+        resizeHeight = Math.round((width / metadata.width!) * metadata.height);
+      } else if (height && !width && metadata.width) {
+        resizeWidth = Math.round((height / metadata.height!) * metadata.width);
+      }
+      
+      // Only resize if dimensions are provided and different from original
+      if (
+        (resizeWidth || resizeHeight) &&
+        (resizeWidth !== metadata.width || resizeHeight !== metadata.height)
+      ) {
+        sharpInstance = sharpInstance.resize(resizeWidth, resizeHeight, {
+          fit: "inside",
+          withoutEnlargement: true, // Don't upscale images
+        });
+      }
+      
+      // Convert to desired format and optimize
+      // Preserve PNG format if original is PNG and no format preference
+      const preservePNG = originalContentType === "image/png" && 
+                         outputFormat === "jpeg" && 
+                         !prefersAVIF && 
+                         !prefersWebP;
+      
+      let optimizedBuffer: Buffer;
+      let finalContentType: string;
+      
+      if (preservePNG) {
+        // Preserve PNG format for PNG originals
+        optimizedBuffer = await sharpInstance
+          .png({ quality: Math.min(quality, 100), compressionLevel: 9 })
+          .toBuffer();
+        finalContentType = "image/png";
+      } else {
+        // Use preferred format or convert to JPEG
+        switch (outputFormat) {
+          case "avif":
+            optimizedBuffer = await sharpInstance
+              .avif({ quality: Math.min(quality, 90) })
+              .toBuffer();
+            finalContentType = "image/avif";
+            break;
+          case "webp":
+            optimizedBuffer = await sharpInstance
+              .webp({ quality: Math.min(quality, 90) })
+              .toBuffer();
+            finalContentType = "image/webp";
+            break;
+          default: // jpeg
+            optimizedBuffer = await sharpInstance
+              .jpeg({ quality: Math.min(quality, 100), mozjpeg: true })
+              .toBuffer();
+            finalContentType = "image/jpeg";
+        }
+      }
+      
+      // Generate ETag for caching
+      const etag = createHash("md5")
+        .update(optimizedBuffer)
+        .digest("hex");
+      
+      // Check if client has cached version
+      const ifNoneMatch = request.headers.get("if-none-match");
+      if (ifNoneMatch === `"${etag}"`) {
+        return new NextResponse(null, {
+          status: 304,
+          headers: {
+            ETag: `"${etag}"`,
+            "Cache-Control": "public, max-age=31536000, immutable",
+          },
+        });
+      }
+      
+      return new NextResponse(optimizedBuffer, {
+        headers: {
+          "Content-Type": finalContentType,
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "Content-Length": optimizedBuffer.length.toString(),
+          ETag: `"${etag}"`,
+          Vary: "Accept",
+        },
+      });
+    } catch (error) {
+      console.error(`Error processing image with Sharp for product ${id}:`, error);
+      // Fallback to original image if Sharp processing fails
+      const etag = createHash("md5").update(imageBuffer).digest("hex");
+      const ifNoneMatch = request.headers.get("if-none-match");
+      if (ifNoneMatch === `"${etag}"`) {
+        return new NextResponse(null, {
+          status: 304,
+          headers: {
+            ETag: `"${etag}"`,
+            "Cache-Control": "public, max-age=31536000, immutable",
+          },
+        });
+      }
+      
+      return new NextResponse(imageBuffer, {
+        headers: {
+          "Content-Type": originalContentType,
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "Content-Length": imageBuffer.length.toString(),
+          ETag: `"${etag}"`,
+        },
+      });
+    }
   } catch (error) {
     console.error("Error serving image:", error);
     console.error(
