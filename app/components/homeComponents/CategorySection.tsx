@@ -3,7 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ArrowRightIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { ProductCardProps } from "../../types/types";
 import ProductCard from "../productComponents/ProductCard";
 import { useLocale } from "next-intl";
@@ -22,6 +27,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 }) => {
   const t = useTranslations("home");
   const locale = useLocale();
+  const isArabic = locale.startsWith("ar");
   const [products, setProducts] = useState<ProductCardProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +82,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
     return (
       <section className="section-spacing">
         <div className="container mx-auto px-4">
-          <div className="text-left mb-8">
+          <div className={`mb-8 ${isArabic ? "text-right" : "text-left"}`}>
             <h2 className="text-2xl uppercase lg:text-3xl font-bold text-foreground mb-4">
               {categoryName}
             </h2>
@@ -107,7 +113,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-left mb-8 flex flex-col lg:flex-row justify-between lg:items-center"
+          className={`mb-8 flex flex-row lg:flex-row justify-between lg:items-center ${
+            isArabic ? "text-right sm:text-right" : "text-left sm:text-left"
+          }`}
         >
           <h2 className="text-2xl uppercase lg:text-3xl font-bold text-foreground mb-4">
             {categoryName}
@@ -121,10 +129,16 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           >
             <Link
               href={`/${locale}/shop?category=${categorySlug}`}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-all duration-300 hover:text-primary"
+              className={`inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-all duration-300 hover:text-primary ${
+                isArabic ? "flex-row-reverse" : ""
+              }`}
             >
               {t("viewAll") || "View All"}
-              <ArrowRightIcon className="w-6 h-6 bg-gray-200 rounded-full p-1" />
+              {isArabic ? (
+                <ArrowLeftIcon className="w-6 h-6 bg-gray-200 rounded-full p-1" />
+              ) : (
+                <ArrowRightIcon className="w-6 h-6 bg-gray-200 rounded-full p-1" />
+              )}
             </Link>
           </motion.div>
         </motion.div>
@@ -153,9 +167,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                   viewport={{ once: true }}
                   className="category-card w-[calc(50vw-1.5rem)] min-w-[220px] max-w-[260px] sm:w-60 md:w-64 lg:w-72 flex-shrink-0 snap-start"
                 >
-                  <ProductCard 
-                    product={product} 
-                    showCartButton={false} 
+                  <ProductCard
+                    product={product}
+                    showCartButton={false}
                     isLCP={index === 0} // First product in each category section is LCP candidate
                   />
                 </motion.div>
