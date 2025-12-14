@@ -109,7 +109,7 @@ const HeroSection = () => {
           className="mb-3 md:mb-4"
         >
           <span className="inline-flex items-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight uppercase drop-shadow-lg">
-            {heroBadge} !!!
+            {heroBadge}
           </span>
         </motion.div>
 
