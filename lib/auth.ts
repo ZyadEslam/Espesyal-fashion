@@ -20,13 +20,20 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
+          // Validate required user data
+          if (!user.email) {
+            console.error("❌ User email is missing");
+            return false;
+          }
+
           await dbConnect();
+
           // Check if user exists in your database
           let dbUser = await User.findOne({
             email: user.email,
           });
 
-          // If th user does not exist Create a new user in your database
+          // If the user does not exist, create a new user in your database
           if (!dbUser) {
             // Check if this email should be granted admin access on first sign-in
             const firstAdminEmail =
@@ -35,32 +42,61 @@ export const authOptions: NextAuthOptions = {
             const shouldBeAdmin =
               firstAdminEmail && userEmail === firstAdminEmail;
 
-            const newUser = {
-              email: user.email,
-              name: user.name,
-              isAdmin: shouldBeAdmin || false,
-              cart: [],
-              addresses: [],
-              // image: user.image,
-              // googleId: account.providerAccountId,
-              // createdAt: new Date(),
-            };
+            try {
+              // Use Mongoose create method instead of insertOne
+              dbUser = await User.create({
+                email: user.email,
+                name: user.name || user.email.split("@")[0],
+                isAdmin: shouldBeAdmin || false,
+                cart: [],
+                addresses: [],
+              });
 
-            const result = await User.insertOne(newUser);
-            dbUser = { ...newUser, _id: result.insertedId };
-
-            if (shouldBeAdmin) {
-              console.log(
-                `✅ Admin access automatically granted to ${user.email}`
-              );
+              if (shouldBeAdmin) {
+                console.log(
+                  `✅ Admin access automatically granted to ${user.email}`
+                );
+              }
+              console.log(`✅ New user created: ${user.email}`);
+            } catch (createError: any) {
+              // Handle duplicate email error (race condition)
+              if (
+                createError.code === 11000 ||
+                createError.name === "MongoServerError"
+              ) {
+                console.log(
+                  `⚠️ User already exists (race condition), fetching existing user: ${user.email}`
+                );
+                dbUser = await User.findOne({ email: user.email });
+                if (!dbUser) {
+                  console.error("❌ Failed to find user after duplicate error");
+                  return false;
+                }
+              } else {
+                console.error("❌ Error creating user:", createError);
+                throw createError;
+              }
             }
           }
 
           // Store the database user ID in the user object
-          user.id = dbUser._id.toString();
-          user.isAdmin = dbUser.isAdmin;
-        } catch (error) {
-          console.error("Error in signIn callback:", error);
+          if (dbUser && dbUser._id) {
+            user.id = dbUser._id.toString();
+            user.isAdmin = dbUser.isAdmin || false;
+          } else {
+            console.error("❌ User object is missing _id after creation/fetch");
+            return false;
+          }
+        } catch (error: any) {
+          console.error("❌ Error in signIn callback:", {
+            message: error?.message,
+            stack: error?.stack,
+            email: user?.email,
+            errorName: error?.name,
+            errorCode: error?.code,
+          });
+          // Only deny access for critical errors, not transient issues
+          // Return false to trigger AccessDenied error page
           return false;
         }
       }
