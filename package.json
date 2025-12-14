@@ -32,7 +32,7 @@
     "framer-motion": "^12.23.24",
     "lucide-react": "^0.525.0",
     "mongoose": "^8.14.3",
-    "next": "^15.5.6",
+    "next": "^15.5.7",
     "next-auth": "^4.24.11",
     "next-intl": "^4.4.0",
     "react": "^19.0.0",
