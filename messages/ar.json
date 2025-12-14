@@ -403,9 +403,11 @@
       "links": {
         "addProduct": "إضافة منتج",
         "productList": "قائمة المنتجات",
+        "categories": "الفئات",
         "orders": "الطلبات",
         "promoCodes": "أكواد الخصم",
         "adminManagement": "إدارة المشرفين",
+        "offerSection": "قسم العروض",
         "shippingSettings": "إعدادات الشحن"
       }
     },

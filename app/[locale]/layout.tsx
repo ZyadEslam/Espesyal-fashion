@@ -12,6 +12,7 @@ import { authOptions } from "../../lib/auth";
 import { Footer, UserNav, TopNav } from "../components";
 import CtxProviders from "../components/providers/CtxProvider";
 import { PerformanceMonitor } from "../components/seo/PerformanceOptimizations";
+import { DashboardMenuProvider } from "../context/dashboardMenuCtx";
 import { routing } from "../../routing";
 
 const outfit = localFont({
@@ -78,11 +79,13 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <AuthProvider session={session}>
             <CtxProviders>
-              <PerformanceMonitor />
-              <TopNav />
-              <UserNav />
-              <main>{children}</main>
-              <Footer />
+              <DashboardMenuProvider>
+                <PerformanceMonitor />
+                <TopNav />
+                <UserNav />
+                <main>{children}</main>
+                <Footer />
+              </DashboardMenuProvider>
             </CtxProviders>
           </AuthProvider>
         </NextIntlClientProvider>

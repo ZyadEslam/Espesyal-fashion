@@ -11,12 +11,10 @@ const TopNav = memo(() => {
   return (
     <nav className="py-1 border-b border-black/20">
       <div className="container mx-auto px-4 max-w-7xl">
-        <div
-          className={`flex items-center ${
-            isRTL ? "justify-end" : "justify-start"
-          }`}
-        >
-          <LanguageSwitcher />
+        <div className="flex items-center w-full">
+          <div className={`${isRTL ? "ml-auto" : ""}`}>
+            <LanguageSwitcher />
+          </div>
         </div>
       </div>
     </nav>

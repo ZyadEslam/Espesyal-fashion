@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import React, { memo, useState, useEffect } from "react";
+import React, { memo, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   Plus,
@@ -9,90 +9,82 @@ import {
   Settings,
   Users,
   Tag,
-  Menu,
-  X,
   FolderTree,
   Home,
   Truck,
 } from "lucide-react";
 import { cachedFetch } from "@/app/utils/cachedFetch";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useDashboardMenu } from "@/app/context/dashboardMenuCtx";
 
 const sideNavLinks = [
   {
     href: "/dashboard",
     icon: Plus,
-    label: "Add Product",
-    labelAr: "إضافة منتج",
+    translationKey: "addProduct",
   },
   {
     href: "/dashboard/product-list",
     icon: List,
-    label: "Products List",
-    labelAr: "قائمة المنتجات",
+    translationKey: "productList",
   },
   {
     href: "/dashboard/categories",
     icon: FolderTree,
-    label: "Categories",
-    labelAr: "الفئات",
+    translationKey: "categories",
   },
   {
     href: "/dashboard/orders",
     icon: ShoppingBag,
-    label: "Orders",
-    labelAr: "الطلبات",
+    translationKey: "orders",
   },
   {
     href: "/dashboard/promo-codes",
     icon: Tag,
-    label: "Promo Codes",
-    labelAr: "أكواد الخصم",
+    translationKey: "promoCodes",
   },
   {
     href: "/dashboard/admin-management",
     icon: Users,
-    label: "Admin Management",
-    labelAr: "إدارة المشرفين",
+    translationKey: "adminManagement",
   },
   {
     href: "/dashboard/hero-section",
     icon: Home,
-    label: "Hero Section",
-    labelAr: "قسم البطل",
+    translationKey: "offerSection",
   },
   {
     href: "/dashboard/shipping-settings",
     icon: Truck,
-    label: "Shipping Settings",
-    labelAr: "إعدادات الشحن",
+    translationKey: "shippingSettings",
   },
 ];
 
 const DashboardSideNav = memo(() => {
   const pathname = usePathname();
   const locale = useLocale();
+  const t = useTranslations("dashboard.nav.links");
   const isArabic = locale.startsWith("ar");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isDashboardMenuOpen, setIsDashboardMenuOpen } = useDashboardMenu();
   const prefetchedRef = React.useRef(false);
 
   // Close mobile menu when route changes
   useEffect(() => {
-    setIsMobileMenuOpen(false);
+    setIsDashboardMenuOpen(false);
     // Reset prefetch flag when route changes
     prefetchedRef.current = false;
-  }, [pathname]);
+  }, [pathname, setIsDashboardMenuOpen]);
 
   // Close mobile menu on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setIsMobileMenuOpen(false);
+        setIsDashboardMenuOpen(false);
       }
     };
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, []);
+  }, [setIsDashboardMenuOpen]);
 
   const handlePrefetch = React.useCallback(() => {
     // Only prefetch once per session
@@ -108,33 +100,18 @@ const DashboardSideNav = memo(() => {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className={`lg:hidden fixed top-4 z-50 p-3 bg-white/95 backdrop-blur-md border border-gray-200 rounded-xl shadow-lg hover:shadow-xl hover:bg-white transition-all duration-300 ${
-          isArabic ? "right-4" : "left-4"
-        }`}
-        aria-label="Toggle menu"
-      >
-        {isMobileMenuOpen ? (
-          <X className="w-5 h-5 text-gray-700" />
-        ) : (
-          <Menu className="w-5 h-5 text-gray-700" />
-        )}
-      </button>
-
       {/* Mobile Overlay */}
-      {isMobileMenuOpen && (
+      {isDashboardMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-30 transition-opacity duration-300"
-          onClick={() => setIsMobileMenuOpen(false)}
+          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300"
+          onClick={() => setIsDashboardMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static h-screen w-64 bg-white/95 backdrop-blur-md border-r border-gray-200 shadow-xl z-30 transition-transform duration-300 ${
-          isMobileMenuOpen
+        className={`fixed top-0 h-screen w-64 bg-white/95 backdrop-blur-md border-r border-gray-200 shadow-xl z-50 transition-transform duration-300 ${
+          isDashboardMenuOpen
             ? "translate-x-0"
             : isArabic
             ? "translate-x-full lg:translate-x-0"
@@ -169,10 +146,7 @@ const DashboardSideNav = memo(() => {
                 ? pathname === localizedHref || pathname === `${localizedHref}/`
                 : pathname === localizedHref ||
                   pathname.startsWith(`${localizedHref}/`);
-              const displayLabel =
-                locale.startsWith("ar") && link.labelAr
-                  ? link.labelAr
-                  : link.label;
+              const displayLabel = t(link.translationKey);
 
               return (
                 <Link

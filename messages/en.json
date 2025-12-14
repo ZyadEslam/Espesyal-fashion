@@ -404,9 +404,11 @@
       "links": {
         "addProduct": "Add Product",
         "productList": "Products List",
+        "categories": "Categories",
         "orders": "Orders",
         "promoCodes": "Promo Codes",
         "adminManagement": "Admin Management",
+        "offerSection": "offer section",
         "shippingSettings": "Shipping Settings"
       }
     },

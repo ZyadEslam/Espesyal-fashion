@@ -12,6 +12,7 @@ import { useCart } from "@/app/hooks/useCart";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { signOut } from "next-auth/react";
+import { useDashboardMenu } from "@/app/context/dashboardMenuCtx";
 
 const UserNav = memo(() => {
   const pathname = usePathname();
@@ -131,6 +132,7 @@ const UserNav = memo(() => {
   }, [isMenuOpen, closeMenu]);
 
   const isDashboard = pathname.includes("/dashboard");
+  const { isDashboardMenuOpen, toggleDashboardMenu } = useDashboardMenu();
 
   return (
     <nav
@@ -336,6 +338,18 @@ const UserNav = memo(() => {
             </>
           ) : (
             <div className="flex items-center gap-4">
+              {/* Left Side - Dashboard Menu Toggle Button */}
+              <div
+                className={`flex items-center ${
+                  isDashboardMenuOpen ? "hidden" : ""
+                }`}
+              >
+                <ToggleMenuBtn
+                  isMenuOpen={isDashboardMenuOpen}
+                  toggleMenu={toggleDashboardMenu}
+                />
+              </div>
+
               {/* Dashboard Badge */}
               <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange/10 to-orange/5 border border-orange/20 rounded-xl">
                 <div className="w-2 h-2 bg-orange rounded-full animate-pulse" />
