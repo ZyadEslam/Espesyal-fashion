@@ -21,6 +21,10 @@ const HeroSection = () => {
 
   // Fetch hero content from API with caching - prioritize initial render
   useEffect(() => {
+    let isMounted = true;
+    let idleCallbackId: number | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
+
     // Use cached fetch for better performance
     const fetchHeroContent = async () => {
       try {
@@ -32,21 +36,39 @@ const HeroSection = () => {
           revalidate: 300, // Cache for 5 minutes
         });
 
-        if (result?.success && result.data) {
+        // Only update state if component is still mounted
+        if (isMounted && result?.success && result.data) {
           setHeroContent(result.data);
         }
       } catch (error) {
-        console.error("Error fetching hero section:", error);
+        if (isMounted) {
+          console.error("Error fetching hero section:", error);
+        }
       }
     };
 
     // Defer non-critical fetch to avoid blocking initial render
     // Use requestIdleCallback if available, otherwise setTimeout
     if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      requestIdleCallback(fetchHeroContent, { timeout: 1000 });
+      idleCallbackId = requestIdleCallback(fetchHeroContent, { timeout: 1000 });
     } else {
-      setTimeout(fetchHeroContent, 0);
+      timeoutId = setTimeout(fetchHeroContent, 0);
     }
+
+    // Cleanup function to prevent state updates on unmounted component
+    return () => {
+      isMounted = false;
+      if (
+        idleCallbackId !== null &&
+        typeof window !== "undefined" &&
+        "cancelIdleCallback" in window
+      ) {
+        cancelIdleCallback(idleCallbackId);
+      }
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [locale]);
 
   // Use API content if available, otherwise fallback to translations
