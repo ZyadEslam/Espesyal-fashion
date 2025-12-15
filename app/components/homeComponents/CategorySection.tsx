@@ -123,7 +123,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                 >
                   <ProductCard
                     product={product}
-                    showCartButton={false}
                     isLCP={isFirstCategory && index === 0} // First product in first category is LCP candidate
                   />
                 </motion.div>

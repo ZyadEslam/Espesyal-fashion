@@ -6,49 +6,23 @@ import React, {
   useState,
   memo,
   useCallback,
-  useRef,
 } from "react";
 // import Image from "next/image";
 // import { assets } from "@/public/assets/assets";
 import Link from "next/link";
-import { ShoppingCart } from "lucide-react";
 import { ProductCardProps } from "../../types/types";
-import { useCart } from "../../hooks/useCart";
-import { useTranslations } from "next-intl";
 import { getOptimizedImageUrl } from "../../utils/imageUtils";
-const Toast = lazy(() => import("../../UI/Toast"));
 const ProductImage = lazy(() => import("./ProductImage"));
 
 interface ProductCardComponentProps {
   product: ProductCardProps;
-  showCartButton?: boolean;
   isLCP?: boolean; // Indicates if this is an LCP candidate
 }
 
 const ProductCard = memo(
-  ({
-    product,
-    showCartButton = true,
-    isLCP = false,
-  }: ProductCardComponentProps) => {
-    const [inCart, setInCart] = useState(false);
+  ({ product, isLCP = false }: ProductCardComponentProps) => {
     const [imageError, setImageError] = useState(false);
     const [imageSrc, setImageSrc] = useState("");
-    const [showToast, setShowToast] = useState({ show: false, message: "" });
-    const { addToCart, removeFromCart, isInCart: checkInCart } = useCart();
-    const t = useTranslations("product");
-
-    // Check if product is in cart - use a ref to track previous state to prevent unnecessary updates
-    const prevInCartRef = useRef(inCart);
-
-    useEffect(() => {
-      const currentlyInCart = checkInCart(product._id as string);
-      // Only update state if the value actually changed
-      if (currentlyInCart !== prevInCartRef.current) {
-        prevInCartRef.current = currentlyInCart;
-        setInCart(currentlyInCart);
-      }
-    }, [product._id, checkInCart]);
 
     useEffect(() => {
       if (product._id) {
@@ -65,46 +39,6 @@ const ProductCard = memo(
       }
     }, [product._id]);
 
-    const handleShowToast = useCallback(
-      (showState: boolean, message: string) => {
-        setShowToast(() => {
-          return {
-            show: showState,
-            message: message,
-          };
-        });
-        setTimeout(() => {
-          setShowToast(() => {
-            return { show: false, message: "" };
-          });
-        }, 3000);
-      },
-      []
-    );
-
-    const cartHandler = useCallback(
-      (e: React.MouseEvent) => {
-        e.preventDefault(); // Prevent navigation when clicking cart button
-        e.stopPropagation();
-
-        if (product.variants?.length) {
-          handleShowToast(true, t("selectSizeColor"));
-          return;
-        }
-
-        if (!inCart) {
-          addToCart(product);
-          handleShowToast(true, t("addedToCartShort"));
-          setInCart(true);
-        } else {
-          removeFromCart(product._id as string);
-          handleShowToast(true, t("removedFromCartShort"));
-          setInCart(false);
-        }
-      },
-      [inCart, addToCart, removeFromCart, product, handleShowToast, t]
-    );
-
     const handleImageError = useCallback(() => {
       console.error("Image failed to load");
       setImageError(true);
@@ -112,14 +46,6 @@ const ProductCard = memo(
 
     return (
       <div className="group relative bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden ">
-        {/* Toast Notification */}
-        {showToast.show && (
-          <Toast
-            state={showToast.message.includes("Added") ? "success" : "fail"}
-            message={showToast.message}
-          />
-        )}
-
         {/* Product Link */}
         <Link href={`/product/${product._id}`} className="block">
           {/* Product Image Container */}
@@ -169,38 +95,13 @@ const ProductCard = memo(
               {product.description}
             </p>
 
-            {/* Price and Cart Button */}
-            <div
-              className={`flex items-center ${
-                showCartButton ? "justify-between" : "justify-start"
-              } pt-2`}
-            >
+            {/* Price */}
+            <div className="flex items-center justify-start pt-2">
               <div className="flex flex-col">
                 <span className="font-bold text-lg text-gray-900">
                   ${product.price}
                 </span>
               </div>
-
-              {/* Cart Button - Only show if showCartButton is true */}
-              {showCartButton && (
-                <button
-                  onClick={cartHandler}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 transform hover:scale-105 active:scale-95 ${
-                    inCart
-                      ? "bg-orange text-white shadow-md hover:shadow-lg"
-                      : "bg-gray-100 text-gray-600 hover:bg-orange/10 hover:text-orange hover:shadow-md"
-                  }`}
-                  aria-label={inCart ? t("removeFromCart") : t("addToCart")}
-                >
-                  {
-                    <ShoppingCart
-                      className={`w-4 h-4 ${
-                        inCart ? "text-white" : "text-gray-500"
-                      }`}
-                    />
-                  }
-                </button>
-              )}
             </div>
           </div>
         </Link>

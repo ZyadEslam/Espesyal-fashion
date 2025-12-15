@@ -194,7 +194,7 @@ const ShopLayout = memo(
 
             {/* Pagination */}
             {pagination.totalPages > 1 && (
-              <div className="mt-12 flex justify-center">
+              <div className="mt-12 mb-6 flex justify-center">
                 <Pagination
                   currentPage={pagination.currentPage}
                   totalPages={pagination.totalPages}
