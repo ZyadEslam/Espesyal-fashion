@@ -84,11 +84,11 @@ const ProductTable: React.FC<ProductTableProps> = ({
                 <td className={tdClass}>
                   <div className="flex flex-col">
                     <span className="font-medium text-gray-900">
-                      ${product.price.toFixed(2)}
+                      {product.price.toFixed(2)} EGP
                     </span>
                     {product.oldPrice && (
                       <span className="text-xs text-gray-500 line-through">
-                        ${product.oldPrice.toFixed(2)}
+                        {product.oldPrice.toFixed(2)} EGP
                       </span>
                     )}
                   </div>
@@ -103,7 +103,8 @@ const ProductTable: React.FC<ProductTableProps> = ({
                 </td>
                 <td className={tdClass}>
                   <span className="text-sm text-gray-900">
-                    {(product as Product & { totalStock?: number }).totalStock ??
+                    {(product as Product & { totalStock?: number })
+                      .totalStock ??
                       product.variants?.reduce(
                         (sum, variant) => sum + (variant.quantity || 0),
                         0
@@ -165,11 +166,11 @@ const ProductTable: React.FC<ProductTableProps> = ({
               <div>
                 <span className="text-gray-500">{t("table.price")}:</span>
                 <span className="ml-1 font-medium text-gray-900">
-                  ${product.price.toFixed(2)}
+                  {product.price.toFixed(2)} EGP
                 </span>
                 {product.oldPrice && (
                   <span className="ml-2 text-xs text-gray-500 line-through">
-                    ${product.oldPrice.toFixed(2)}
+                    {product.oldPrice.toFixed(2)} EGP
                   </span>
                 )}
               </div>

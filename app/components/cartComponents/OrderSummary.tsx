@@ -84,7 +84,7 @@ const OrderSummary = memo(() => {
               {tCart("subtotalItems", { count: cart.length })}
             </span>
             <span className="font-semibold text-gray-900">
-              ${totalPrice.toFixed(2)}
+              {totalPrice.toFixed(2)} EGP
             </span>
           </div>
 
@@ -92,7 +92,7 @@ const OrderSummary = memo(() => {
             <span className="text-gray-600">{tCheckout("shipping")}</span>
             <span className="font-semibold text-green-600">
               {shippingFee > 0
-                ? `$${shippingFee.toFixed(2)}`
+                ? `${shippingFee.toFixed(2)} EGP`
                 : tCart("freeShipping")}
             </span>
           </div>
@@ -104,7 +104,7 @@ const OrderSummary = memo(() => {
               {tCart("total")}
             </span>
             <span className="text-xl font-bold text-gray-900">
-              ${totalWithShipping.toFixed(2)}
+              {totalWithShipping.toFixed(2)} EGP
             </span>
           </div>
         </div>

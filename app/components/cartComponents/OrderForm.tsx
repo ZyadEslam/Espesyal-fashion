@@ -218,13 +218,13 @@ const OrderForm = () => {
           <p className="text-gray-500">
             {tCart("itemsLabel", { count: totalItems })}
           </p>
-          <p>${totalPrice.toFixed(2)}</p>
+          <p>{totalPrice.toFixed(2)} EGP</p>
         </div>
         <div className="flex justify-between">
           <p className="text-gray-500">{tCart("shippingFee")}</p>
           <p>
             {shippingFee > 0
-              ? `$${shippingFee.toFixed(2)}`
+              ? `${shippingFee.toFixed(2)} EGP`
               : tCart("freeShipping")}
           </p>
         </div>
@@ -233,14 +233,14 @@ const OrderForm = () => {
             <p className="text-gray-500">
               {tCart("discountLabel", { code: appliedPromoCode })}
             </p>
-            <p>-${discountAmount.toFixed(2)}</p>
+            <p>-{discountAmount.toFixed(2)} EGP</p>
           </div>
         )}
       </div>
       <hr />
       <div className="flex justify-between font-medium text-xl">
         <p>{tCart("total")}</p>
-        <p>${finalPrice.toFixed(2)}</p>
+        <p>{finalPrice.toFixed(2)} EGP</p>
       </div>
 
       <button

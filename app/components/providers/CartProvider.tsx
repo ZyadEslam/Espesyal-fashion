@@ -287,8 +287,15 @@ const CartProvider = ({ children }: CartProviderProps) => {
 
   // Sync with server database on component mount (only when user ID changes)
   useEffect(() => {
+    // Don't sync for guest users
+    if (!session?.user?.id) {
+      // Clear any error state for guest users
+      setError("");
+      return;
+    }
+
     // Prevent multiple syncs for the same user
-    if (hasSyncedRef.current && session?.user?.id) {
+    if (hasSyncedRef.current) {
       return;
     }
 
@@ -308,10 +315,43 @@ const CartProvider = ({ children }: CartProviderProps) => {
           const anonymousCart = localStorage.getItem(anonymousKey);
           const userCart = localStorage.getItem(userKey);
 
-          // Fetch server cart
-          const { cart: serverCart } = await api.getCart(
-            session?.user?.id as string
-          );
+          // Fetch server cart - handle errors gracefully
+          let serverCart: ProductCardProps[] = [];
+          try {
+            const cartResponse = await api.getCart(session.user.id as string);
+            serverCart = cartResponse.cart || [];
+          } catch (fetchError) {
+            // If fetch fails, log but don't show error to user
+            // Use local cart as fallback
+            console.warn(
+              "Failed to fetch cart from server, using local cart:",
+              fetchError
+            );
+
+            // If we have a local cart, use it
+            if (userCart) {
+              const parsedUserCart = JSON.parse(userCart);
+              if (parsedUserCart.length > 0) {
+                setCart(parsedUserCart);
+                return; // Exit early, don't try to sync
+              }
+            }
+
+            // If we have anonymous cart and no user cart, preserve it
+            if (anonymousCart && !userCart) {
+              const parsedAnonymousCart = JSON.parse(anonymousCart);
+              setCart(parsedAnonymousCart);
+              localStorage.setItem(userKey, anonymousCart);
+              // Don't remove anonymous cart yet - will sync later when server is available
+            }
+
+            // Don't set error state for network issues - user can still use local cart
+            hasSyncedRef.current = false; // Allow retry
+            return;
+          }
+
+          // Clear any previous errors on successful sync attempt
+          setError("");
 
           // Merge logic: prioritize preserving guest cart items
           let mergedCart: ProductCardProps[] = [];
@@ -334,9 +374,12 @@ const CartProvider = ({ children }: CartProviderProps) => {
             setCart(mergedCart);
             localStorage.setItem(userKey, JSON.stringify(mergedCart));
 
-            // Sync to server
+            // Sync to server (don't await - fire and forget)
             if (mergedCart.length > 0) {
-              await api.mergeCart(mergedCart, session.user.id);
+              api.mergeCart(mergedCart, session.user.id).catch((err) => {
+                console.warn("Failed to sync cart to server:", err);
+                // Don't show error - cart is saved locally
+              });
             }
 
             // Remove anonymous cart after successful merge
@@ -350,12 +393,15 @@ const CartProvider = ({ children }: CartProviderProps) => {
               setCart(mergedCart);
               localStorage.setItem(userKey, JSON.stringify(mergedCart));
 
-              // Sync to server if there are changes
+              // Sync to server if there are changes (don't await)
               if (
                 mergedCart.length > 0 &&
                 JSON.stringify(mergedCart) !== JSON.stringify(serverCart)
               ) {
-                await api.mergeCart(mergedCart, session.user.id);
+                api.mergeCart(mergedCart, session.user.id).catch((err) => {
+                  console.warn("Failed to sync cart to server:", err);
+                  // Don't show error - cart is saved locally
+                });
               }
             } else if (serverCart.length > 0) {
               // Local is empty but server has items - use server
@@ -368,8 +414,9 @@ const CartProvider = ({ children }: CartProviderProps) => {
             localStorage.setItem(userKey, JSON.stringify(serverCart));
           }
         } catch (err) {
-          setError("Error Fetching Cart Please try again later ");
-          console.error("Error syncing cart with server:", err);
+          // Only show error for unexpected errors, not network/auth issues
+          console.error("Unexpected error syncing cart:", err);
+          // Don't set error state - let user continue with local cart
           hasSyncedRef.current = false; // Allow retry on error
         }
       }

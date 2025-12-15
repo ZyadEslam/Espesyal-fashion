@@ -12,8 +12,9 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
   const { removeFromCart, updateQuantity } = useCart();
   const maxAvailable =
     product.maxAvailable ??
-    product.variants?.find((variant) => variant._id === product.selectedVariantId)
-      ?.quantity ??
+    product.variants?.find(
+      (variant) => variant._id === product.selectedVariantId
+    )?.quantity ??
     product.totalStock ??
     undefined;
 
@@ -30,7 +31,11 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
       setQuantity(newQuantity);
 
       if (updateQuantity) {
-        updateQuantity(product._id as string, product.selectedVariantId, newQuantity);
+        updateQuantity(
+          product._id as string,
+          product.selectedVariantId,
+          newQuantity
+        );
       }
     },
     [product._id, product.selectedVariantId, updateQuantity, maxAvailable]
@@ -90,7 +95,7 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
               </h3>
             </Link>
             <p className="text-lg font-bold text-gray-900 mt-1">
-              ${productPrice.toFixed(2)}
+              {productPrice.toFixed(2)} EGP
             </p>
             {(product.selectedColor || product.selectedSize) && (
               <p className="text-xs text-gray-500 mt-1">
@@ -98,7 +103,9 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
                   <span>Color: {product.selectedColor}</span>
                 )}
                 {product.selectedColor && product.selectedSize && " · "}
-                {product.selectedSize && <span>Size: {product.selectedSize}</span>}
+                {product.selectedSize && (
+                  <span>Size: {product.selectedSize}</span>
+                )}
               </p>
             )}
           </div>
@@ -172,7 +179,7 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
               </h3>
             </Link>
             <p className="text-sm text-gray-500 mt-1">
-              ${product.price.toFixed(2)} each
+              {product.price.toFixed(2)} EGP each
             </p>
             {(product.selectedColor || product.selectedSize) && (
               <p className="text-xs text-gray-500 mt-1">
@@ -180,7 +187,9 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
                   <span>Color: {product.selectedColor}</span>
                 )}
                 {product.selectedColor && product.selectedSize && " · "}
-                {product.selectedSize && <span>Size: {product.selectedSize}</span>}
+                {product.selectedSize && (
+                  <span>Size: {product.selectedSize}</span>
+                )}
               </p>
             )}
           </div>
@@ -211,13 +220,13 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
 
         {/* Unit Price */}
         <div className="col-span-2">
-          <p className="text-gray-600">${product.price.toFixed(2)}</p>
+          <p className="text-gray-600">{product.price.toFixed(2)} EGP</p>
         </div>
 
         {/* Total Price & Actions */}
         <div className="col-span-2 flex items-center justify-between">
           <p className="text-lg font-bold text-gray-900">
-            ${productPrice.toFixed(2)}
+            {productPrice.toFixed(2)} EGP
           </p>
           <button
             onClick={removeFromCartHandler}

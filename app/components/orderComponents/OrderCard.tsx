@@ -58,11 +58,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
     }
   };
 
-  const totalItems = order.products?.reduce(
-    (total: number, product: Product) =>
-      total + (product.quantityInCart || product.quantity || 1),
-    0
-  ) || 0;
+  const totalItems =
+    order.products?.reduce(
+      (total: number, product: Product) =>
+        total + (product.quantityInCart || product.quantity || 1),
+      0
+    ) || 0;
 
   return (
     <Link href={`/${locale}/my-orders/${order._id}`}>
@@ -103,7 +104,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
                 <span className="text-sm">Total</span>
               </div>
               <span className="text-lg font-bold text-gray-900">
-                ${order.totalPrice.toFixed(2)}
+                {order.totalPrice.toFixed(2)} EGP
               </span>
             </div>
           </div>
@@ -139,4 +140,3 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
 };
 
 export default OrderCard;
-

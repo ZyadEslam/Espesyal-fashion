@@ -197,10 +197,10 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
       </p>
 
       <p className="text-xl sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6">
-        {data.price}$
+        {data.price} EGP
         {data.oldPrice && (
           <span className="text-gray-400 font-normal text-sm ml-2 line-through">
-            {data.oldPrice}$
+            {data.oldPrice} EGP
           </span>
         )}
       </p>

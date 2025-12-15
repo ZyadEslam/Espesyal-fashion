@@ -144,11 +144,12 @@ const OrderDetailPage = () => {
     }
   };
 
-  const totalItems = order.products?.reduce(
-    (total: number, product: Product) =>
-      total + (product.quantityInCart || product.quantity || 1),
-    0
-  ) || 0;
+  const totalItems =
+    order.products?.reduce(
+      (total: number, product: Product) =>
+        total + (product.quantityInCart || product.quantity || 1),
+      0
+    ) || 0;
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -189,7 +190,14 @@ const OrderDetailPage = () => {
               </div>
               <div className="p-6">
                 <OrderStatusTimeline
-                  status={order.orderState as "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled"}
+                  status={
+                    order.orderState as
+                      | "Pending"
+                      | "Processing"
+                      | "Shipped"
+                      | "Delivered"
+                      | "Cancelled"
+                  }
                   shippedDate={order.shippedDate}
                   deliveredDate={order.deliveredDate}
                   estimatedDeliveryDate={order.estimatedDeliveryDate}
@@ -261,10 +269,11 @@ const OrderDetailPage = () => {
                         </p>
                       )}
                       <p className="text-sm text-gray-600 mb-2">
-                        Quantity: {product.quantityInCart || product.quantity || 1}
+                        Quantity:{" "}
+                        {product.quantityInCart || product.quantity || 1}
                       </p>
                       <p className="text-lg font-bold text-gray-900">
-                        ${(product.price || 0).toFixed(2)}
+                        {(product.price || 0).toFixed(2)} EGP
                       </p>
                     </div>
                   </div>
@@ -307,7 +316,7 @@ const OrderDetailPage = () => {
                   <div className="flex justify-between text-sm text-green-600">
                     <span className="text-gray-600">{t("discount")}</span>
                     <span className="font-medium">
-                      -${order.discountAmount.toFixed(2)}
+                      -{order.discountAmount.toFixed(2)} EGP
                     </span>
                   </div>
                 )}
@@ -316,7 +325,7 @@ const OrderDetailPage = () => {
                     {t("total")}
                   </span>
                   <span className="text-xl font-bold text-gray-900">
-                    ${order.totalPrice.toFixed(2)}
+                    {order.totalPrice.toFixed(2)} EGP
                   </span>
                 </div>
               </div>
@@ -417,4 +426,3 @@ const OrderDetailPage = () => {
 };
 
 export default OrderDetailPage;
-

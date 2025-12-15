@@ -100,11 +100,12 @@ const OrderConfirmationPage = () => {
     );
   }
 
-  const totalItems = order.products?.reduce(
-    (total: number, product: Product) =>
-      total + (product.quantityInCart || product.quantity || 1),
-    0
-  ) || 0;
+  const totalItems =
+    order.products?.reduce(
+      (total: number, product: Product) =>
+        total + (product.quantityInCart || product.quantity || 1),
+      0
+    ) || 0;
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -164,7 +165,7 @@ const OrderConfirmationPage = () => {
                 {t("total")}
               </span>
               <span className="text-2xl font-bold text-gray-900">
-                ${order.totalPrice.toFixed(2)}
+                {order.totalPrice.toFixed(2)} EGP
               </span>
             </div>
           </div>
@@ -193,4 +194,3 @@ const OrderConfirmationPage = () => {
 };
 
 export default OrderConfirmationPage;
-

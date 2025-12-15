@@ -57,13 +57,10 @@ export const formatOrderFullDate = (date: string | Date): string => {
 };
 
 export const formatPrice = (price: number): string => {
-  return `$${price.toFixed(2)}`;
+  return `${price.toFixed(2)} EGP`;
 };
 
-export const filterOrders = (
-  orders: Order[],
-  searchQuery: string
-): Order[] => {
+export const filterOrders = (orders: Order[], searchQuery: string): Order[] => {
   if (!searchQuery.trim()) {
     return orders;
   }
@@ -76,4 +73,3 @@ export const filterOrders = (
       order.userEmail.toLowerCase().includes(query)
   );
 };
-

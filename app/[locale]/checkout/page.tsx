@@ -384,7 +384,7 @@ const CheckoutPage = () => {
                       {t("items")} ({totalItems})
                     </span>
                     <span className="font-semibold text-gray-900">
-                      ${checkoutData.subtotal.toFixed(2)}
+                      {checkoutData.subtotal.toFixed(2)} EGP
                     </span>
                   </div>
 
@@ -392,7 +392,7 @@ const CheckoutPage = () => {
                     <span className="text-gray-600">{t("shipping")}</span>
                     <span className="font-semibold text-green-600">
                       {checkoutData.shippingFee && checkoutData.shippingFee > 0
-                        ? `$${checkoutData.shippingFee.toFixed(2)}`
+                        ? `${checkoutData.shippingFee.toFixed(2)} EGP`
                         : "Free"}
                     </span>
                   </div>
@@ -404,7 +404,7 @@ const CheckoutPage = () => {
                           {t("discount")} ({checkoutData.promoCode})
                         </span>
                         <span className="font-semibold">
-                          -${checkoutData.discountAmount.toFixed(2)}
+                          -{checkoutData.discountAmount.toFixed(2)} EGP
                         </span>
                       </div>
                     )}
@@ -416,7 +416,7 @@ const CheckoutPage = () => {
                       {t("total")}
                     </span>
                     <span className="text-xl font-bold text-gray-900">
-                      ${checkoutData.totalPrice.toFixed(2)}
+                      {checkoutData.totalPrice.toFixed(2)} EGP
                     </span>
                   </div>
                 </div>

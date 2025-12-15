@@ -82,14 +82,12 @@ const PaymentFormContent = ({
     }
 
     try {
-      const { error: submitError, paymentIntent } = await stripe.confirmCardPayment(
-        clientSecret,
-        {
+      const { error: submitError, paymentIntent } =
+        await stripe.confirmCardPayment(clientSecret, {
           payment_method: {
             card: cardElement,
           },
-        }
-      );
+        });
 
       if (submitError) {
         setError(submitError.message || "Payment failed");
@@ -99,7 +97,8 @@ const PaymentFormContent = ({
         onPaymentSuccess(paymentIntent.id);
       }
     } catch {
-      const errorMessage = "An error occurred during payment. Please try again.";
+      const errorMessage =
+        "An error occurred during payment. Please try again.";
       setError(errorMessage);
       onPaymentError(errorMessage);
       setIsProcessing(false);
@@ -146,7 +145,7 @@ const PaymentFormContent = ({
         ) : (
           <>
             <CreditCard className="w-5 h-5" />
-            Pay ${amount.toFixed(2)}
+            Pay {amount.toFixed(2)} EGP
           </>
         )}
       </button>
@@ -169,4 +168,3 @@ const StripePaymentForm = (props: StripePaymentFormProps) => {
 };
 
 export default StripePaymentForm;
-

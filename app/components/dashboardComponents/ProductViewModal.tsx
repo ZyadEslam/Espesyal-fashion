@@ -31,7 +31,9 @@ const ProductViewModal: React.FC<ProductViewModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4 sm:p-6 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Product Details</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            Product Details
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 p-1"
@@ -54,7 +56,7 @@ const ProductViewModal: React.FC<ProductViewModalProps> = ({
             <div>
               <label className="text-sm font-medium text-gray-700">Price</label>
               <p className="mt-1 text-gray-900">
-                ${product.price.toFixed(2)}
+                {product.price.toFixed(2)} EGP
               </p>
             </div>
             {product.oldPrice && (
@@ -63,7 +65,7 @@ const ProductViewModal: React.FC<ProductViewModalProps> = ({
                   Old Price
                 </label>
                 <p className="mt-1 text-gray-900">
-                  ${product.oldPrice.toFixed(2)}
+                  {product.oldPrice.toFixed(2)} EGP
                 </p>
               </div>
             )}
@@ -137,4 +139,3 @@ const ProductViewModal: React.FC<ProductViewModalProps> = ({
 };
 
 export default ProductViewModal;
-
