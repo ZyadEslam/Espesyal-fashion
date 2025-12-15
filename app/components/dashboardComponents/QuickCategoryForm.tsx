@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Plus, X, Loader2, CheckCircle2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface QuickCategoryFormProps {
   onCategoryCreated: (categoryId: string, categoryName: string) => void;
@@ -12,6 +13,9 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
   onCategoryCreated,
   onClose,
 }) => {
+  const t = useTranslations(
+    "dashboard.productList.editModal.form.quickCategory"
+  );
   const [categoryName, setCategoryName] = useState("");
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,9 +34,9 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
       e.preventDefault();
       e.stopPropagation();
     }
-    
+
     if (!categoryName.trim()) {
-      setError("Category name is required");
+      setError(t("nameRequired"));
       return;
     }
 
@@ -62,7 +66,7 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
       }
 
       setSuccess(true);
-      
+
       // Wait a moment to show success state, then call callback
       setTimeout(() => {
         onCategoryCreated(result.data._id, result.data.name);
@@ -72,7 +76,9 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
       }, 500);
     } catch (err) {
       console.error("Error creating category:", err);
-      setError(err instanceof Error ? err.message : "Failed to create category");
+      setError(
+        err instanceof Error ? err.message : "Failed to create category"
+      );
       setCreating(false);
     }
   };
@@ -110,10 +116,10 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
 
           {/* Header */}
           <div className="mb-6">
-            <h3 className="text-xl font-semibold text-gray-900">Add New Category</h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Create a new category for your products
-            </p>
+            <h3 className="text-xl font-semibold text-gray-900">
+              {t("title")}
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">{t("description")}</p>
           </div>
 
           {/* Form */}
@@ -123,7 +129,7 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
                 htmlFor="category-name"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Category Name *
+                {t("categoryNameRequired")}
               </label>
               <input
                 id="category-name"
@@ -140,14 +146,12 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
                     handleSubmit(e);
                   }
                 }}
-                placeholder="e.g., T-Shirts, Summer, Women..."
+                placeholder={t("categoryNamePlaceholder")}
                 className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange outline-none transition-colors"
                 disabled={creating || success}
                 autoFocus
               />
-              {error && (
-                <p className="mt-1.5 text-xs text-red-600">{error}</p>
-              )}
+              {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
             </div>
 
             <div className="flex items-center gap-3 pt-2">
@@ -164,17 +168,17 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
                 {creating ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Creating...</span>
+                    <span>{t("creating")}</span>
                   </>
                 ) : success ? (
                   <>
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Created!</span>
+                    <span>{t("created")}</span>
                   </>
                 ) : (
                   <>
                     <Plus className="w-4 h-4" />
-                    <span>Add Category</span>
+                    <span>{t("addCategory")}</span>
                   </>
                 )}
               </button>
@@ -188,7 +192,7 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
                 disabled={creating}
                 className="px-4 py-2.5 text-sm font-medium border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
-                Cancel
+                {t("cancel")}
               </button>
             </div>
           </div>
@@ -199,4 +203,3 @@ const QuickCategoryForm: React.FC<QuickCategoryFormProps> = ({
 };
 
 export default QuickCategoryForm;
-

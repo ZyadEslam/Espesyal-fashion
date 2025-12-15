@@ -2,6 +2,7 @@ import React from "react";
 import { X } from "lucide-react";
 import { ProductFormData, Category } from "@/app/hooks/useProducts";
 import ProductEditForm from "./ProductEditForm";
+import { useTranslations } from "next-intl";
 
 interface ProductEditModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ const ProductEditModal: React.FC<ProductEditModalProps> = ({
   onCategoryCreated,
   submitting,
 }) => {
+  const t = useTranslations("dashboard.productList.editModal");
   if (!isOpen) return null;
 
   return (
@@ -38,10 +40,13 @@ const ProductEditModal: React.FC<ProductEditModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4 sm:p-6 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Edit Product</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            {t("title")}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 p-1"
+            aria-label={t("cancel")}
           >
             <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
@@ -61,4 +66,3 @@ const ProductEditModal: React.FC<ProductEditModalProps> = ({
 };
 
 export default ProductEditModal;
-

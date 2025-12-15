@@ -12,6 +12,7 @@ import React, {
 import Link from "next/link";
 import { ProductCardProps } from "../../types/types";
 import { getOptimizedImageUrl } from "../../utils/imageUtils";
+import { useTranslations } from "next-intl";
 const ProductImage = lazy(() => import("./ProductImage"));
 
 interface ProductCardComponentProps {
@@ -21,6 +22,7 @@ interface ProductCardComponentProps {
 
 const ProductCard = memo(
   ({ product, isLCP = false }: ProductCardComponentProps) => {
+    const t = useTranslations("common");
     const [imageError, setImageError] = useState(false);
     const [imageSrc, setImageSrc] = useState("");
 
@@ -57,7 +59,9 @@ const ProductCard = memo(
               <Suspense
                 fallback={
                   <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
-                    <span className="text-gray-400 text-sm">Loading...</span>
+                    <span className="text-gray-400 text-sm">
+                      {t("loading")}
+                    </span>
                   </div>
                 }
               >
@@ -99,7 +103,7 @@ const ProductCard = memo(
             <div className="flex items-center justify-start pt-2">
               <div className="flex flex-col">
                 <span className="font-bold text-lg text-gray-900">
-                  {product.price} EGP
+                  {product.price} {t("currency")}
                 </span>
               </div>
             </div>

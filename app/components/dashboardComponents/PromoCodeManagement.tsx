@@ -23,6 +23,7 @@ const PromoCodeManagement = React.memo(() => {
     deletePromoCode,
   } = usePromoCodes();
   const t = useTranslations("dashboard.promoCodes");
+  const tAdmin = useTranslations("dashboard.adminManagement");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCode, setEditingCode] = useState<PromoCode | null>(null);
   const [formData, setFormData] = useState<PromoCodeFormData>({
@@ -90,7 +91,7 @@ const PromoCodeManagement = React.memo(() => {
 
   const handleDelete = useCallback(
     async (id: string) => {
-      if (!confirm("Are you sure you want to delete this promo code?")) {
+      if (!confirm(tAdmin("deletePromoConfirm"))) {
         return;
       }
 
@@ -98,7 +99,7 @@ const PromoCodeManagement = React.memo(() => {
       await deletePromoCode(id);
       setDeleting(null);
     },
-    [deletePromoCode]
+    [deletePromoCode, tAdmin]
   );
 
   if (loading) {
@@ -125,7 +126,7 @@ const PromoCodeManagement = React.memo(() => {
               onClick={handleOpenModal}
               className="mt-4 text-orange hover:text-orange/80"
             >
-              {t("createFirstPromoCode")}
+              {t("createButton")}
             </button>
           </div>
         ) : (
@@ -141,7 +142,7 @@ const PromoCodeManagement = React.memo(() => {
       <PromoCodeModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={editingCode ? "Edit Promo Code" : "Create Promo Code"}
+        title={editingCode ? t("form.editTitle") : t("form.createTitle")}
         formData={formData}
         onSubmit={handleSubmit}
         onCancel={handleCloseModal}

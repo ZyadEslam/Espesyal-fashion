@@ -123,11 +123,7 @@ const AdminManagement = React.memo(() => {
       }
 
       // Confirmation
-      if (
-        !confirm(
-          `Are you sure you want to remove admin access from ${adminEmail}?`
-        )
-      ) {
+      if (!confirm(t("removeAdminConfirm", { email: adminEmail }))) {
         return;
       }
 
@@ -157,7 +153,7 @@ const AdminManagement = React.memo(() => {
         setRemoving(null);
       }
     },
-    [session, fetchAdmins, protectedAdminEmail]
+    [session, fetchAdmins, protectedAdminEmail, t]
   );
 
   // Clear messages after 5 seconds

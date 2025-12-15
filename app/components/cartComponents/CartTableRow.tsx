@@ -4,8 +4,12 @@ import { TableRowProps } from "../../types/types";
 import Link from "next/link";
 import { useCart } from "@/app/hooks/useCart";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const CartTableRow = memo(({ product }: TableRowProps) => {
+  const t = useTranslations("cart");
+  const tCommon = useTranslations("common");
+  const tProduct = useTranslations("product");
   const [productPrice, setProductPrice] = useState(product.price);
   const [quantity, setQuantity] = useState(product.quantityInCart || 1);
   const [imageError, setImageError] = useState(false);
@@ -95,16 +99,20 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
               </h3>
             </Link>
             <p className="text-lg font-bold text-gray-900 mt-1">
-              {productPrice.toFixed(2)} EGP
+              {productPrice.toFixed(2)} {tCommon("currency")}
             </p>
             {(product.selectedColor || product.selectedSize) && (
               <p className="text-xs text-gray-500 mt-1">
                 {product.selectedColor && (
-                  <span>Color: {product.selectedColor}</span>
+                  <span>
+                    {tProduct("color")}: {product.selectedColor}
+                  </span>
                 )}
                 {product.selectedColor && product.selectedSize && " · "}
                 {product.selectedSize && (
-                  <span>Size: {product.selectedSize}</span>
+                  <span>
+                    {tProduct("size")}: {product.selectedSize}
+                  </span>
                 )}
               </p>
             )}
@@ -179,16 +187,20 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
               </h3>
             </Link>
             <p className="text-sm text-gray-500 mt-1">
-              {product.price.toFixed(2)} EGP each
+              {product.price.toFixed(2)} {tCommon("currency")} {t("each")}
             </p>
             {(product.selectedColor || product.selectedSize) && (
               <p className="text-xs text-gray-500 mt-1">
                 {product.selectedColor && (
-                  <span>Color: {product.selectedColor}</span>
+                  <span>
+                    {tProduct("color")}: {product.selectedColor}
+                  </span>
                 )}
                 {product.selectedColor && product.selectedSize && " · "}
                 {product.selectedSize && (
-                  <span>Size: {product.selectedSize}</span>
+                  <span>
+                    {tProduct("size")}: {product.selectedSize}
+                  </span>
                 )}
               </p>
             )}
@@ -220,13 +232,15 @@ const CartTableRow = memo(({ product }: TableRowProps) => {
 
         {/* Unit Price */}
         <div className="col-span-2">
-          <p className="text-gray-600">{product.price.toFixed(2)} EGP</p>
+          <p className="text-gray-600">
+            {product.price.toFixed(2)} {tCommon("currency")}
+          </p>
         </div>
 
         {/* Total Price & Actions */}
         <div className="col-span-2 flex items-center justify-between">
           <p className="text-lg font-bold text-gray-900">
-            {productPrice.toFixed(2)} EGP
+            {productPrice.toFixed(2)} {tCommon("currency")}
           </p>
           <button
             onClick={removeFromCartHandler}

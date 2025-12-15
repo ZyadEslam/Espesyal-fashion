@@ -12,6 +12,7 @@ const OrderSummary = memo(() => {
   const { totalPrice, cart } = useCart();
   const tCart = useTranslations("cart");
   const tCheckout = useTranslations("checkout");
+  const tCommon = useTranslations("common");
   const { status } = useSession();
   const locale = useLocale();
   const [shippingFee, setShippingFee] = useState<number>(0);
@@ -84,7 +85,7 @@ const OrderSummary = memo(() => {
               {tCart("subtotalItems", { count: cart.length })}
             </span>
             <span className="font-semibold text-gray-900">
-              {totalPrice.toFixed(2)} EGP
+              {totalPrice.toFixed(2)} {tCommon("currency")}
             </span>
           </div>
 
@@ -92,7 +93,7 @@ const OrderSummary = memo(() => {
             <span className="text-gray-600">{tCheckout("shipping")}</span>
             <span className="font-semibold text-green-600">
               {shippingFee > 0
-                ? `${shippingFee.toFixed(2)} EGP`
+                ? `${shippingFee.toFixed(2)} ${tCommon("currency")}`
                 : tCart("freeShipping")}
             </span>
           </div>
@@ -104,7 +105,7 @@ const OrderSummary = memo(() => {
               {tCart("total")}
             </span>
             <span className="text-xl font-bold text-gray-900">
-              {totalWithShipping.toFixed(2)} EGP
+              {totalWithShipping.toFixed(2)} {tCommon("currency")}
             </span>
           </div>
         </div>

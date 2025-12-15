@@ -38,7 +38,11 @@
     "next": "التالي",
     "noProducts": "لم يتم العثور على منتجات",
     "tryAdjusting": "جرب تعديل المرشحات أو تصفح فئات أخرى",
-    "sold": "مباع"
+    "sold": "مباع",
+    "noImage": "لا توجد صورة",
+    "currency": "جنيه",
+    "close": "إغلاق",
+    "closeMenu": "إغلاق القائمة"
   },
   "nav": {
     "home": "الرئيسية",
@@ -52,7 +56,10 @@
     "myAccount": "حسابي",
     "menu": "القائمة",
     "exitDashboard": "الخروج من لوحة التحكم",
-    "shoppingCart": "سلة التسوق"
+    "shoppingCart": "سلة التسوق",
+    "adminMode": "وضع الإدارة",
+    "exit": "خروج",
+    "closeMenu": "إغلاق القائمة"
   },
   "shop": {
     "title": "المتجر",
@@ -98,7 +105,8 @@
     "quantity": "الكمية",
     "brand": "العلامة التجارية",
     "category": "الفئة",
-    "itemsAvailable": "عنصر متاح"
+    "itemsAvailable": "عنصر متاح",
+    "noImage": "لا توجد صورة"
   },
   "cart": {
     "title": "سلة التسوق",
@@ -139,6 +147,8 @@
     "unlockExclusiveBenefits": "افتح المزايا الحصرية",
     "fasterCheckout": "دفع أسرع!",
     "quickSecure": "سريع وآمن • لا حاجة لكلمة مرور",
+    "noImage": "لا توجد صورة",
+    "each": "لكل",
     "table": {
       "productDetails": "تفاصيل المنتج",
       "quantity": "الكمية",
@@ -160,6 +170,7 @@
     "discount": "الخصم",
     "total": "الإجمالي",
     "placeOrder": "تأكيد الطلب",
+    "pay": "ادفع",
     "processingPayment": "جاري معالجة الدفع...",
     "paymentFailed": "فشل الدفع. يرجى المحاولة مرة أخرى.",
     "orderPlaced": "تم تأكيد الطلب بنجاح!",
@@ -174,17 +185,20 @@
     "noOrdersDesc": "ابدأ التسوق لرؤية طلباتك هنا",
     "startShopping": "ابدأ التسوق",
     "orderNumber": "رقم الطلب",
+    "orderNumberPrefix": "طلب رقم",
     "orderDate": "تاريخ الطلب",
     "orderStatus": "حالة الطلب",
     "total": "الإجمالي",
     "items": "العناصر",
     "item": "عنصر",
+    "itemsPlural": "عناصر",
     "viewDetails": "عرض التفاصيل",
     "orderDetails": "تفاصيل الطلب",
     "orderSummary": "ملخص الطلب",
     "shippingAddress": "عنوان الشحن",
     "paymentMethod": "طريقة الدفع",
     "paymentStatus": "حالة الدفع",
+    "payment": "الدفع",
     "trackingNumber": "رقم التتبع",
     "estimatedDelivery": "التاريخ المتوقع للتسليم",
     "shippedOn": "تم الشحن في",
@@ -204,10 +218,7 @@
     "cancelled": "ملغي",
     "paid": "مدفوع",
     "pendingPayment": "قيد الانتظار",
-    "failed": "فشل",
-    "cashOnDelivery": "الدفع عند الاستلام",
-    "cardPayment": "الدفع بالبطاقة",
-    "preparingYourOrder": "جاري تحضير طلبك"
+    "failed": "فشل"
   },
   "footer": {
     "about": "من نحن",
@@ -451,14 +462,25 @@
         "view": "عرض",
         "edit": "تعديل",
         "delete": "حذف",
-        "cancel": "إلغاء"
+        "cancel": "إلغاء",
+        "confirm": "تأكيد"
       },
       "viewModal": {
         "title": "تفاصيل المنتج",
+        "name": "الاسم",
         "description": "الوصف",
         "price": "السعر",
+        "oldPrice": "السعر القديم",
         "category": "التصنيف",
         "brand": "العلامة التجارية",
+        "rating": "التقييم",
+        "images": "الصور",
+        "totalStock": "إجمالي المخزون",
+        "variants": "المتغيرات",
+        "color": "اللون",
+        "size": "المقاس",
+        "quantity": "الكمية",
+        "sku": "رمز المنتج",
         "close": "إغلاق"
       },
       "editModal": {
@@ -466,7 +488,61 @@
         "cancel": "إلغاء",
         "save": "حفظ التغييرات",
         "hideFromHome": "إخفاء من الصفحة الرئيسية",
-        "hideFromHomeDesc": "عند التمكين، لن يظهر هذا المنتج في الصفحة الرئيسية ولكنه سيظل مرئياً في صفحات الفئات ونتائج البحث."
+        "hideFromHomeDesc": "عند التمكين، لن يظهر هذا المنتج في الصفحة الرئيسية ولكنه سيظل مرئياً في صفحات الفئات ونتائج البحث.",
+        "form": {
+          "productName": "اسم المنتج",
+          "productNameRequired": "اسم المنتج *",
+          "description": "الوصف",
+          "descriptionRequired": "الوصف *",
+          "price": "السعر",
+          "priceRequired": "السعر *",
+          "oldPrice": "السعر القديم",
+          "discount": "الخصم (%)",
+          "rating": "التقييم",
+          "ratingRequired": "التقييم *",
+          "brand": "العلامة التجارية",
+          "brandRequired": "العلامة التجارية *",
+          "categoryName": "اسم الفئة",
+          "categoryNameRequired": "اسم الفئة *",
+          "categoryId": "معرف الفئة",
+          "categoryIdRequired": "معرف الفئة *",
+          "selectCategory": "اختر الفئة",
+          "addNewCategory": "إضافة فئة جديدة",
+          "updating": "جاري التحديث...",
+          "updateProduct": "تحديث المنتج",
+          "variants": {
+            "title": "متغيرات المخزون",
+            "description": "حدد كل مجموعة لون ومقاس مع كمية المخزون الخاصة بها.",
+            "totalStock": "إجمالي المخزون:",
+            "variantNumber": "متغير رقم",
+            "remove": "إزالة",
+            "color": "اللون",
+            "colorRequired": "اللون *",
+            "colorPlaceholder": "مثال: أسود",
+            "size": "المقاس",
+            "sizeRequired": "المقاس *",
+            "sizePlaceholder": "مثال: م",
+            "quantity": "الكمية",
+            "quantityRequired": "الكمية *",
+            "quantityPlaceholder": "0",
+            "sku": "رمز المنتج (اختياري)",
+            "skuPlaceholder": "رمز مخصص",
+            "addAnother": "إضافة متغير آخر"
+          },
+          "quickCategory": {
+            "title": "إضافة فئة جديدة",
+            "description": "أنشئ فئة جديدة لمنتجاتك",
+            "categoryName": "اسم الفئة",
+            "categoryNameRequired": "اسم الفئة *",
+            "categoryNamePlaceholder": "مثال: قمصان، صيف، نساء...",
+            "nameRequired": "اسم الفئة مطلوب",
+            "creating": "جاري الإنشاء...",
+            "created": "تم الإنشاء!",
+            "addCategory": "إضافة الفئة",
+            "cancel": "إلغاء",
+            "createError": "فشل إنشاء الفئة"
+          }
+        }
       },
       "messages": {
         "noProducts": "لا توجد منتجات",
@@ -555,6 +631,48 @@
       "updateSuccess": "تم تحديث رسوم الشحن بنجاح",
       "updateError": "فشل تحديث رسوم الشحن. يرجى المحاولة مرة أخرى."
     },
+    "categories": {
+      "badge": "الإدارة",
+      "title": "التحكم في الفئات",
+      "subtitle": "إدارة ظهور الفئات وترتيبها في الصفحة الرئيسية",
+      "noCategories": "لم يتم العثور على فئات",
+      "table": {
+        "name": "الاسم",
+        "slug": "الرابط",
+        "active": "نشط",
+        "priority": "الأولوية",
+        "actions": "الإجراءات"
+      },
+      "form": {
+        "nameLabel": "الاسم",
+        "slugLabel": "الرابط",
+        "activeLabel": "نشط",
+        "priorityLabel": "الأولوية",
+        "namePlaceholder": "اسم الفئة",
+        "slugPlaceholder": "رابط-الفئة"
+      },
+      "buttons": {
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "edit": "تعديل"
+      },
+      "messages": {
+        "fetchError": "فشل تحميل الفئات",
+        "nameRequired": "اسم الفئة مطلوب",
+        "slugRequired": "رابط الفئة مطلوب",
+        "updateError": "فشل تحديث الفئة",
+        "updateSuccess": "تم تحديث الفئة بنجاح"
+      },
+      "info": {
+        "title": "كيف يعمل:",
+        "nameSlugLabel": "الاسم والرابط",
+        "nameSlugDesc": "قم بتعديل اسم الفئة ورابط URL. يتم إنشاء الرابط تلقائياً من الاسم ولكن يمكن تخصيصه.",
+        "activeLabel": "نشط",
+        "activeDesc": "ستظهر الفئات النشطة فقط في الصفحة الرئيسية",
+        "priorityLabel": "الأولوية",
+        "priorityDesc": "الأرقام الأقل تظهر أولاً. يتم ترتيب الفئات التي لها نفس الأولوية حسب تاريخ الإنشاء"
+      }
+    },
     "adminManagement": {
       "title": "إدارة المشرفين",
       "subtitle": "إدارة أعضاء الفريق والصلاحيات",
@@ -568,7 +686,14 @@
       "you": "أنت",
       "protected": "محمي",
       "youCannotRemoveYourOwnAdminAccess": "لا يمكنك إزالة صلاحيات المشرف الخاصة بك",
+      "protectedAccount": "هذا الحساب محمي ولا يمكن حذفه",
       "removeAdmin": "إزالة المشرف",
+      "deleteConfirm": "هل أنت متأكد أنك تريد حذف هذا؟",
+      "deleteAddressConfirm": "هل أنت متأكد أنك تريد حذف هذا العنوان؟",
+      "deletePromoConfirm": "هل أنت متأكد أنك تريد حذف رمز الخصم هذا؟",
+      "removeAdminConfirm": "هل أنت متأكد أنك تريد إزالة صلاحيات المشرف من {email}؟",
+      "deleteAddressFailed": "فشل حذف العنوان",
+      "loginToAddAddress": "يرجى تسجيل الدخول لإضافة عنوان",
       "note": "تذكر أن المستخدم يجب أن يقوم بتسجيل الدخول على الأقل مرة واحدة قبل أن يتم السماح له بالوصول إلى لوحة التحكم.",
       "table": {
         "name": "الاسم",

@@ -30,6 +30,7 @@ const AddressSelection = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const tShipping = useTranslations("shipping");
+  const tAdmin = useTranslations("dashboard.adminManagement");
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -81,7 +82,7 @@ const AddressSelection = ({
     // Prevent dropdown from closing
     event.stopPropagation();
 
-    if (!confirm("Are you sure you want to delete this address?")) {
+    if (!confirm(tAdmin("deleteAddressConfirm"))) {
       return;
     }
 
@@ -100,11 +101,11 @@ const AddressSelection = ({
           setSelectedAddress({} as AddressProps);
         }
       } else {
-        alert(result.message || "Failed to delete address");
+        alert(result.message || tAdmin("deleteAddressFailed"));
       }
     } catch (error) {
       console.error("Error deleting address:", error);
-      alert("Failed to delete address");
+      alert(tAdmin("deleteAddressFailed"));
     }
   };
 
@@ -142,7 +143,7 @@ const AddressSelection = ({
 
   const handleAddNewAddress = () => {
     if (session.status !== "authenticated") {
-      alert("Please login to add an address");
+      alert(tAdmin("loginToAddAddress"));
       return;
     }
     setIsOpen(false);

@@ -133,6 +133,7 @@ const UserNav = memo(() => {
 
   const isDashboard = pathname.includes("/dashboard");
   const { isDashboardMenuOpen, toggleDashboardMenu } = useDashboardMenu();
+  const isArabic = locale.startsWith("ar");
 
   return (
     <nav
@@ -247,10 +248,16 @@ const UserNav = memo(() => {
                       onClick={closeMenu}
                     />
 
-                    {/* Menu Panel - Slides from Left */}
+                    {/* Menu Panel - Slides from Left/Right based on locale */}
                     <div
-                      className={`fixed top-0 left-0 h-full w-80 max-w-[85vw] lg:max-w-md bg-white shadow-2xl transform transition-transform duration-300 ${
-                        isMenuOpen ? "translate-x-0" : "-translate-x-full"
+                      className={`fixed top-0 h-full w-80 max-w-[85vw] lg:max-w-md bg-white shadow-2xl transform transition-transform duration-300 ${
+                        isArabic
+                          ? `right-0 ${
+                              isMenuOpen ? "translate-x-0" : "translate-x-full"
+                            }`
+                          : `left-0 ${
+                              isMenuOpen ? "translate-x-0" : "-translate-x-full"
+                            }`
                       }`}
                     >
                       <div className="flex flex-col h-full">
@@ -262,7 +269,7 @@ const UserNav = memo(() => {
                           <button
                             onClick={closeMenu}
                             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                            aria-label="Close menu"
+                            aria-label={t("closeMenu")}
                           >
                             <svg
                               className="w-5 h-5 text-gray-600"
@@ -352,7 +359,7 @@ const UserNav = memo(() => {
               <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange/10 to-orange/5 border border-orange/20 rounded-xl">
                 <div className="w-2 h-2 bg-orange rounded-full animate-pulse" />
                 <span className="text-sm font-medium text-gray-700">
-                  Admin Mode
+                  {t("adminMode")}
                 </span>
               </div>
 
@@ -390,7 +397,7 @@ const UserNav = memo(() => {
                   />
                 </svg>
                 <span className="hidden sm:inline">{t("exitDashboard")}</span>
-                <span className="sm:hidden">Exit</span>
+                <span className="sm:hidden">{t("exit")}</span>
               </Link>
             </div>
           )}

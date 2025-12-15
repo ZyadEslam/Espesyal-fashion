@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Package, Calendar, DollarSign, ArrowRight } from "lucide-react";
 
 interface Product {
@@ -31,6 +31,7 @@ interface OrderCardProps {
 
 const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
   const locale = useLocale();
+  const t = useTranslations("orders");
 
   const formatDate = (date: Date | string) => {
     const dateObj = typeof date === "string" ? new Date(date) : date;
@@ -74,7 +75,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
               <div className="flex items-center gap-2 mb-2">
                 <Package className="w-5 h-5 text-orange" />
                 <h3 className="text-lg font-bold text-gray-900">
-                  Order #{order.orderNumber}
+                  {t("orderNumberPrefix")}
+                  {order.orderNumber}
                 </h3>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -111,7 +113,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
 
           <div className="flex items-center justify-between pt-4 border-t border-gray-200">
             <span className="text-sm text-gray-600">
-              Payment:{" "}
+              {t("payment")}:{" "}
               <span
                 className={`font-medium ${
                   order.paymentStatus === "paid"
@@ -122,14 +124,14 @@ const OrderCard: React.FC<OrderCardProps> = ({ order }) => {
                 }`}
               >
                 {order.paymentStatus === "paid"
-                  ? "Paid"
+                  ? t("paid")
                   : order.paymentStatus === "pending"
-                  ? "Pending"
-                  : "Failed"}
+                  ? t("pending")
+                  : t("failed")}
               </span>
             </span>
             <div className="flex items-center gap-1 text-orange hover:text-orange/80 transition-colors">
-              <span className="text-sm font-medium">View Details</span>
+              <span className="text-sm font-medium">{t("viewDetails")}</span>
               <ArrowRight className="w-4 h-4" />
             </div>
           </div>

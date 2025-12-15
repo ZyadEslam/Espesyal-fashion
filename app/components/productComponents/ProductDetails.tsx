@@ -12,6 +12,7 @@ import { useCart } from "../../hooks/useCart";
 const ProductDetails = ({ data }: { data: ProductCardProps }) => {
   const { addToCart, removeFromCart, isInCart } = useCart();
   const t = useTranslations("product");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const locale = useLocale();
   const [showToast, setShowToast] = useState({ show: false, message: "" });
@@ -197,10 +198,10 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
       </p>
 
       <p className="text-xl sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6">
-        {data.price} EGP
+        {data.price} {tCommon("currency")}
         {data.oldPrice && (
           <span className="text-gray-400 font-normal text-sm ml-2 line-through">
-            {data.oldPrice} EGP
+            {data.oldPrice} {tCommon("currency")}
           </span>
         )}
       </p>
@@ -211,7 +212,9 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
         <>
           {/* Color Selection */}
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Color</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">
+              {t("color")}
+            </h3>
             <div className="flex flex-wrap gap-2">
               {colorOptions.map((color) => (
                 <button
@@ -244,7 +247,9 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
 
           {/* Size Selection */}
           <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Size</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">
+              {t("size")}
+            </h3>
             <div className="flex flex-wrap gap-2">
               {sizeOptions.map((option) => (
                 <button
@@ -267,7 +272,9 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
 
       {/* Quantity Selection */}
       <div className="mb-6">
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Quantity</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">
+          {t("quantity")}
+        </h3>
         <div className="flex items-center gap-3">
           <button
             onClick={() => handleQuantityChange(quantity - 1)}

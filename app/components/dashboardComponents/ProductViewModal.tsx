@@ -1,6 +1,7 @@
 import React from "react";
 import { X } from "lucide-react";
 import { Product } from "@/app/hooks/useProducts";
+import { useTranslations } from "next-intl";
 
 interface ProductViewModalProps {
   product: Product | null;
@@ -11,6 +12,8 @@ const ProductViewModal: React.FC<ProductViewModalProps> = ({
   product,
   onClose,
 }) => {
+  const t = useTranslations("dashboard.productList.viewModal");
+  const tCommon = useTranslations("common");
   if (!product) return null;
 
   const totalStock =
@@ -32,52 +35,59 @@ const ProductViewModal: React.FC<ProductViewModalProps> = ({
       >
         <div className="p-4 sm:p-6 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-            Product Details
+            {t("title")}
           </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 p-1"
+            aria-label={t("close")}
           >
             <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
         <div className="p-4 sm:p-6 space-y-4">
           <div>
-            <label className="text-sm font-medium text-gray-700">Name</label>
+            <label className="text-sm font-medium text-gray-700">
+              {t("name")}
+            </label>
             <p className="mt-1 text-gray-900">{product.name}</p>
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700">
-              Description
+              {t("description")}
             </label>
             <p className="mt-1 text-gray-900">{product.description}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-gray-700">Price</label>
+              <label className="text-sm font-medium text-gray-700">
+                {t("price")}
+              </label>
               <p className="mt-1 text-gray-900">
-                {product.price.toFixed(2)} EGP
+                {product.price.toFixed(2)} {tCommon("currency")}
               </p>
             </div>
             {product.oldPrice && (
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Old Price
+                  {t("oldPrice")}
                 </label>
                 <p className="mt-1 text-gray-900">
-                  {product.oldPrice.toFixed(2)} EGP
+                  {product.oldPrice.toFixed(2)} {tCommon("currency")}
                 </p>
               </div>
             )}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-gray-700">Brand</label>
+              <label className="text-sm font-medium text-gray-700">
+                {t("brand")}
+              </label>
               <p className="mt-1 text-gray-900">{product.brand}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Category
+                {t("category")}
               </label>
               <p className="mt-1 text-gray-900">{product.categoryName}</p>
             </div>
@@ -85,19 +95,19 @@ const ProductViewModal: React.FC<ProductViewModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Rating
+                {t("rating")}
               </label>
               <p className="mt-1 text-gray-900">{product.rating} ★</p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Images
+                {t("images")}
               </label>
               <p className="mt-1 text-gray-900">{product.imageCount || 0}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Total Stock
+                {t("totalStock")}
               </label>
               <p className="mt-1 text-gray-900">{totalStock}</p>
             </div>
@@ -105,14 +115,14 @@ const ProductViewModal: React.FC<ProductViewModalProps> = ({
           {product.variants && product.variants.length > 0 && (
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
-                Variants
+                {t("variants")}
               </label>
               <div className="border border-gray-200 rounded-lg overflow-hidden">
                 <div className="grid grid-cols-4 bg-gray-50 text-xs font-semibold text-gray-600">
-                  <span className="px-3 py-2">Color</span>
-                  <span className="px-3 py-2">Size</span>
-                  <span className="px-3 py-2">Quantity</span>
-                  <span className="px-3 py-2">SKU</span>
+                  <span className="px-3 py-2">{t("color")}</span>
+                  <span className="px-3 py-2">{t("size")}</span>
+                  <span className="px-3 py-2">{t("quantity")}</span>
+                  <span className="px-3 py-2">{t("sku")}</span>
                 </div>
                 {product.variants.map((variant) => (
                   <div

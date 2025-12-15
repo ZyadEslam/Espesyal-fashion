@@ -8,6 +8,7 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { CreditCard } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // Initialize Stripe
 const stripePromise = loadStripe(
@@ -27,6 +28,8 @@ const PaymentFormContent = ({
 }: StripePaymentFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
+  const t = useTranslations("checkout");
+  const tCommon = useTranslations("common");
   const [isProcessing, setIsProcessing] = useState(false);
   const [clientSecret, setClientSecret] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -140,12 +143,12 @@ const PaymentFormContent = ({
         {isProcessing ? (
           <>
             <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            Processing...
+            {t("processingPayment")}
           </>
         ) : (
           <>
             <CreditCard className="w-5 h-5" />
-            Pay {amount.toFixed(2)} EGP
+            {t("pay")} {amount.toFixed(2)} {tCommon("currency")}
           </>
         )}
       </button>

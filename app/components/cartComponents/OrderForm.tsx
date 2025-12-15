@@ -13,6 +13,7 @@ const OrderForm = () => {
   const router = useRouter();
   const locale = useLocale();
   const tCart = useTranslations("cart");
+  const tCommon = useTranslations("common");
   const { cart, totalPrice } = useCart();
 
   // Promo code state
@@ -218,13 +219,15 @@ const OrderForm = () => {
           <p className="text-gray-500">
             {tCart("itemsLabel", { count: totalItems })}
           </p>
-          <p>{totalPrice.toFixed(2)} EGP</p>
+          <p>
+            {totalPrice.toFixed(2)} {tCommon("currency")}
+          </p>
         </div>
         <div className="flex justify-between">
           <p className="text-gray-500">{tCart("shippingFee")}</p>
           <p>
             {shippingFee > 0
-              ? `${shippingFee.toFixed(2)} EGP`
+              ? `${shippingFee.toFixed(2)} ${tCommon("currency")}`
               : tCart("freeShipping")}
           </p>
         </div>
@@ -233,14 +236,18 @@ const OrderForm = () => {
             <p className="text-gray-500">
               {tCart("discountLabel", { code: appliedPromoCode })}
             </p>
-            <p>-{discountAmount.toFixed(2)} EGP</p>
+            <p>
+              -{discountAmount.toFixed(2)} {tCommon("currency")}
+            </p>
           </div>
         )}
       </div>
       <hr />
       <div className="flex justify-between font-medium text-xl">
         <p>{tCart("total")}</p>
-        <p>{finalPrice.toFixed(2)} EGP</p>
+        <p>
+          {finalPrice.toFixed(2)} {tCommon("currency")}
+        </p>
       </div>
 
       <button

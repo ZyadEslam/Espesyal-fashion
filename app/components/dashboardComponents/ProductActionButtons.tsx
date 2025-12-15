@@ -1,6 +1,7 @@
 import React from "react";
 import { Edit, Trash2, Eye, Loader2 } from "lucide-react";
 import { Product } from "@/app/hooks/useProducts";
+import { useTranslations } from "next-intl";
 
 interface ProductActionButtonsProps {
   product: Product;
@@ -21,20 +22,21 @@ const ProductActionButtons: React.FC<ProductActionButtonsProps> = ({
   deleting,
   deleteConfirm,
 }) => {
+  const t = useTranslations("dashboard.productList.table");
   return (
     <div>
       <div className="flex items-center gap-2">
         <button
           onClick={() => onView(product)}
           className="text-blue-600 hover:text-blue-800"
-          title="View"
+          title={t("view")}
         >
           <Eye className="w-4 h-4" />
         </button>
         <button
           onClick={() => onEdit(product)}
           className="text-orange hover:text-orange/80"
-          title="Edit"
+          title={t("edit")}
         >
           <Edit className="w-4 h-4" />
         </button>
@@ -42,7 +44,7 @@ const ProductActionButtons: React.FC<ProductActionButtonsProps> = ({
           onClick={() => onDelete(product._id)}
           disabled={deleting === product._id}
           className="text-red-600 hover:text-red-800 disabled:opacity-50"
-          title="Delete"
+          title={t("delete")}
         >
           {deleting === product._id ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -57,13 +59,13 @@ const ProductActionButtons: React.FC<ProductActionButtonsProps> = ({
             onClick={() => onDelete(product._id)}
             className="text-red-600 hover:text-red-800 mr-2"
           >
-            Confirm
+            {t("confirm")}
           </button>
           <button
             onClick={onCancelDelete}
             className="text-gray-600 hover:text-gray-800"
           >
-            Cancel
+            {t("cancel")}
           </button>
         </div>
       )}
@@ -72,4 +74,3 @@ const ProductActionButtons: React.FC<ProductActionButtonsProps> = ({
 };
 
 export default ProductActionButtons;
-

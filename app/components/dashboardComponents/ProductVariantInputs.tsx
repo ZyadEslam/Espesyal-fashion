@@ -3,6 +3,7 @@
 import React from "react";
 import { Plus, Trash2 } from "lucide-react";
 import type { ProductFormVariant } from "@/app/hooks/useProducts";
+import { useTranslations } from "next-intl";
 
 interface ProductVariantInputsProps {
   variants: ProductFormVariant[];
@@ -26,10 +27,14 @@ const createEmptyVariant = (): ProductFormVariant => ({
 const ProductVariantInputs: React.FC<ProductVariantInputsProps> = ({
   variants,
   onChange,
-  title = "Inventory variants",
-  description = "Specify each color & size combination with its stock quantity.",
+  title,
+  description,
   minRows = 1,
 }) => {
+  const t = useTranslations("dashboard.productList.editModal.form.variants");
+  const defaultTitle = title || t("title");
+  const defaultDescription = description || t("description");
+
   const handleVariantChange = <K extends keyof ProductFormVariant>(
     index: number,
     field: K,
@@ -60,11 +65,13 @@ const ProductVariantInputs: React.FC<ProductVariantInputsProps> = ({
       <div>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-            <p className="text-sm text-gray-500">{description}</p>
+            <h3 className="text-base font-semibold text-gray-900">
+              {defaultTitle}
+            </h3>
+            <p className="text-sm text-gray-500">{defaultDescription}</p>
           </div>
           <div className="text-sm text-gray-600">
-            Total stock:{" "}
+            {t("totalStock")}{" "}
             <span className="font-semibold text-gray-900">{totalStock}</span>
           </div>
         </div>
@@ -73,12 +80,17 @@ const ProductVariantInputs: React.FC<ProductVariantInputsProps> = ({
       <div className="space-y-3">
         {variants.map((variant, index) => (
           <div
-            key={variant.clientId || variant._id || `${variant.size}-${variant.color}-${index}`}
+            key={
+              variant.clientId ||
+              variant._id ||
+              `${variant.size}-${variant.color}-${index}`
+            }
             className="p-4 border border-gray-200 rounded-xl bg-gray-50/60 space-y-3"
           >
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">
-                Variant #{index + 1}
+                {t("variantNumber")}
+                {index + 1}
               </span>
               <button
                 type="button"
@@ -87,14 +99,14 @@ const ProductVariantInputs: React.FC<ProductVariantInputsProps> = ({
                 className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 disabled:text-gray-300"
               >
                 <Trash2 className="w-4 h-4" />
-                Remove
+                {t("remove")}
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div className="space-y-1">
                 <label className="text-sm font-medium text-gray-700">
-                  Color *
+                  {t("colorRequired")}
                 </label>
                 <input
                   type="text"
@@ -103,13 +115,13 @@ const ProductVariantInputs: React.FC<ProductVariantInputsProps> = ({
                   onChange={(e) =>
                     handleVariantChange(index, "color", e.target.value)
                   }
-                  placeholder="e.g. Black"
+                  placeholder={t("colorPlaceholder")}
                   className="dashboard-input"
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-medium text-gray-700">
-                  Size *
+                  {t("sizeRequired")}
                 </label>
                 <input
                   type="text"
@@ -118,13 +130,13 @@ const ProductVariantInputs: React.FC<ProductVariantInputsProps> = ({
                   onChange={(e) =>
                     handleVariantChange(index, "size", e.target.value)
                   }
-                  placeholder="e.g. M"
+                  placeholder={t("sizePlaceholder")}
                   className="dashboard-input"
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-medium text-gray-700">
-                  Quantity *
+                  {t("quantityRequired")}
                 </label>
                 <input
                   type="number"
@@ -134,13 +146,13 @@ const ProductVariantInputs: React.FC<ProductVariantInputsProps> = ({
                   onChange={(e) =>
                     handleVariantChange(index, "quantity", e.target.value)
                   }
-                  placeholder="0"
+                  placeholder={t("quantityPlaceholder")}
                   className="dashboard-input"
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-medium text-gray-700">
-                  SKU (optional)
+                  {t("sku")}
                 </label>
                 <input
                   type="text"
@@ -148,7 +160,7 @@ const ProductVariantInputs: React.FC<ProductVariantInputsProps> = ({
                   onChange={(e) =>
                     handleVariantChange(index, "sku", e.target.value)
                   }
-                  placeholder="Custom SKU"
+                  placeholder={t("skuPlaceholder")}
                   className="dashboard-input"
                 />
               </div>
@@ -163,11 +175,10 @@ const ProductVariantInputs: React.FC<ProductVariantInputsProps> = ({
         className="inline-flex items-center gap-2 text-sm font-medium text-orange hover:text-orange/80"
       >
         <Plus className="w-4 h-4" />
-        Add another variant
+        {t("addAnother")}
       </button>
     </div>
   );
 };
 
 export default ProductVariantInputs;
-

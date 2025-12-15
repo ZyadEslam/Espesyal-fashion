@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Loader2, Plus, Edit2, Save, X } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 
 interface Category {
   _id: string;
@@ -16,7 +16,7 @@ interface Category {
 }
 
 const CategoriesPage = () => {
-  useLocale(); // Keep for potential future use
+  const t = useTranslations("dashboard.categories");
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,11 +30,7 @@ const CategoriesPage = () => {
   } | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -53,16 +49,18 @@ const CategoriesPage = () => {
         });
         setCategories(sorted);
       } else {
-        setError(data.message || "Failed to fetch categories");
+        setError(data.message || t("messages.fetchError"));
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to fetch categories"
-      );
+      setError(err instanceof Error ? err.message : t("messages.fetchError"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const generateSlug = (name: string): string => {
     return name
@@ -91,12 +89,12 @@ const CategoriesPage = () => {
 
     // Validate required fields
     if (!editingValues.name.trim()) {
-      setError("Category name is required");
+      setError(t("messages.nameRequired"));
       return;
     }
 
     if (!editingValues.slug.trim()) {
-      setError("Category slug is required");
+      setError(t("messages.slugRequired"));
       return;
     }
 
@@ -119,7 +117,7 @@ const CategoriesPage = () => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        let errorMessage = "Failed to update category";
+        let errorMessage = t("messages.updateError");
         try {
           const errorData = JSON.parse(errorText);
           errorMessage = errorData.message || errorMessage;
@@ -133,18 +131,16 @@ const CategoriesPage = () => {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess("Category updated successfully");
+        setSuccess(t("messages.updateSuccess"));
         await fetchCategories();
         setEditingId(null);
         setEditingValues(null);
         setTimeout(() => setSuccess(null), 3000);
       } else {
-        setError(data.message || "Failed to update category");
+        setError(data.message || t("messages.updateError"));
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to update category"
-      );
+      setError(err instanceof Error ? err.message : t("messages.updateError"));
     } finally {
       setUpdating(null);
     }
@@ -154,6 +150,13 @@ const CategoriesPage = () => {
     categoryId: string,
     currentValue: boolean
   ) => {
+    // Optimistically update the UI immediately
+    setCategories((prevCategories) =>
+      prevCategories.map((cat) =>
+        cat._id === categoryId ? { ...cat, isActive: !currentValue } : cat
+      )
+    );
+
     try {
       setUpdating(categoryId);
       setError(null);
@@ -169,8 +172,14 @@ const CategoriesPage = () => {
       });
 
       if (!response.ok) {
+        // Revert the optimistic update on error
+        setCategories((prevCategories) =>
+          prevCategories.map((cat) =>
+            cat._id === categoryId ? { ...cat, isActive: currentValue } : cat
+          )
+        );
         const errorText = await response.text();
-        let errorMessage = "Failed to update category";
+        let errorMessage = t("messages.updateError");
         try {
           const errorData = JSON.parse(errorText);
           errorMessage = errorData.message || errorMessage;
@@ -184,16 +193,27 @@ const CategoriesPage = () => {
       const data = await response.json();
 
       if (data.success) {
-        setSuccess("Category updated successfully");
+        setSuccess(t("messages.updateSuccess"));
+        // Refresh to ensure consistency with server
         await fetchCategories();
         setTimeout(() => setSuccess(null), 3000);
       } else {
-        setError(data.message || "Failed to update category");
+        // Revert the optimistic update on error
+        setCategories((prevCategories) =>
+          prevCategories.map((cat) =>
+            cat._id === categoryId ? { ...cat, isActive: currentValue } : cat
+          )
+        );
+        setError(data.message || t("messages.updateError"));
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to update category"
+      // Revert the optimistic update on error
+      setCategories((prevCategories) =>
+        prevCategories.map((cat) =>
+          cat._id === categoryId ? { ...cat, isActive: currentValue } : cat
+        )
       );
+      setError(err instanceof Error ? err.message : t("messages.updateError"));
     } finally {
       setUpdating(null);
     }
@@ -217,13 +237,13 @@ const CategoriesPage = () => {
           </div>
           <div>
             <p className="text-xs font-semibold uppercase text-orange">
-              Management
+              {t("badge")}
             </p>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-              Categories Control
+              {t("title")}
             </h1>
             <p className="text-sm sm:text-base text-gray-600 mt-1">
-              Manage category visibility and homepage order
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -245,7 +265,7 @@ const CategoriesPage = () => {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {categories.length === 0 ? (
           <div className="p-12 text-center">
-            <p className="text-gray-600">No categories found</p>
+            <p className="text-gray-600">{t("noCategories")}</p>
           </div>
         ) : (
           <>
@@ -255,19 +275,19 @@ const CategoriesPage = () => {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                      Name
+                      {t("table.name")}
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
-                      Slug
+                      {t("table.slug")}
                     </th>
                     <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
-                      Active
+                      {t("table.active")}
                     </th>
                     <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
-                      Priority
+                      {t("table.priority")}
                     </th>
                     <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
-                      Actions
+                      {t("table.actions")}
                     </th>
                   </tr>
                 </thead>
@@ -298,7 +318,7 @@ const CategoriesPage = () => {
                               });
                             }}
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-orange focus:border-orange outline-none font-medium"
-                            placeholder="Category name"
+                            placeholder={t("form.namePlaceholder")}
                           />
                         ) : (
                           <>
@@ -331,7 +351,7 @@ const CategoriesPage = () => {
                               });
                             }}
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-orange focus:border-orange outline-none font-mono"
-                            placeholder="category-slug"
+                            placeholder={t("form.slugPlaceholder")}
                           />
                         ) : (
                           <span className="text-sm text-gray-600 font-mono">
@@ -409,7 +429,7 @@ const CategoriesPage = () => {
                               onClick={() => handleSave(category._id)}
                               disabled={updating === category._id}
                               className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
-                              title="Save"
+                              title={t("buttons.save")}
                             >
                               {updating === category._id ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -421,7 +441,7 @@ const CategoriesPage = () => {
                               onClick={handleCancelEdit}
                               disabled={updating === category._id}
                               className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-                              title="Cancel"
+                              title={t("buttons.cancel")}
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -430,7 +450,7 @@ const CategoriesPage = () => {
                           <button
                             onClick={() => handleEdit(category)}
                             className="p-2 text-orange hover:bg-orange/10 rounded-lg transition-colors"
-                            title="Edit"
+                            title={t("buttons.edit")}
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
@@ -477,12 +497,12 @@ const CategoriesPage = () => {
                               });
                             }}
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-orange focus:border-orange outline-none font-medium"
-                            placeholder="Category name"
+                            placeholder={t("form.namePlaceholder")}
                           />
                         </div>
                         <div>
                           <label className="text-xs text-gray-500 mb-1 block">
-                            Slug
+                            {t("form.slugLabel")}
                           </label>
                           <input
                             type="text"
@@ -500,7 +520,7 @@ const CategoriesPage = () => {
                               });
                             }}
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-orange focus:border-orange outline-none font-mono"
-                            placeholder="category-slug"
+                            placeholder={t("form.slugPlaceholder")}
                           />
                         </div>
                       </div>
@@ -524,7 +544,7 @@ const CategoriesPage = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs text-gray-500 mb-1 block">
-                        Active
+                        {t("form.activeLabel")}
                       </label>
                       {editingId === category._id && editingValues ? (
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -567,7 +587,7 @@ const CategoriesPage = () => {
                     </div>
                     <div>
                       <label className="text-xs text-gray-500 mb-1 block">
-                        Priority
+                        {t("form.priorityLabel")}
                       </label>
                       {editingId === category._id && editingValues ? (
                         <input
@@ -603,7 +623,7 @@ const CategoriesPage = () => {
                           ) : (
                             <>
                               <Save className="w-4 h-4" />
-                              <span>Save</span>
+                              <span>{t("buttons.save")}</span>
                             </>
                           )}
                         </button>
@@ -613,7 +633,7 @@ const CategoriesPage = () => {
                           className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
                         >
                           <X className="w-4 h-4" />
-                          <span>Cancel</span>
+                          <span>{t("buttons.cancel")}</span>
                         </button>
                       </div>
                     ) : (
@@ -622,7 +642,7 @@ const CategoriesPage = () => {
                         className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-orange text-white rounded-lg hover:bg-orange/90 transition-colors"
                       >
                         <Edit2 className="w-4 h-4" />
-                        <span>Edit</span>
+                        <span>{t("buttons.edit")}</span>
                       </button>
                     )}
                   </div>
@@ -636,20 +656,17 @@ const CategoriesPage = () => {
       {/* Info Box */}
       <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <h3 className="text-sm font-semibold text-blue-900 mb-2">
-          How it works:
+          {t("info.title")}
         </h3>
         <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
           <li>
-            <strong>Name & Slug:</strong> Edit the category name and URL slug.
-            The slug auto-generates from the name but can be customized.
+            <strong>{t("info.nameSlugLabel")}:</strong> {t("info.nameSlugDesc")}
           </li>
           <li>
-            <strong>Active:</strong> Only active categories will appear on the
-            homepage
+            <strong>{t("info.activeLabel")}:</strong> {t("info.activeDesc")}
           </li>
           <li>
-            <strong>Priority:</strong> Lower numbers appear first. Categories
-            with the same priority are sorted by creation date
+            <strong>{t("info.priorityLabel")}:</strong> {t("info.priorityDesc")}
           </li>
         </ul>
       </div>
