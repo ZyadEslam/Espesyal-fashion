@@ -150,19 +150,23 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   const handleImageError = (originalIndex: number) => {
     setFailedImages((prev) => {
       const newFailed = new Set([...prev, originalIndex]);
+      // Calculate the current original index using the PREVIOUS failedImages set
+      // to check if the failed image is currently selected
+      const validIndicesBeforeFailure = product.imgSrc
+        .map((_, index) => index)
+        .filter((index) => !prev.has(index));
+      const currentOriginalIndex =
+        validIndicesBeforeFailure[selectedImageIndex];
+
       // If the failed image is the currently selected one, select the first valid image
-      const currentOriginalIndex = getOriginalIndex(selectedImageIndex);
       if (originalIndex === currentOriginalIndex) {
-        const validIndices = product.imgSrc
+        const validIndicesAfterFailure = product.imgSrc
           .map((_, index) => index)
           .filter((index) => !newFailed.has(index));
-        if (validIndices.length > 0) {
-          // Find the index in validImagesWithIndices for the first valid image
-          const firstValidOriginalIndex = validIndices[0];
-          const newValidImages = product.imgSrc
-            .map((_, index) => index)
-            .filter((index) => !newFailed.has(index));
-          const newSelectedIndex = newValidImages.indexOf(
+        if (validIndicesAfterFailure.length > 0) {
+          // Find the index in the new validImagesWithIndices for the first valid image
+          const firstValidOriginalIndex = validIndicesAfterFailure[0];
+          const newSelectedIndex = validIndicesAfterFailure.indexOf(
             firstValidOriginalIndex
           );
           if (newSelectedIndex !== -1) {

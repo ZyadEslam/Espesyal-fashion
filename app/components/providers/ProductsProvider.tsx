@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { ProductCardProps } from "@/app/types/types";
 import { api } from "@/app/utils/api";
 import { ProductsContext } from "@/app/context/productsCtx";
@@ -13,7 +13,7 @@ const ProductsProvider = ({ children }: ProductsProviderProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     if (typeof window === "undefined") return;
     // Avoid refetching if we already have products or are currently loading
     if (isLoading || products.length > 0) return;
@@ -30,7 +30,7 @@ const ProductsProvider = ({ children }: ProductsProviderProps) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isLoading, products.length]);
 
   const contextValue = useMemo(
     () => ({
@@ -42,7 +42,7 @@ const ProductsProvider = ({ children }: ProductsProviderProps) => {
       setError,
       fetchProducts,
     }),
-    [products, isLoading, error]
+    [products, isLoading, error, fetchProducts]
   );
 
   return (

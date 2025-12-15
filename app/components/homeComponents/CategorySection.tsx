@@ -14,7 +14,6 @@ import ProductCard from "../productComponents/ProductCard";
 import { useLocale } from "next-intl";
 
 interface CategorySectionProps {
-  categoryId: string;
   categoryName: string;
   categorySlug: string;
   products: ProductCardProps[];

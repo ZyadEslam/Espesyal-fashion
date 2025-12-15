@@ -58,7 +58,6 @@ export default async function Home() {
               }
             >
               <CategorySection
-                categoryId={category._id}
                 categoryName={category.name}
                 categorySlug={category.slug}
                 products={products}
