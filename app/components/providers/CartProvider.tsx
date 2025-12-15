@@ -61,7 +61,28 @@ const CartProvider = ({ children }: CartProviderProps) => {
       if (storedCart) {
         setCart(JSON.parse(storedCart));
       } else {
-        setCart([]);
+        // If user just logged in and no user cart exists, check for anonymous cart
+        if (session?.user?.id) {
+          const anonymousKey = getCartStorageKey();
+          const anonymousCart = localStorage.getItem(anonymousKey);
+          if (anonymousCart) {
+            // Preserve anonymous cart temporarily - sync will merge it
+            const parsedAnonymousCart = JSON.parse(anonymousCart);
+            setCart(parsedAnonymousCart);
+            // Don't remove anonymous cart yet - let sync handle merging
+          } else {
+            setCart([]);
+          }
+        } else {
+          // Guest user - use anonymous cart
+          const anonymousKey = getCartStorageKey();
+          const anonymousCart = localStorage.getItem(anonymousKey);
+          if (anonymousCart) {
+            setCart(JSON.parse(anonymousCart));
+          } else {
+            setCart([]);
+          }
+        }
       }
     } catch (error) {
       console.error("Error loading cart from localStorage:", error);
@@ -271,6 +292,11 @@ const CartProvider = ({ children }: CartProviderProps) => {
       return;
     }
 
+    // Don't sync until cart is hydrated
+    if (!isCartHydrated) {
+      return;
+    }
+
     const syncCartWithServer = async () => {
       if (session?.user?.id && typeof window !== "undefined") {
         try {
@@ -278,46 +304,68 @@ const CartProvider = ({ children }: CartProviderProps) => {
           const anonymousKey = getCartStorageKey();
           const userKey = getCartStorageKey(session.user.id);
 
+          // Get carts from localStorage (source of truth)
           const anonymousCart = localStorage.getItem(anonymousKey);
           const userCart = localStorage.getItem(userKey);
+
+          // Fetch server cart
           const { cart: serverCart } = await api.getCart(
             session?.user?.id as string
           );
 
-          // Don't sync if local cart is explicitly empty (was manually cleared)
-          const localCartData = userCart
-            ? JSON.parse(userCart)
-            : anonymousCart
-            ? JSON.parse(anonymousCart)
-            : [];
-          if (localCartData.length === 0 && serverCart.length === 0) {
-            // Both are empty, nothing to sync
-            return;
-          }
+          // Merge logic: prioritize preserving guest cart items
+          let mergedCart: ProductCardProps[] = [];
 
           if (anonymousCart && !userCart) {
+            // User just logged in - merge anonymous cart with server cart
+            const parsedAnonymousCart = JSON.parse(anonymousCart);
             if (serverCart.length > 0) {
-              const uniqueItems = uniqueListItems([
+              // Merge both carts, removing duplicates
+              mergedCart = uniqueListItems([
+                ...parsedAnonymousCart,
                 ...serverCart,
-                ...JSON.parse(anonymousCart),
               ]);
-              setCart(uniqueItems);
-              localStorage.setItem(userKey, JSON.stringify(uniqueItems));
-              localStorage.removeItem(anonymousKey);
             } else {
-              setCart(JSON.parse(anonymousCart));
-              localStorage.setItem(userKey, anonymousCart);
-              localStorage.removeItem(anonymousKey);
+              // No server cart, use anonymous cart
+              mergedCart = parsedAnonymousCart;
             }
+
+            // Update state and localStorage
+            setCart(mergedCart);
+            localStorage.setItem(userKey, JSON.stringify(mergedCart));
+
+            // Sync to server
+            if (mergedCart.length > 0) {
+              await api.mergeCart(mergedCart, session.user.id);
+            }
+
+            // Remove anonymous cart after successful merge
+            localStorage.removeItem(anonymousKey);
           } else if (userCart) {
+            // User cart exists - merge with server cart
             const parsedUserCart = JSON.parse(userCart);
-            // Only merge if local cart has items (not manually cleared)
             if (parsedUserCart.length > 0) {
-              setCart(uniqueListItems([...serverCart, ...parsedUserCart]));
+              // Merge local with server
+              mergedCart = uniqueListItems([...parsedUserCart, ...serverCart]);
+              setCart(mergedCart);
+              localStorage.setItem(userKey, JSON.stringify(mergedCart));
+
+              // Sync to server if there are changes
+              if (
+                mergedCart.length > 0 &&
+                JSON.stringify(mergedCart) !== JSON.stringify(serverCart)
+              ) {
+                await api.mergeCart(mergedCart, session.user.id);
+              }
             } else if (serverCart.length > 0) {
-              // Local is empty but server has items - use server (unless it was just cleared)
+              // Local is empty but server has items - use server
               setCart(serverCart);
+              localStorage.setItem(userKey, JSON.stringify(serverCart));
             }
+          } else if (serverCart.length > 0) {
+            // Only server has items
+            setCart(serverCart);
+            localStorage.setItem(userKey, JSON.stringify(serverCart));
           }
         } catch (err) {
           setError("Error Fetching Cart Please try again later ");
@@ -328,8 +376,8 @@ const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     syncCartWithServer();
-    // Only sync when user ID changes, not on every error state change
-  }, [session?.user?.id]);
+    // Only sync when user ID or hydration status changes
+  }, [session?.user?.id, isCartHydrated]);
 
   // Reset sync flag when user changes
   useEffect(() => {

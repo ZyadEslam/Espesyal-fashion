@@ -38,6 +38,13 @@ const OrderSummary = memo(() => {
 
   const handleSignIn = async () => {
     try {
+      // Ensure guest cart is saved before redirecting to login
+      if (cart.length > 0 && typeof window !== "undefined") {
+        const anonymousKey = "cart-anonymous";
+        localStorage.setItem(anonymousKey, JSON.stringify(cart));
+        console.log("Guest cart preserved before login:", cart);
+      }
+
       await signIn("google", {
         callbackUrl: `/${locale}/cart`,
         redirect: true,

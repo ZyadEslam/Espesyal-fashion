@@ -99,7 +99,7 @@ const ProductCard = memo(
             <div className="flex items-center justify-start pt-2">
               <div className="flex flex-col">
                 <span className="font-bold text-lg text-gray-900">
-                  ${product.price}
+                  {product.price} EGP
                 </span>
               </div>
             </div>

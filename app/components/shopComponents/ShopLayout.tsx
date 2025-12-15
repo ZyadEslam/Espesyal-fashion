@@ -1,6 +1,7 @@
 "use client";
-import React, { memo, useState, useCallback, Suspense } from "react";
+import React, { memo, useState, useCallback, Suspense, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter, usePathname } from "next/navigation";
 import {
   useCategories,
   useProductsByCategory,
@@ -13,6 +14,7 @@ import ProductsGrid from "./ProductsGrid";
 import Pagination from "./Pagination";
 import { ProductSkeletonGroup } from "../productComponents/LoadingSkeleton";
 import type { ShopCategory } from "@/app/[locale]/shop/shop-data";
+import { CategoryProps } from "../../types/types";
 
 interface ShopLayoutProps {
   initialCategory?: string;
@@ -23,6 +25,8 @@ interface ShopLayoutProps {
 const ShopLayout = memo(
   ({ initialCategory, initialCategories, className = "" }: ShopLayoutProps) => {
     const t = useTranslations("shop");
+    const router = useRouter();
+    const pathname = usePathname();
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
       initialCategory || null
     );
@@ -32,26 +36,9 @@ const ShopLayout = memo(
       if (initialCategory !== selectedCategory) {
         setSelectedCategory(initialCategory || null);
         setCurrentPage(1);
-        setFilters({
-          sortBy: "createdAt",
-          sortOrder: "desc",
-        });
       }
     }, [initialCategory, selectedCategory]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [filters, setFilters] = useState<{
-      sortBy: string;
-      sortOrder: string;
-      minPrice?: number;
-      maxPrice?: number;
-      brand?: string;
-    }>({
-      sortBy: "createdAt",
-      sortOrder: "desc",
-      minPrice: undefined,
-      maxPrice: undefined,
-      brand: undefined,
-    });
 
     // Always fetch categories client-side (no blocking)
     const {
@@ -60,7 +47,25 @@ const ShopLayout = memo(
       isLoading: categoriesLoadingFromHook,
     } = useCategories({ enabled: true });
 
-    const categories = initialCategories ?? fetchedCategories;
+    // Convert ShopCategory[] to CategoryProps[] if needed, or use fetched categories
+    const categories: CategoryProps[] = useMemo(() => {
+      if (initialCategories && initialCategories.length > 0) {
+        // Convert ShopCategory to CategoryProps format
+        return initialCategories.map((cat) => ({
+          _id: cat._id,
+          name: cat.name,
+          slug: cat.slug,
+          isActive: true, // ShopCategory only contains active categories
+          isFeatured: false,
+          sortOrder: 0,
+          products: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }));
+      }
+      return fetchedCategories;
+    }, [initialCategories, fetchedCategories]);
+
     const categoriesLoading = initialCategories
       ? false
       : categoriesLoadingFromHook;
@@ -74,15 +79,9 @@ const ShopLayout = memo(
       setCurrentFilters,
     } = useShopProducts();
 
-    // Check if we need to fetch (if filters changed from initial state)
+    // Check if we need to fetch (if category or page changed from initial state)
     const needsFetch =
-      currentPage !== 1 ||
-      filters.minPrice !== undefined ||
-      filters.maxPrice !== undefined ||
-      filters.brand !== undefined ||
-      filters.sortBy !== "createdAt" ||
-      filters.sortOrder !== "desc" ||
-      selectedCategory !== initialCategory;
+      currentPage !== 1 || selectedCategory !== initialCategory;
 
     // Use conditional fetching hook
     const {
@@ -95,7 +94,8 @@ const ShopLayout = memo(
       categorySlug: selectedCategory || undefined,
       page: currentPage,
       limit: 12,
-      ...filters,
+      sortBy: "createdAt",
+      sortOrder: "desc",
       enabled: needsFetch,
     });
 
@@ -122,18 +122,21 @@ const ShopLayout = memo(
     const productsLoading = needsFetch ? isFetching : false;
     const error = needsFetch ? fetchError : null;
 
-    const handleFiltersChange = useCallback(
-      (newFilters: {
-        sortBy: string;
-        sortOrder: string;
-        minPrice?: number;
-        maxPrice?: number;
-        brand?: string;
-      }) => {
-        setFilters(newFilters);
+    const handleCategoryChange = useCallback(
+      (categorySlug: string | null) => {
+        setSelectedCategory(categorySlug);
         setCurrentPage(1);
+
+        // Update URL with category parameter
+        const params = new URLSearchParams();
+        if (categorySlug) {
+          params.set("category", categorySlug);
+        }
+        const queryString = params.toString();
+        const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+        router.push(newUrl, { scroll: false });
       },
-      []
+      [pathname, router]
     );
 
     const handlePageChange = useCallback((page: number) => {
@@ -154,7 +157,12 @@ const ShopLayout = memo(
           {/* Sidebar Filters */}
           <aside className="col-span-12 lg:col-span-3">
             <div className="lg:sticky lg:top-24 space-y-6 bg-white rounded-lg p-6 shadow-sm">
-              <ProductFilters onFiltersChange={handleFiltersChange} />
+              <ProductFilters
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategoryChange={handleCategoryChange}
+                isLoading={categoriesLoading}
+              />
             </div>
           </aside>
 
