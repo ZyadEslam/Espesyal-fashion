@@ -53,12 +53,12 @@ const ShopLayout = memo(
       brand: undefined,
     });
 
-    // If we already have categories from the server, don't refetch them
+    // Always fetch categories client-side (no blocking)
     const {
       categories: fetchedCategories,
       // featuredCategories,
       isLoading: categoriesLoadingFromHook,
-    } = useCategories({ enabled: !initialCategories });
+    } = useCategories({ enabled: true });
 
     const categories = initialCategories ?? fetchedCategories;
     const categoriesLoading = initialCategories
@@ -141,9 +141,11 @@ const ShopLayout = memo(
       window.scrollTo({ top: 0, behavior: "smooth" });
     }, []);
 
-    if (categoriesLoading) {
-      return <ProductSkeletonGroup />;
-    }
+    // Get category name for display (don't block on loading)
+    const categoryName = selectedCategory
+      ? categories.find((c) => c.slug === selectedCategory)?.name ||
+        (categoriesLoading ? "" : t("title"))
+      : t("allProducts");
 
     return (
       <div className={`max-w-7xl mx-auto ${className}`}>
@@ -162,10 +164,9 @@ const ShopLayout = memo(
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {selectedCategory
-                    ? categories.find((c) => c.slug === selectedCategory)
-                        ?.name || t("title")
-                    : t("allProducts")}
+                  {categoryName || (
+                    <span className="inline-block w-32 h-8 bg-gray-200 animate-pulse rounded" />
+                  )}
                 </h1>
                 <p className="text-gray-500 mt-1.5">
                   {pagination.totalProducts} {t("productCount")}

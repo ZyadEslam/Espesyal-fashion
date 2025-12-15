@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { generateMetadata as generateSEOMetadata } from "../../utils/seo";
 import ShopProductsProvider from "../../components/providers/ShopProductsProvider";
-import { fetchInitialProducts, fetchShopCategories } from "./shop-data";
+import { fetchInitialProducts } from "./shop-data";
 import ShopContent from "./ShopContent";
 
 // Add ISR revalidation
@@ -68,11 +68,8 @@ const ShopPage = async ({ params, searchParams }: ShopPageProps) => {
   const t = await getTranslations("shop");
   const tNav = await getTranslations("nav");
 
-  // Prefetch initial products data and categories in parallel
-  const [initialData, initialCategories] = await Promise.all([
-    fetchInitialProducts(category),
-    fetchShopCategories(),
-  ]);
+  // Prefetch initial products data immediately (don't wait for categories)
+  const initialData = await fetchInitialProducts(category);
 
   const breadcrumbItems = [
     { name: tNav("home"), url: `/${locale}` },
@@ -103,7 +100,6 @@ const ShopPage = async ({ params, searchParams }: ShopPageProps) => {
         category={category}
         q={q}
         breadcrumbItems={breadcrumbItems}
-        categories={initialCategories}
       />
     </ShopProductsProvider>
   );
