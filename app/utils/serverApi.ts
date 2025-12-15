@@ -4,10 +4,11 @@
  */
 
 import Product from "@/app/models/product";
+import Category from "@/app/models/category";
 import connectDB from "@/app/utils/db";
 import { ProductCardProps } from "../types/types";
 
-interface ProductDoc {
+type ProductDoc = {
   _id: { toString: () => string };
   name: string;
   description: string;
@@ -22,8 +23,7 @@ interface ProductDoc {
   variants?: unknown[];
   totalStock?: number;
   createdAt?: Date | string;
-  [key: string]: unknown;
-}
+} & Record<string, unknown>;
 
 /**
  * Get a single product by ID (server-side only)
@@ -113,5 +113,144 @@ export async function getAllProducts(): Promise<ProductCardProps[]> {
   } catch (error) {
     console.error("Error fetching products from database:", error);
     return [];
+  }
+}
+
+interface CategoryDoc {
+  _id: { toString: () => string };
+  name: string;
+  slug: string;
+  sortOrder?: number;
+  createdAt?: Date | string;
+  [key: string]: unknown;
+}
+
+export interface ServerCategory {
+  _id: string;
+  name: string;
+  slug: string;
+  sortOrder: number;
+  createdAt: string;
+}
+
+/**
+ * Get active categories sorted by sortOrder (server-side only)
+ */
+export async function getActiveCategories(): Promise<ServerCategory[]> {
+  try {
+    await connectDB();
+
+    const categories = (await Category.find({ isActive: true })
+      .select("name slug sortOrder createdAt")
+      .sort({ sortOrder: 1, createdAt: 1 })
+      .lean()
+      .exec()) as unknown as CategoryDoc[];
+
+    return categories.map((cat) => ({
+      _id: cat._id.toString(),
+      name: cat.name,
+      slug: cat.slug,
+      sortOrder: cat.sortOrder ?? 0,
+      createdAt: cat.createdAt
+        ? new Date(cat.createdAt).toISOString()
+        : new Date().toISOString(),
+    }));
+  } catch (error) {
+    console.error("Error fetching categories from database:", error);
+    return [];
+  }
+}
+
+/**
+ * Get products by category ID (server-side only)
+ * @param categoryId - Category ID or slug
+ * @param limit - Maximum number of products to return
+ */
+export async function getProductsByCategory(
+  categoryId: string,
+  limit: number = 20
+): Promise<ProductCardProps[]> {
+  try {
+    await connectDB();
+
+    // Check if categoryId is an ObjectId or slug
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(categoryId);
+    let category: CategoryDoc | null = null;
+
+    if (isValidObjectId) {
+      category = (await Category.findById(
+        categoryId
+      ).lean()) as unknown as CategoryDoc | null;
+    } else {
+      category = (await Category.findOne({
+        slug: categoryId,
+        isActive: true,
+      }).lean()) as unknown as CategoryDoc | null;
+    }
+
+    if (!category) {
+      return [];
+    }
+
+    const products = (await Product.find({
+      category: category._id,
+      hideFromHome: { $ne: true },
+    })
+      .select(
+        "name description price oldPrice discount rating brand categoryName imgSrc hideFromHome createdAt"
+      )
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean()
+      .exec()) as unknown as ProductDoc[];
+
+    return products.map((product) => ({
+      _id: product._id.toString(),
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      oldPrice: product.oldPrice,
+      discount: product.discount?.toString(),
+      rating: product.rating,
+      brand: product.brand,
+      categoryName: product.categoryName,
+      imgSrc: (product.imgSrc || []).map(
+        (_: unknown, index: number) =>
+          `/api/product/image/${product._id}?index=${index}`
+      ) as unknown as ProductCardProps["imgSrc"],
+    }));
+  } catch (error) {
+    console.error("Error fetching products by category from database:", error);
+    return [];
+  }
+}
+
+/**
+ * Batch fetch products for multiple categories in parallel (server-side only)
+ */
+export async function getProductsForCategories(
+  categories: ServerCategory[],
+  limit: number = 20
+): Promise<Map<string, ProductCardProps[]>> {
+  try {
+    await connectDB();
+
+    // Fetch products for all categories in parallel
+    const productPromises = categories.map((category) =>
+      getProductsByCategory(category._id, limit)
+    );
+
+    const productsArrays = await Promise.all(productPromises);
+
+    // Create a map of category ID to products
+    const productsMap = new Map<string, ProductCardProps[]>();
+    categories.forEach((category, index) => {
+      productsMap.set(category._id, productsArrays[index] || []);
+    });
+
+    return productsMap;
+  } catch (error) {
+    console.error("Error batch fetching products:", error);
+    return new Map();
   }
 }

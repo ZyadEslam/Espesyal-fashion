@@ -11,9 +11,17 @@ interface UseCategoriesReturn {
   refetch: () => Promise<void>;
 }
 
-export const useCategories = (): UseCategoriesReturn => {
+interface UseCategoriesOptions {
+  enabled?: boolean;
+}
+
+export const useCategories = (
+  options: UseCategoriesOptions = {}
+): UseCategoriesReturn => {
+  const { enabled = true } = options;
+
   const [categories, setCategories] = useState<CategoryProps[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(enabled);
   const [error, setError] = useState<string | null>(null);
 
   const fetchCategories = useCallback(async () => {
@@ -21,7 +29,11 @@ export const useCategories = (): UseCategoriesReturn => {
       setIsLoading(true);
       setError(null);
 
-      const data = await cachedFetchJson<{ data: CategoryProps[]; success: boolean; message?: string }>(
+      const data = await cachedFetchJson<{
+        data: CategoryProps[];
+        success: boolean;
+        message?: string;
+      }>(
         "/api/categories?includeProducts=true&active=true",
         cacheStrategies.categories()
       );
@@ -43,8 +55,10 @@ export const useCategories = (): UseCategoriesReturn => {
   }, [categories]);
 
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    if (enabled) {
+      fetchCategories();
+    }
+  }, [enabled, fetchCategories]);
 
   return {
     categories,

@@ -136,7 +136,7 @@ const UserNav = memo(() => {
 
   return (
     <nav
-      className={`sticky top-0 transition-all duration-300 ${
+      className={`w-[100%] sticky top-0 transition-all duration-300 ${
         isDashboard
           ? "z-40 bg-background backdrop-blur-md shadow-sm border-b border-black/20"
           : `z-[100] ${
@@ -146,7 +146,9 @@ const UserNav = memo(() => {
             }`
       }`}
     >
-      <div className={`container mx-auto px-4 max-w-7xl`}>
+      <div
+        className={`w-[95%] mx-auto sm:container sm:mx-auto sm:px-6 lg:px-8`}
+      >
         <div className="flex items-center justify-between h-16 lg:h-20">
           {!isDashboard ? (
             <>

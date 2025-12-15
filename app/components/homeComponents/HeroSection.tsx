@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
-import { Copy, Check, Sparkles } from "lucide-react";
+import { Copy, Check, 
+  // Sparkles
+ } from "lucide-react";
 import { cachedFetchJson } from "../../utils/cachedFetch";
 
 interface HeroContent {
@@ -85,11 +87,11 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-black via-black/90 to-black/80 px-6 py-5 md:px-8 md:py-6">
+    <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-black via-black/90 to-black/80 ">
       {/* Creative Background Patterns */}
       <div className="absolute inset-0">
         {/* Grid Pattern */}
-        <div
+        {/* <div
           className="absolute inset-0 opacity-[0.09]"
           style={{
             backgroundImage: `
@@ -98,10 +100,10 @@ const HeroSection = () => {
             `,
             backgroundSize: "40px 40px",
           }}
-        />
+        /> */}
 
         {/* Sparkle Icons - Defer animation to reduce initial render cost */}
-        {[...Array(6)].map((_, i) => (
+        {/* {[...Array(6)].map((_, i) => (
           <motion.div
             key={`sparkle-${i}`}
             initial={{ opacity: 0 }}
@@ -132,7 +134,7 @@ const HeroSection = () => {
           >
             <Sparkles className="w-4 h-4 md:w-6 md:h-6" />
           </motion.div>
-        ))}
+        ))} */}
       </div>
 
       {/* Content */}

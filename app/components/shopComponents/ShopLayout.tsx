@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useState, useCallback, Suspense, useEffect } from "react";
+import React, { memo, useState, useCallback, Suspense } from "react";
 import { useTranslations } from "next-intl";
 import {
   useCategories,
@@ -12,30 +12,32 @@ import ProductsGrid from "./ProductsGrid";
 // import CategorySection from "./CategorySection";
 import Pagination from "./Pagination";
 import { ProductSkeletonGroup } from "../productComponents/LoadingSkeleton";
+import type { ShopCategory } from "@/app/[locale]/shop/shop-data";
 
 interface ShopLayoutProps {
   initialCategory?: string;
+  initialCategories?: ShopCategory[];
   className?: string;
 }
 
 const ShopLayout = memo(
-  ({ initialCategory, className = "" }: ShopLayoutProps) => {
+  ({ initialCategory, initialCategories, className = "" }: ShopLayoutProps) => {
     const t = useTranslations("shop");
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
       initialCategory || null
     );
-    useEffect(() => {
-      setSelectedCategory(initialCategory || null);
-    }, [initialCategory]);
-    useEffect(() => {
-      setCurrentPage(1);
-    }, [selectedCategory]);
-    useEffect(() => {
-      setFilters({
-        sortBy: "createdAt",
-        sortOrder: "desc",
-      });
-    }, [selectedCategory]);
+
+    // Update selectedCategory when initialCategory changes
+    React.useEffect(() => {
+      if (initialCategory !== selectedCategory) {
+        setSelectedCategory(initialCategory || null);
+        setCurrentPage(1);
+        setFilters({
+          sortBy: "createdAt",
+          sortOrder: "desc",
+        });
+      }
+    }, [initialCategory, selectedCategory]);
     const [currentPage, setCurrentPage] = useState(1);
     const [filters, setFilters] = useState<{
       sortBy: string;
@@ -51,11 +53,17 @@ const ShopLayout = memo(
       brand: undefined,
     });
 
+    // If we already have categories from the server, don't refetch them
     const {
-      categories,
+      categories: fetchedCategories,
       // featuredCategories,
-      isLoading: categoriesLoading,
-    } = useCategories();
+      isLoading: categoriesLoadingFromHook,
+    } = useCategories({ enabled: !initialCategories });
+
+    const categories = initialCategories ?? fetchedCategories;
+    const categoriesLoading = initialCategories
+      ? false
+      : categoriesLoadingFromHook;
 
     // Get prefetched data from context
     const {
@@ -92,7 +100,7 @@ const ShopLayout = memo(
     });
 
     // Update context state when we fetch new data
-    useEffect(() => {
+    React.useEffect(() => {
       if (needsFetch && !isFetching && fetchedProducts.length > 0) {
         setCurrentProducts(fetchedProducts);
         setCurrentPagination(fetchedPagination);
@@ -113,11 +121,6 @@ const ShopLayout = memo(
     const pagination = needsFetch ? fetchedPagination : initialPagination;
     const productsLoading = needsFetch ? isFetching : false;
     const error = needsFetch ? fetchError : null;
-
-    // const handleCategoryChange = useCallback((categorySlug: string | null) => {
-    //   setSelectedCategory(categorySlug);
-    //   setCurrentPage(1);
-    // }, []);
 
     const handleFiltersChange = useCallback(
       (newFilters: {

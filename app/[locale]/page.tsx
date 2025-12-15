@@ -1,95 +1,77 @@
-"use client";
-
-import React, { useEffect, useState, Suspense, lazy } from "react";
+import React, { Suspense } from "react";
 import CategoriesLoadingSection from "../components/homeComponents/CategoriesLoadingSection";
 import LoadingSpinner from "../UI/LoadingSpinner";
-import { cachedFetchJson, cacheStrategies } from "../utils/cachedFetch";
+import HeroSection from "../components/homeComponents/HeroSection";
+import CategorySection from "../components/homeComponents/CategorySection";
+import SubscriptionOffer from "../components/homeComponents/SubscriptionOffer";
+import {
+  getActiveCategories,
+  getProductsForCategories,
+} from "../utils/serverApi";
 
-// Lazy load heavy components for better code splitting
-const HeroSection = lazy(() => import("../components/homeComponents/HeroSection"));
-const CategorySection = lazy(() => import("../components/homeComponents/CategorySection"));
-const SubscriptionOffer = lazy(() => import("../components/homeComponents/SubscriptionOffer"));
+// Add ISR revalidation
+export const revalidate = 60; // Revalidate every 60 seconds
 
-interface Category {
-  _id: string;
-  name: string;
-  slug: string;
-}
+export default async function Home() {
+  // Fetch categories server-side
+  const categories = await getActiveCategories();
 
-export default function Home() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        const data = await cachedFetchJson<{
-          success: boolean;
-          data: (Category & { sortOrder: number; createdAt: string })[];
-        }>("/api/categories?active=true", cacheStrategies.categories());
-
-        if (data.success) {
-          // Sort categories by sortOrder (priority) ascending, then by createdAt
-          const sortedCategories = (data.data || []).sort(
-            (
-              a: Category & { sortOrder: number; createdAt: string },
-              b: Category & { sortOrder: number; createdAt: string }
-            ) => {
-              // First sort by priority (lower numbers first)
-              const priorityA = a.sortOrder ?? 0;
-              const priorityB = b.sortOrder ?? 0;
-              if (priorityA !== priorityB) {
-                return priorityA - priorityB;
-              }
-              // If priorities are equal, sort by creation date
-              return (
-                new Date(a.createdAt || 0).getTime() -
-                new Date(b.createdAt || 0).getTime()
-              );
-            }
-          );
-          setCategories(sortedCategories);
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
+  // Fetch products for all categories in parallel
+  const productsMap = await getProductsForCategories(categories, 20);
 
   return (
     <main className="min-h-screen">
       {/* Black Friday Campaign Hero Section */}
       <section className="section-spacing">
-        <div className="container mx-auto px-4 md:px-6 lg:px-8">
-          <Suspense fallback={<LoadingSpinner />}>
-            <HeroSection />
-          </Suspense>
+        <div className="layout-shell">
+          <HeroSection />
         </div>
       </section>
 
       {/* Category-based Product Sections */}
-      {loading ? (
+      {categories.length === 0 ? (
         <CategoriesLoadingSection />
       ) : (
-        categories.map((category) => (
-          <Suspense key={category._id} fallback={<LoadingSpinner />}>
-            <CategorySection
-              categoryId={category._id}
-              categoryName={category.name}
-              categorySlug={category.slug}
-            />
-          </Suspense>
-        ))
+        categories.map((category) => {
+          const products = productsMap.get(category._id) || [];
+          return (
+            <Suspense
+              key={category._id}
+              fallback={
+                <section className="section-spacing">
+                  <div className="layout-shell">
+                    <div className="mb-8 text-left">
+                      <h2 className="text-2xl uppercase lg:text-3xl font-bold text-foreground mb-4">
+                        {category.name}
+                      </h2>
+                    </div>
+                    <div className="flex gap-6 overflow-hidden pb-4">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div
+                          key={i}
+                          className="flex-shrink-0 w-64 h-80 bg-gray-200 animate-pulse rounded-2xl"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </section>
+              }
+            >
+              <CategorySection
+                categoryId={category._id}
+                categoryName={category.name}
+                categorySlug={category.slug}
+                products={products}
+                isFirstCategory={categories.indexOf(category) === 0}
+              />
+            </Suspense>
+          );
+        })
       )}
 
       {/* Subscription Offer */}
-      <section className="py-12 w-[95%] mx-auto">
-        <div className="container mx-auto border border-orange/20">
+      <section className="section-spacing !border-b-0">
+        <div className="layout-shell">
           <Suspense fallback={<LoadingSpinner />}>
             <SubscriptionOffer />
           </Suspense>

@@ -51,7 +51,7 @@ const ProductImage = ({
       sizes={sizes}
       fetchPriority={fetchPriority}
       loading={loading}
-      className="h-full w-full object-contain object-center transition-transform duration-300 hover:scale-[1.02]"
+      className="block h-full w-full max-h-full max-w-full object-contain object-center mx-auto transition-transform duration-300 hover:scale-[1.02]"
       onError={handleImageError}
       decoding="async"
     />

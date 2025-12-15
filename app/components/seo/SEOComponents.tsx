@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 interface StructuredDataProps {
   data: Record<string, unknown>;
@@ -136,15 +137,15 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
             )}
             {item.current ? (
               <span className="font-medium text-gray-900" aria-current="page">
-                {item.name}
+                {item.name} 
               </span>
             ) : (
-              <a
+              <Link
                 href={item.url}
                 className="hover:text-gray-900 transition-colors duration-200"
               >
                 {item.name}
-              </a>
+              </Link>
             )}
           </li>
         ))}

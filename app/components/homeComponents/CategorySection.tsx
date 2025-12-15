@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -12,58 +12,25 @@ import {
 import { ProductCardProps } from "../../types/types";
 import ProductCard from "../productComponents/ProductCard";
 import { useLocale } from "next-intl";
-import { cachedFetchJson, cacheStrategies } from "../../utils/cachedFetch";
 
 interface CategorySectionProps {
   categoryId: string;
   categoryName: string;
   categorySlug: string;
+  products: ProductCardProps[];
+  isFirstCategory?: boolean;
 }
 
 const CategorySection: React.FC<CategorySectionProps> = ({
-  categoryId,
   categoryName,
   categorySlug,
+  products,
+  isFirstCategory = false,
 }) => {
   const t = useTranslations("home");
   const locale = useLocale();
   const isArabic = locale.startsWith("ar");
-  const [products, setProducts] = useState<ProductCardProps[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        // Limit to 20 products for home page display
-        const data = await cachedFetchJson<{
-          success: boolean;
-          data: ProductCardProps[];
-        }>(
-          `/api/categories/${categoryId}/products?limit=20`,
-          cacheStrategies.products()
-        );
-
-        if (data.success) {
-          setProducts(data.data || []);
-        } else {
-          setError("Failed to load products");
-        }
-      } catch (err) {
-        console.error("Error fetching products:", err);
-        setError("Failed to load products");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (categoryId) {
-      fetchProducts();
-    }
-  }, [categoryId]);
 
   const handleScroll = (direction: "prev" | "next") => {
     if (!scrollContainerRef.current) return;
@@ -88,35 +55,13 @@ const CategorySection: React.FC<CategorySectionProps> = ({
     });
   };
 
-  if (loading) {
-    return (
-      <section className="section-spacing">
-        <div className="container mx-auto px-4">
-          <div className={`mb-8 ${isArabic ? "text-right" : "text-left"}`}>
-            <h2 className="text-2xl uppercase lg:text-3xl font-bold text-foreground mb-4">
-              {categoryName}
-            </h2>
-          </div>
-          <div className="flex gap-6 overflow-hidden pb-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="flex-shrink-0 w-64 h-80 bg-gray-200 animate-pulse rounded-2xl"
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error || products.length === 0) {
+  if (products.length === 0) {
     return null; // Don't render section if no products
   }
 
   return (
     <section className="section-spacing">
-      <div className="container mx-auto px-4">
+      <div className="layout-shell">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -180,7 +125,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                   <ProductCard
                     product={product}
                     showCartButton={false}
-                    isLCP={index === 0} // First product in each category section is LCP candidate
+                    isLCP={isFirstCategory && index === 0} // First product in first category is LCP candidate
                   />
                 </motion.div>
               ))}

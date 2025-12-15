@@ -129,7 +129,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { ProductCardProps } from "../../types/types";
-import { getOptimizedImageUrl, getImageDimensions } from "../../utils/imageUtils";
+import {
+  getOptimizedImageUrl,
+  getImageDimensions,
+} from "../../utils/imageUtils";
 
 const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -145,23 +148,35 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   }, [product.imgSrc]);
 
   const handleImageError = (originalIndex: number) => {
-    setFailedImages((prev) => new Set([...prev, originalIndex]));
+    setFailedImages((prev) => {
+      const newFailed = new Set([...prev, originalIndex]);
+      // If the failed image is the currently selected one, select the first valid image
+      const currentOriginalIndex = getOriginalIndex(selectedImageIndex);
+      if (originalIndex === currentOriginalIndex) {
+        const validIndices = product.imgSrc
+          .map((_, index) => index)
+          .filter((index) => !newFailed.has(index));
+        if (validIndices.length > 0) {
+          // Find the index in validImagesWithIndices for the first valid image
+          const firstValidOriginalIndex = validIndices[0];
+          const newValidImages = product.imgSrc
+            .map((_, index) => index)
+            .filter((index) => !newFailed.has(index));
+          const newSelectedIndex = newValidImages.indexOf(
+            firstValidOriginalIndex
+          );
+          if (newSelectedIndex !== -1) {
+            setSelectedImageIndex(newSelectedIndex);
+          }
+        }
+      }
+      return newFailed;
+    });
     setLoadingImages((prev) => {
       const newSet = new Set(prev);
       newSet.delete(originalIndex);
       return newSet;
     });
-
-    // If the failed image is the currently selected one, select the first valid image
-    const validImages = product.imgSrc.filter(
-      (_, index) => !failedImages.has(index) && index !== originalIndex
-    );
-    if (
-      validImages.length > 0 &&
-      originalIndex === getOriginalIndex(selectedImageIndex)
-    ) {
-      setSelectedImageIndex(0); // Reset to first valid image
-    }
   };
 
   const handleImageLoad = (originalIndex: number) => {
@@ -225,7 +240,7 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   // Get optimized image URLs with proper dimensions
   const mainImageDimensions = getImageDimensions("product-detail");
   const thumbnailDimensions = getImageDimensions("thumbnail");
-  
+
   // Generate optimized URLs using product ID directly
   const getOptimizedMainImageUrl = (originalIndex: number) => {
     if (product._id) {
@@ -243,7 +258,10 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   return (
     <div className="w-full md:w-1/3 relative md:left-20">
       <div className="bg-secondaryLight rounded-lg mb-2 sm:mb-3 md:mb-4 p-2 sm:p-3 md:p-4">
-        <div className="relative w-full h-[300px]" style={{ aspectRatio: "1 / 1" }}>
+        <div
+          className="relative w-full h-[300px]"
+          style={{ aspectRatio: "1 / 1" }}
+        >
           {loadingImages.has(currentImage.originalIndex) && (
             <div className="absolute inset-0 animate-pulse bg-gray-200 rounded-lg"></div>
           )}
@@ -294,29 +312,27 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
                   : "bg-secondaryLight"
               }`}
               onClick={() => setSelectedImageIndex(filteredIndex)}
-              style={{ width: `${thumbnailDimensions.width}px`, height: `${thumbnailDimensions.height}px` }}
+              style={{
+                width: `${thumbnailDimensions.width}px`,
+                height: `${thumbnailDimensions.height}px`,
+              }}
             >
               {loadingImages.has(originalIndex) && (
                 <div className="absolute inset-0 animate-pulse bg-gray-200 rounded-lg"></div>
               )}
-              {failedImages.has(originalIndex) ? (
-                <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 bg-gray-100 rounded">
-                  N/A
-                </div>
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={getOptimizedThumbnailUrl()}
-                  alt={`${product.name} view ${filteredIndex + 1}`}
-                  width={thumbnailDimensions.width}
-                  height={thumbnailDimensions.height}
-                  className="w-full h-full object-cover rounded"
-                  sizes="80px"
-                  loading="lazy"
-                  decoding="async"
-                  onLoad={() => handleImageLoad(originalIndex)}
-                />
-              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={getOptimizedThumbnailUrl()}
+                alt={`${product.name} view ${filteredIndex + 1}`}
+                width={thumbnailDimensions.width}
+                height={thumbnailDimensions.height}
+                className="w-full h-full object-cover rounded"
+                sizes="80px"
+                loading="lazy"
+                decoding="async"
+                onError={() => handleImageError(originalIndex)}
+                onLoad={() => handleImageLoad(originalIndex)}
+              />
             </div>
           );
         })}

@@ -22,7 +22,7 @@ const Footer = () => {
 
   return (
     <footer className="border-t border-black/20">
-      <div className="container mx-auto px-4 py-12">
+      <div className="layout-shell py-12">
         {/* First Row: 3 Columns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-gray-300">
           {/* Column 1: Logo + Contact Info */}

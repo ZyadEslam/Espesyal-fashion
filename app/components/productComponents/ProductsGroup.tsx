@@ -22,6 +22,14 @@ const ProductsGroup = ({
   const products = useMemo(() => context?.products || [], [context?.products]);
   const isLoading = context?.isLoading || false;
   const error = context?.error || null;
+  const fetchProducts = context?.fetchProducts;
+
+  useEffect(() => {
+    // Trigger products fetch on demand when a consumer actually mounts
+    if (products.length === 0 && fetchProducts) {
+      fetchProducts();
+    }
+  }, [products.length, fetchProducts]);
 
   useEffect(() => {
     if (numOfProducts && products.length > 0) {
@@ -41,7 +49,11 @@ const ProductsGroup = ({
 
   if (error || !products || products.length === 0) {
     return (
-      <ErrorBox errorMessage={error || "Error loading products: Please Wait and try again"} />
+      <ErrorBox
+        errorMessage={
+          error || "Error loading products: Please Wait and try again"
+        }
+      />
     );
   }
 
@@ -51,9 +63,9 @@ const ProductsGroup = ({
     <section className={`${customClassName}`}>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-6">
         {productsToRender.map((product: ProductCardProps, index: number) => (
-          <ProductCard 
-            key={product._id} 
-            product={product} 
+          <ProductCard
+            key={product._id}
+            product={product}
             isLCP={index === 0} // First product is LCP candidate
           />
         ))}

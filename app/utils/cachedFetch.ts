@@ -34,11 +34,11 @@ const pendingRequests = new Map<string, Promise<Response>>();
 const CACHE_CONFIG = {
   // Default cache times (in milliseconds)
   PRODUCTS: 30 * 1000, // 30 seconds
-  CATEGORIES: 60 * 1000, // 1 minute
+  CATEGORIES: 120 * 1000, // 2 minutes
   PROMO_CODES: 30 * 1000, // 30 seconds
-  ADMINS: 60 * 1000, // 1 minute
+  ADMINS: 120 * 1000, // 2 minutes
   USER_DATA: 5 * 60 * 1000, // 5 minutes
-  DEFAULT: 60 * 1000, // 1 minute
+  DEFAULT: 120 * 1000, // 2 minutes
 };
 
 /**

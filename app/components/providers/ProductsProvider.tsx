@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { ProductCardProps } from "@/app/types/types";
 import { api } from "@/app/utils/api";
 import { ProductsContext } from "@/app/context/productsCtx";
@@ -13,28 +13,24 @@ const ProductsProvider = ({ children }: ProductsProviderProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const getProductsFromServer = async () => {
-      if (typeof window !== "undefined") {
-        try {
-          setIsLoading(true);
-          const serverProducts = await api.getProducts();
-          console.log("Server Products: ", serverProducts);
+  const fetchProducts = async () => {
+    if (typeof window === "undefined") return;
+    // Avoid refetching if we already have products or are currently loading
+    if (isLoading || products.length > 0) return;
 
-          setProducts(serverProducts);
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Error fetching products:", error);
-          setError(
-            error instanceof Error ? error.message : "Error Fetching Products"
-          );
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-    getProductsFromServer();
-  }, []);
+    try {
+      setIsLoading(true);
+      const serverProducts = await api.getProducts();
+      setProducts(serverProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setError(
+        error instanceof Error ? error.message : "Error Fetching Products"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const contextValue = useMemo(
     () => ({
@@ -44,6 +40,7 @@ const ProductsProvider = ({ children }: ProductsProviderProps) => {
       setProducts,
       setIsLoading,
       setError,
+      fetchProducts,
     }),
     [products, isLoading, error]
   );

@@ -98,10 +98,14 @@ export default async function LocaleLayout({
         {/* Prefetch critical API routes for faster navigation */}
         <link
           rel="prefetch"
-          href="/api/categories?featured=true"
+          href="/api/categories?active=true"
           as="fetch"
           crossOrigin="anonymous"
         />
+        {/* Preconnect to same origin for API routes */}
+        <link rel="preconnect" href="/api" />
+        {/* Resource hints for product images */}
+        <link rel="dns-prefetch" href="/api/product/image" />
       </head>
       <body
         className={`${outfit.variable} ${playfairDisplay.variable} antialiased`}

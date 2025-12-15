@@ -25,14 +25,11 @@ export const api = {
     }
 
     // Client-side: use HTTP request
-    console.log("API_BASE_URL:", API_BASE_URL);
-
     try {
       const data = await cachedFetchJson<{ products: ProductCardProps[] }>(
         `${API_BASE_URL}/product`,
         cacheStrategies.products()
       );
-      console.log("fetched products:", data);
 
       return data.products || [];
     } catch (error) {

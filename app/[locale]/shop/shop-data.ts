@@ -21,6 +21,13 @@ export interface ShopInitialData {
   };
 }
 
+// Minimal category shape needed for the shop layout (name + slug)
+export interface ShopCategory {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
 export async function fetchInitialProducts(
   categorySlug?: string
 ): Promise<ShopInitialData> {
@@ -37,29 +44,32 @@ export async function fetchInitialProducts(
 
     if (slug === "all") {
       // Build product query for all products
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const productQuery: any = {};
+      const productQuery: Record<string, unknown> = {};
 
       // Build sort object
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sort: any = {};
+      const sort: Record<string, 1 | -1> = {};
       sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
       // Calculate pagination
       const skip = (page - 1) * limit;
 
-      // Get products with pagination
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const productsRaw = await Product.find(productQuery as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .sort(sort as any)
-        .skip(skip)
-        .limit(limit)
-        .select(
-          "name description price oldPrice discount rating brand categoryName imgSrc"
-        )
-        .lean()
-        .exec();
+      // Batch queries: fetch products, count, and brands in parallel
+      const [productsRaw, totalProducts, brands] = await Promise.all([
+        // Get products with pagination
+        Product.find(productQuery)
+          .sort(sort)
+          .skip(skip)
+          .limit(limit)
+          .select(
+            "name description price oldPrice discount rating brand categoryName imgSrc"
+          )
+          .lean()
+          .exec(),
+        // Get total count for pagination
+        Product.countDocuments(productQuery),
+        // Get unique brands
+        Product.distinct("brand"),
+      ]);
 
       // Convert to proper format - convert imgSrc buffers to API endpoints
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,13 +89,7 @@ export async function fetchInitialProducts(
         ) as unknown as ProductCardProps["imgSrc"],
       }));
 
-      // Get total count for pagination
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const totalProducts = await Product.countDocuments(productQuery as any);
       const totalPages = Math.ceil(totalProducts / limit);
-
-      // Get unique brands
-      const brands = await Product.distinct("brand");
 
       return {
         products,
@@ -114,29 +118,32 @@ export async function fetchInitialProducts(
     }
 
     // Build product query
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const productQuery: any = { category: category._id };
+    const productQuery: Record<string, unknown> = { category: category._id };
 
     // Build sort object
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sort: any = {};
+    const sort: Record<string, 1 | -1> = {};
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
 
     // Calculate pagination
     const skip = (page - 1) * limit;
 
-    // Get products with pagination
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const productsRaw = await Product.find(productQuery as any)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .sort(sort as any)
-      .skip(skip)
-      .limit(limit)
-      .select(
-        "name description price oldPrice discount rating brand categoryName imgSrc"
-      )
-      .lean()
-      .exec();
+    // Batch queries: fetch products, count, and brands in parallel
+    const [productsRaw, totalProducts, brands] = await Promise.all([
+      // Get products with pagination
+      Product.find(productQuery)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .select(
+          "name description price oldPrice discount rating brand categoryName imgSrc"
+        )
+        .lean()
+        .exec(),
+      // Get total count for pagination
+      Product.countDocuments(productQuery),
+      // Get unique brands for this category
+      Product.distinct("brand", { category: category._id }),
+    ]);
 
     // Convert to proper format - convert imgSrc buffers to API endpoints
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -156,13 +163,7 @@ export async function fetchInitialProducts(
       ) as unknown as ProductCardProps["imgSrc"],
     }));
 
-    // Get total count for pagination
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const totalProducts = await Product.countDocuments(productQuery as any);
     const totalPages = Math.ceil(totalProducts / limit);
-
-    // Get unique brands for this category
-    const brands = await Product.distinct("brand", { category: category._id });
 
     return {
       products,
@@ -203,3 +204,36 @@ export async function fetchInitialProducts(
   }
 }
 
+// Type definition for category document from Mongoose
+interface CategoryDoc {
+  _id: { toString: () => string };
+  name: string;
+  slug: string;
+  sortOrder?: number;
+  [key: string]: unknown;
+}
+
+// Server-side helper to fetch active categories for the shop page.
+// This lets the shop page render with real category names immediately,
+// without waiting for a client-side API request.
+export async function fetchShopCategories(): Promise<ShopCategory[]> {
+  try {
+    await connectDB();
+
+    // Only active categories, ordered by sortOrder if available
+    const categoriesRaw = (await Category.find({ isActive: true })
+      .sort({ sortOrder: 1 })
+      .select("name slug")
+      .lean()
+      .exec()) as unknown as CategoryDoc[];
+
+    return categoriesRaw.map((c) => ({
+      _id: c._id.toString(),
+      name: c.name,
+      slug: c.slug,
+    }));
+  } catch (error) {
+    console.error("Error fetching shop categories:", error);
+    return [];
+  }
+}

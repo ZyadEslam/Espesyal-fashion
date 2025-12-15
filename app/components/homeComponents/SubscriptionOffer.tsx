@@ -51,11 +51,11 @@ const SubscriptionOffer = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           viewport={{ once: true }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-black via-black/90 to-black/80 px-6 py-5 md:px-8 md:py-6"
+          className="relative overflow-hidden rounded-lg bg-gradient-to-r from-black via-black/90 to-black/80 "
         >
           {/* Subtle grid like HeroSection */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.08]"
+          {/* <div
+            className=" pointer-events-none absolute inset-0 opacity-[0.08]"
             style={{
               backgroundImage: `
                 linear-gradient(to right, white 1px, transparent 1px),
@@ -63,9 +63,9 @@ const SubscriptionOffer = () => {
               `,
               backgroundSize: "32px 32px",
             }}
-          />
+          /> */}
 
-          <div className="relative z-10 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="relative z-10 flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-between py-6 md:py-8 px-6 md:px-8">
             {/* Text side - smaller, simple */}
             <div className="text-center md:text-left max-w-xl">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 mb-2">
@@ -102,11 +102,11 @@ const SubscriptionOffer = () => {
                   viewport={{ once: true }}
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.96 }}
-                  className={`relative flex h-10 w-10 md:h-11 md:w-11 items-center justify-center rounded-full bg-gradient-to-br ${social.gradient} shadow-lg hover:shadow-xl transition-all duration-200`}
+                  className={`relative flex h-10 w-10 md:h-11 md:w-11 items-center justify-center rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-200`}
                   aria-label={social.name}
                   title={social.description}
                 >
-                  <social.icon className="h-5 w-5 text-white" />
+                  <social.icon className="h-5 w-5 text-gray-800" />
                 </motion.a>
               ))}
             </div>

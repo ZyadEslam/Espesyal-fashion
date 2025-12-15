@@ -184,8 +184,11 @@ html {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  .layout-shell {
+    @apply w-[95%] mx-auto sm:container sm:mx-auto sm:px-6 lg:px-8;
+  }
+
   .section-spacing {
-    /* @apply py-12 md:py-16; */
-    @apply w-[95%] mx-auto py-6 md:py-8 border-b border-black/20;
+    @apply py-6 md:py-8 border-b border-black/20;
   }
 }

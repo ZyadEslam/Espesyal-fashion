@@ -50,12 +50,8 @@ const ProductCard = memo(
       }
     }, [product._id, checkInCart]);
 
-    // Set optimized image source with proper dimensions based on actual display size
-    // Product cards display at: mobile ~260px, sm: 320px, so request appropriate size
     useEffect(() => {
       if (product._id) {
-        // Use smaller dimensions that match actual display size (260-320px)
-        // This prevents loading oversized images (587x781) for small displays
         const displayWidth = 320; // Max display size for product cards
         const displayHeight = 320;
         const optimizedUrl = getOptimizedImageUrl(
@@ -115,7 +111,7 @@ const ProductCard = memo(
     }, []);
 
     return (
-      <div className="group relative bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 hover:border-orange/20">
+      <div className="group relative bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden ">
         {/* Toast Notification */}
         {showToast.show && (
           <Toast
@@ -128,7 +124,7 @@ const ProductCard = memo(
         <Link href={`/product/${product._id}`} className="block">
           {/* Product Image Container */}
           <div
-            className="relative bg-secondaryLight rounded-t-2xl h-[260px] sm:h-[320px] flex items-center justify-center overflow-hidden"
+            className="relative bg-secondaryLight rounded-t-2xl flex items-center justify-center overflow-hidden"
             style={{ aspectRatio: "1 / 1" }}
           >
             {imageSrc && !imageError ? (

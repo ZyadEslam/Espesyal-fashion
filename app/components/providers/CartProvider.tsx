@@ -283,7 +283,6 @@ const CartProvider = ({ children }: CartProviderProps) => {
           const { cart: serverCart } = await api.getCart(
             session?.user?.id as string
           );
-          console.log("Server Cart: ", serverCart);
 
           // Don't sync if local cart is explicitly empty (was manually cleared)
           const localCartData = userCart

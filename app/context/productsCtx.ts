@@ -9,6 +9,7 @@ interface ProductsContextProps {
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   error: string | null;
   setError: React.Dispatch<React.SetStateAction<string | null>>;
+  fetchProducts: () => Promise<void>;
 }
 
 export const ProductsContext = createContext<ProductsContextProps | null>(null);
