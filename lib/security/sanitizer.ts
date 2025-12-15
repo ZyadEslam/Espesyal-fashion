@@ -13,7 +13,6 @@ function getValidator() {
     // Use eval to prevent webpack static analysis
     // This allows the code to work even if validator is not installed
     // The webpack.IgnorePlugin in next.config.js will prevent webpack from bundling it
-    // eslint-disable-next-line no-eval
     const validator = eval(
       'typeof require !== "undefined" ? require("validator") : null'
     );

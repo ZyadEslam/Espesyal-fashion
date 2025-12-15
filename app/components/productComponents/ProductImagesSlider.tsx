@@ -191,14 +191,6 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
     });
   };
 
-  // Helper function to get the original index from the filtered array index
-  const getOriginalIndex = (filteredIndex: number) => {
-    const validIndices = product.imgSrc
-      .map((_, index) => index)
-      .filter((index) => !failedImages.has(index));
-    return validIndices[filteredIndex];
-  };
-
   if (!product?.imgSrc?.length) {
     return (
       <div className="w-full md:w-1/3 relative md:left-20">
