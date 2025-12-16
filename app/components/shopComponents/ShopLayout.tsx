@@ -37,15 +37,19 @@ const ShopLayout = memo(
         setSelectedCategory(initialCategory || null);
         setCurrentPage(1);
       }
-    }, [initialCategory, selectedCategory]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialCategory]); // Removed selectedCategory from deps to prevent unnecessary re-runs
     const [currentPage, setCurrentPage] = useState(1);
 
-    // Always fetch categories client-side (no blocking)
+    // Only fetch categories client-side if not provided server-side
+    // This eliminates unnecessary API call and reduces TBT significantly
+    const shouldFetchCategories =
+      !initialCategories || initialCategories.length === 0;
     const {
       categories: fetchedCategories,
       // featuredCategories,
       isLoading: categoriesLoadingFromHook,
-    } = useCategories({ enabled: true });
+    } = useCategories({ enabled: shouldFetchCategories });
 
     // Convert ShopCategory[] to CategoryProps[] if needed, or use fetched categories
     const categories: CategoryProps[] = useMemo(() => {
@@ -106,16 +110,9 @@ const ShopLayout = memo(
         setCurrentPagination(fetchedPagination);
         setCurrentFilters(fetchedFilters);
       }
-    }, [
-      needsFetch,
-      isFetching,
-      fetchedProducts,
-      fetchedPagination,
-      fetchedFilters,
-      setCurrentProducts,
-      setCurrentPagination,
-      setCurrentFilters,
-    ]);
+      // Only run when fetch completes, not on every dependency change
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [needsFetch, isFetching]); // Optimized dependencies to reduce re-renders
 
     const products = needsFetch ? fetchedProducts : initialProducts;
     const pagination = needsFetch ? fetchedPagination : initialPagination;

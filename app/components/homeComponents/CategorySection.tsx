@@ -124,6 +124,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                   <ProductCard
                     product={product}
                     isLCP={isFirstCategory && index === 0} // First product in first category is LCP candidate
+                    isAboveFold={isFirstCategory && index < 3} // First 3 products in first category are above the fold
                   />
                 </motion.div>
               ))}

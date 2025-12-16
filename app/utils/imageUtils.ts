@@ -55,11 +55,11 @@ export const getOptimizedImageUrl = (
 export const getImageSrcSet = (
   productId: string,
   index: number = 0,
-  sizes: number[] = [267, 400, 500, 800, 1200]
+  sizes: number[] = [220, 260, 320] // Default optimized for product cards
 ): string => {
   return sizes
     .map((width) => {
-      const url = getOptimizedImageUrl(productId, index, width);
+      const url = getOptimizedImageUrl(productId, index, width, width, 80); // Use optimized quality
       return `${url} ${width}w`;
     })
     .join(", ");

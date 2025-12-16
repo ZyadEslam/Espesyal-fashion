@@ -2,10 +2,10 @@
 import React, {
   lazy,
   Suspense,
-  useEffect,
   useState,
   memo,
   useCallback,
+  useMemo,
 } from "react";
 // import Image from "next/image";
 // import { assets } from "@/public/assets/assets";
@@ -13,32 +13,41 @@ import Link from "next/link";
 import { ProductCardProps } from "../../types/types";
 import { getOptimizedImageUrl } from "../../utils/imageUtils";
 import { useTranslations } from "next-intl";
-const ProductImage = lazy(() => import("./ProductImage"));
+// Import ProductImage directly for LCP candidates to avoid lazy loading delay
+import ProductImage from "./ProductImage";
+const ProductImageLazy = lazy(() => import("./ProductImage"));
 
 interface ProductCardComponentProps {
   product: ProductCardProps;
   isLCP?: boolean; // Indicates if this is an LCP candidate
+  isAboveFold?: boolean; // Indicates if this image is above the fold
 }
 
 const ProductCard = memo(
-  ({ product, isLCP = false }: ProductCardComponentProps) => {
+  ({
+    product,
+    isLCP = false,
+    isAboveFold = false,
+  }: ProductCardComponentProps) => {
     const t = useTranslations("common");
     const [imageError, setImageError] = useState(false);
-    const [imageSrc, setImageSrc] = useState("");
 
-    useEffect(() => {
+    // Compute image URL synchronously during render instead of useEffect
+    // This eliminates delay in image src assignment and improves LCP significantly
+    const imageSrc = useMemo(() => {
       if (product._id) {
         const displayWidth = 320; // Max display size for product cards
         const displayHeight = 320;
-        const optimizedUrl = getOptimizedImageUrl(
+        // Use optimized quality (80) for better compression while maintaining visual quality
+        return getOptimizedImageUrl(
           product._id as string,
           0,
           displayWidth,
           displayHeight,
-          85
+          80
         );
-        setImageSrc(optimizedUrl);
       }
+      return "";
     }, [product._id]);
 
     const handleImageError = useCallback(() => {
@@ -56,27 +65,42 @@ const ProductCard = memo(
             style={{ aspectRatio: "1 / 1" }}
           >
             {imageSrc && !imageError ? (
-              <Suspense
-                fallback={
-                  <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
-                    <span className="text-gray-400 text-sm">
-                      {t("loading")}
-                    </span>
-                  </div>
-                }
-              >
+              isLCP || isAboveFold ? (
+                // Render LCP and above-fold images directly without lazy loading
                 <ProductImage
                   productName={product.name}
                   imageSrc={imageSrc}
                   handleImageError={handleImageError}
                   fetchPriority={isLCP ? "high" : "auto"}
-                  loading={isLCP ? "eager" : "lazy"}
+                  loading="eager"
                   context="product-card"
                   width={320}
                   height={320}
                   productId={product._id as string}
                 />
-              </Suspense>
+              ) : (
+                <Suspense
+                  fallback={
+                    <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
+                      <span className="text-gray-400 text-sm">
+                        {t("loading")}
+                      </span>
+                    </div>
+                  }
+                >
+                  <ProductImageLazy
+                    productName={product.name}
+                    imageSrc={imageSrc}
+                    handleImageError={handleImageError}
+                    fetchPriority="auto"
+                    loading="lazy"
+                    context="product-card"
+                    width={320}
+                    height={320}
+                    productId={product._id as string}
+                  />
+                </Suspense>
+              )
             ) : (
               <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                 <span className="text-gray-400 text-sm">No image</span>

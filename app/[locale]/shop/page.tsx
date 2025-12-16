@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { generateMetadata as generateSEOMetadata } from "../../utils/seo";
 import ShopProductsProvider from "../../components/providers/ShopProductsProvider";
-import { fetchInitialProducts } from "./shop-data";
+import { fetchInitialProducts, fetchShopCategories } from "./shop-data";
 import ShopContent from "./ShopContent";
 
 // Add ISR revalidation
@@ -68,8 +68,11 @@ const ShopPage = async ({ params, searchParams }: ShopPageProps) => {
   const t = await getTranslations("shop");
   const tNav = await getTranslations("nav");
 
-  // Prefetch initial products data immediately (don't wait for categories)
-  const initialData = await fetchInitialProducts(category);
+  // Fetch initial products and categories in parallel (server-side)
+  const [initialData, initialCategories] = await Promise.all([
+    fetchInitialProducts(category),
+    fetchShopCategories(),
+  ]);
 
   const breadcrumbItems = [
     { name: tNav("home"), url: `/${locale}` },
@@ -90,6 +93,17 @@ const ShopPage = async ({ params, searchParams }: ShopPageProps) => {
     });
   }
 
+  // Preload critical images for above-fold products (first 3)
+  const criticalImageUrls = initialData.products
+    .slice(0, 3)
+    .map((product) => {
+      if (product._id && product.imgSrc && product.imgSrc.length > 0) {
+        return `/api/product/image/${product._id}?index=0&w=320&h=320&q=80`;
+      }
+      return null;
+    })
+    .filter((url): url is string => url !== null);
+
   return (
     <ShopProductsProvider
       initialProducts={initialData.products}
@@ -100,6 +114,8 @@ const ShopPage = async ({ params, searchParams }: ShopPageProps) => {
         category={category}
         q={q}
         breadcrumbItems={breadcrumbItems}
+        initialCategories={initialCategories}
+        criticalImageUrls={criticalImageUrls}
       />
     </ShopProductsProvider>
   );

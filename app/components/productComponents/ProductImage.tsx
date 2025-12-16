@@ -27,13 +27,14 @@ const ProductImage = ({
   const sizes = getImageSizes(context);
 
   // Generate srcset for responsive images if productId is provided
+  // Optimized sizes to match actual display dimensions (no unnecessary larger sizes)
   const srcset =
     productId && context !== "thumbnail"
       ? getImageSrcSet(
           productId,
           0,
           context === "product-card"
-            ? [220, 260, 320, 400]
+            ? [220, 260, 320] // Match actual display sizes: mobile ~220px, tablet ~260px, desktop ~320px
             : [400, 600, 800, 1200]
         )
       : undefined;

@@ -74,19 +74,7 @@ export default async function LocaleLayout({
         {/* DNS prefetch for external domains */}
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//www.google-analytics.com" />
-        <link rel="dns-prefetch" href="//js.stripe.com" />
-        <link rel="dns-prefetch" href="//api.stripe.com" />
-        {/* Preconnect for critical third-party resources */}
-        <link
-          rel="preconnect"
-          href="https://js.stripe.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preconnect"
-          href="https://api.stripe.com"
-          crossOrigin="anonymous"
-        />
+        {/* Stripe preconnects removed - only added on checkout page */}
         {/* Preload critical fonts */}
         <link
           rel="preload"

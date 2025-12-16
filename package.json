@@ -12,13 +12,12 @@
   },
   "browserslist": {
     "production": [
-      "defaults",
-      "not IE 11",
-      "not op_mini all",
+      "defaults and supports es6-module",
+      "maintained node versions",
       "not dead",
-      "> 0.5%",
+      "> 0.2%",
       "last 2 versions",
-      "Firefox ESR"
+      "not op_mini all"
     ],
     "development": [
       "last 1 chrome version",

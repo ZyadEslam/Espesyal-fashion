@@ -15,6 +15,7 @@ import {
 import LoadingOverlay from "@/app/components/LoadingOverlay";
 import ActionNotification from "@/app/UI/ActionNotification";
 import StripePaymentForm from "@/app/components/checkoutComponents/StripePaymentForm";
+import StripePreconnects from "@/app/components/checkoutComponents/StripePreconnects";
 import { api } from "@/app/utils/api";
 import { signIn } from "next-auth/react";
 import { useCart } from "@/app/hooks/useCart";
@@ -237,6 +238,7 @@ const CheckoutPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50/50">
+      <StripePreconnects />
       <LoadingOverlay
         isVisible={isProcessing}
         message={t("processingPayment")}

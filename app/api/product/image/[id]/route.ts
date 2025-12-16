@@ -13,7 +13,7 @@ export async function GET(
     const { id } = await params;
     const url = new URL(request.url);
     const imageIndex = parseInt(url.searchParams.get("index") || "0");
-    
+
     // Parse query parameters for image optimization
     const width = url.searchParams.get("w")
       ? parseInt(url.searchParams.get("w")!)
@@ -23,13 +23,13 @@ export async function GET(
       : null;
     const quality = url.searchParams.get("q")
       ? parseInt(url.searchParams.get("q")!)
-      : 85; // Default quality
-    
+      : 80; // Optimized default quality for better compression
+
     // Check Accept header for format preference
     const acceptHeader = request.headers.get("accept") || "";
     const prefersWebP = acceptHeader.includes("image/webp");
     const prefersAVIF = acceptHeader.includes("image/avif");
-    
+
     // Determine output format - preserve PNG if original is PNG and no format preference
     let outputFormat: "jpeg" | "png" | "webp" | "avif" = "jpeg";
     if (prefersAVIF) {
@@ -154,76 +154,94 @@ export async function GET(
     // Process image with Sharp
     try {
       let sharpInstance = sharp(imageBuffer);
-      
+
       // Get original image metadata
       const metadata = await sharpInstance.metadata();
-      
+
       // Determine resize dimensions
       let resizeWidth = width;
       let resizeHeight = height;
-      
+
       // If only one dimension is provided, maintain aspect ratio
       if (width && !height && metadata.height) {
         resizeHeight = Math.round((width / metadata.width!) * metadata.height);
       } else if (height && !width && metadata.width) {
         resizeWidth = Math.round((height / metadata.height!) * metadata.width);
       }
-      
+
       // Only resize if dimensions are provided and different from original
-      if (
-        (resizeWidth || resizeHeight) &&
-        (resizeWidth !== metadata.width || resizeHeight !== metadata.height)
-      ) {
-        sharpInstance = sharpInstance.resize(resizeWidth, resizeHeight, {
-          fit: "inside",
-          withoutEnlargement: true, // Don't upscale images
-        });
+      // Use more aggressive resizing to ensure we don't serve oversized images
+      if (resizeWidth || resizeHeight) {
+        // Always resize to requested dimensions if provided, even if same size
+        // This ensures proper compression and format conversion
+        const targetWidth = resizeWidth || metadata.width;
+        const targetHeight = resizeHeight || metadata.height;
+
+        if (targetWidth && targetHeight) {
+          sharpInstance = sharpInstance.resize(targetWidth, targetHeight, {
+            fit: "inside",
+            withoutEnlargement: true, // Don't upscale images
+          });
+        }
       }
-      
+
       // Convert to desired format and optimize
       // Preserve PNG format if original is PNG and no format preference
-      const preservePNG = originalContentType === "image/png" && 
-                         outputFormat === "jpeg" && 
-                         !prefersAVIF && 
-                         !prefersWebP;
-      
+      const preservePNG =
+        originalContentType === "image/png" &&
+        outputFormat === "jpeg" &&
+        !prefersAVIF &&
+        !prefersWebP;
+
       let optimizedBuffer: Buffer;
       let finalContentType: string;
-      
+
       if (preservePNG) {
-        // Preserve PNG format for PNG originals
+        // Preserve PNG format for PNG originals with optimized compression
         optimizedBuffer = await sharpInstance
-          .png({ quality: Math.min(quality, 100), compressionLevel: 9 })
+          .png({
+            quality: Math.min(quality, 100),
+            compressionLevel: 9,
+            effort: 10, // Maximum compression effort
+          })
           .toBuffer();
         finalContentType = "image/png";
       } else {
-        // Use preferred format or convert to JPEG
+        // Use preferred format or convert to JPEG with optimized compression
         switch (outputFormat) {
           case "avif":
             optimizedBuffer = await sharpInstance
-              .avif({ quality: Math.min(quality, 90) })
+              .avif({
+                quality: Math.min(quality, 85), // AVIF works well at lower quality
+                effort: 6, // Balance between compression and speed
+              })
               .toBuffer();
             finalContentType = "image/avif";
             break;
           case "webp":
             optimizedBuffer = await sharpInstance
-              .webp({ quality: Math.min(quality, 90) })
+              .webp({
+                quality: Math.min(quality, 85), // WebP works well at lower quality
+                effort: 6, // Balance between compression and speed
+              })
               .toBuffer();
             finalContentType = "image/webp";
             break;
           default: // jpeg
             optimizedBuffer = await sharpInstance
-              .jpeg({ quality: Math.min(quality, 100), mozjpeg: true })
+              .jpeg({
+                quality: Math.min(quality, 85), // Optimized quality for better compression
+                mozjpeg: true, // Use mozjpeg for better compression
+                progressive: true, // Progressive JPEG for better perceived performance
+              })
               .toBuffer();
             finalContentType = "image/jpeg";
         }
       }
-      
+
       // Generate ETag for caching
-      const etag = createHash("md5")
-        .update(optimizedBuffer)
-        .digest("hex");
-      
+      const etag = createHash("md5").update(optimizedBuffer).digest("hex");
+
       // Check if client has cached version
       const ifNoneMatch = request.headers.get("if-none-match");
       if (ifNoneMatch === `"${etag}"`) {
@@ -235,7 +253,7 @@ export async function GET(
           },
         });
       }
-      
+
       return new NextResponse(optimizedBuffer, {
         headers: {
           "Content-Type": finalContentType,
@@ -246,7 +264,10 @@ export async function GET(
         },
       });
     } catch (error) {
-      console.error(`Error processing image with Sharp for product ${id}:`, error);
+      console.error(
+        `Error processing image with Sharp for product ${id}:`,
+        error
+      );
       // Fallback to original image if Sharp processing fails
       const etag = createHash("md5").update(imageBuffer).digest("hex");
       const ifNoneMatch = request.headers.get("if-none-match");
@@ -259,7 +280,7 @@ export async function GET(
           },
         });
       }
-      
+
       return new NextResponse(imageBuffer, {
         headers: {
           "Content-Type": originalContentType,
