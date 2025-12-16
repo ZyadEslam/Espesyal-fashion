@@ -9,6 +9,7 @@ interface UseOrdersReturn {
   totalPages: number;
   fetchOrders: (pageNum?: number, statusFilter?: string) => Promise<void>;
   updateOrder: (orderId: string, updates: Partial<Order>) => Promise<void>;
+  deleteOrder: (orderId: string) => Promise<void>;
   addOrder: (order: Order) => void;
   updateOrderInList: (orderId: string, updates: Partial<Order>) => void;
 }
@@ -36,7 +37,10 @@ export const useOrders = (): UseOrdersReturn => {
         const data: OrdersResponse = await response.json();
 
         if (!response.ok) {
-          throw new Error((data as unknown as { error: string }).error || "Failed to fetch orders");
+          throw new Error(
+            (data as unknown as { error: string }).error ||
+              "Failed to fetch orders"
+          );
         }
 
         setOrders(data.orders);
@@ -92,6 +96,26 @@ export const useOrders = (): UseOrdersReturn => {
     });
   }, []);
 
+  const deleteOrder = useCallback(async (orderId: string) => {
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete order");
+      }
+
+      // Remove order from local state
+      setOrders((prev) => prev.filter((order) => order._id !== orderId));
+    } catch (err) {
+      console.error("Error deleting order:", err);
+      throw err;
+    }
+  }, []);
+
   const updateOrderInList = useCallback(
     (orderId: string, updates: Partial<Order>) => {
       setOrders((prev) =>
@@ -111,8 +135,8 @@ export const useOrders = (): UseOrdersReturn => {
     totalPages,
     fetchOrders,
     updateOrder,
+    deleteOrder,
     addOrder,
     updateOrderInList,
   };
 };
-

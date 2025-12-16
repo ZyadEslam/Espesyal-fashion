@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Loader2, CheckCircle2, X } from "lucide-react";
+import { Loader2, CheckCircle2, X, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Order, OrderFormData, OrderProduct } from "@/app/types/orders";
 import { formatOrderFullDate, formatPrice } from "@/app/utils/orderUtils";
 
@@ -9,6 +10,7 @@ interface OrderDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (orderId: string, updates: Partial<Order>) => Promise<void>;
+  onDelete: (orderId: string) => Promise<void>;
 }
 
 export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
@@ -16,8 +18,15 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
   isOpen,
   onClose,
   onUpdate,
+  onDelete,
 }) => {
+  const t = useTranslations("dashboard.orders.updateModal");
+  const tDetails = useTranslations("dashboard.orders.details");
+  const tPayment = useTranslations("dashboard.orders.paymentStatus");
+  const tStatuses = useTranslations("dashboard.orders.statuses");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [fullOrder, setFullOrder] = useState<Order | null>(order);
   const [formData, setFormData] = useState<OrderFormData>({});
@@ -33,6 +42,11 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
             setFullOrder(data.order);
             setFormData({
               orderState: data.order.orderState,
+              paymentStatus: data.order.paymentStatus as
+                | "pending"
+                | "paid"
+                | "failed"
+                | "refunded",
               trackingNumber: data.order.trackingNumber || "",
               estimatedDeliveryDate: data.order.estimatedDeliveryDate
                 ? new Date(data.order.estimatedDeliveryDate)
@@ -75,6 +89,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     try {
       const updates: Partial<Order> = {
         orderState: formData.orderState,
+        paymentStatus: formData.paymentStatus,
         trackingNumber: formData.trackingNumber,
         estimatedDeliveryDate: formData.estimatedDeliveryDate || undefined,
       };
@@ -87,9 +102,28 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     }
   };
 
+  const handleDelete = async () => {
+    if (!order) return;
+    setIsDeleting(true);
+    try {
+      await onDelete(order._id);
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      console.error("Error deleting order:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">
             Order #{displayOrder.orderNumber}
@@ -113,7 +147,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    Customer Information
+                    {t("customerInformation")}
                   </h3>
                   <div className="space-y-1">
                     <p className="text-gray-900 font-medium">
@@ -132,7 +166,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    Order Date
+                    {t("orderDate")}
                   </h3>
                   <p className="text-gray-900">
                     {formatOrderFullDate(displayOrder.date)}
@@ -140,20 +174,21 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    Total Price
+                    {t("totalPrice")}
                   </h3>
                   <p className="text-gray-900 font-bold text-xl">
                     {formatPrice(displayOrder.totalPrice)}
                   </p>
                   {(displayOrder.discountAmount || 0) > 0 && (
                     <p className="text-sm text-green-600">
-                      Discount: {formatPrice(displayOrder.discountAmount || 0)}
+                      {t("discount")}{" "}
+                      {formatPrice(displayOrder.discountAmount || 0)}
                     </p>
                   )}
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    Payment
+                    {t("payment")}
                   </h3>
                   <p className="text-gray-900 capitalize">
                     {displayOrder.paymentMethod.replace("_", " ")}
@@ -162,10 +197,18 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     className={`inline-block mt-1 px-2 py-1 rounded text-xs font-medium ${
                       displayOrder.paymentStatus === "paid"
                         ? "bg-green-100 text-green-800"
+                        : displayOrder.paymentStatus === "refunded"
+                        ? "bg-red-100 text-red-800"
                         : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
-                    {displayOrder.paymentStatus}
+                    {tPayment(
+                      displayOrder.paymentStatus as
+                        | "pending"
+                        | "paid"
+                        | "failed"
+                        | "refunded"
+                    )}
                   </span>
                 </div>
               </div>
@@ -174,7 +217,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
               {displayOrder.address && (
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2">
-                    Shipping Address
+                    {t("shippingAddress")}
                   </h3>
                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                     <div className="flex items-start justify-between">
@@ -242,7 +285,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                                 <div className="flex items-center gap-4 flex-wrap mb-2">
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs font-medium text-gray-500 uppercase">
-                                      Qty:
+                                      {t("qty")}
                                     </span>
                                     <span className="px-3 py-1 bg-orange/10 text-orange font-bold text-lg rounded-md border border-orange/20">
                                       {quantity}
@@ -253,7 +296,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                                   {size && (
                                     <div className="flex items-center gap-2">
                                       <span className="text-xs font-medium text-gray-500 uppercase">
-                                        Size:
+                                        {t("size")}
                                       </span>
                                       <span className="px-2 py-1 bg-gray-200 text-gray-800 font-medium text-sm rounded">
                                         {size}
@@ -265,7 +308,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                                   {color && (
                                     <div className="flex items-center gap-2">
                                       <span className="text-xs font-medium text-gray-500 uppercase">
-                                        Color:
+                                        {t("color")}
                                       </span>
                                       <span className="px-2 py-1 bg-gray-200 text-gray-800 font-medium text-sm rounded">
                                         {color}
@@ -278,7 +321,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                                 {sku && (
                                   <div className="mb-2">
                                     <span className="text-xs font-medium text-gray-500 uppercase">
-                                      SKU:
+                                      {t("sku")}
                                     </span>
                                     <span className="ml-2 text-sm font-mono text-gray-700">
                                       {sku}
@@ -313,13 +356,13 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
             className="border-t border-gray-200 pt-6 space-y-4"
           >
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Update Order
+              {t("updateOrder")}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Order Status
+                  {t("orderStatus")}
                 </label>
                 <select
                   value={formData.orderState || ""}
@@ -331,17 +374,42 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange"
                 >
-                  <option value="Pending">Pending</option>
-                  <option value="Processing">Processing</option>
-                  <option value="Shipped">Shipped</option>
-                  <option value="Delivered">Delivered</option>
-                  <option value="Cancelled">Cancelled</option>
+                  <option value="Pending">{tStatuses("Pending")}</option>
+                  <option value="Processing">{tStatuses("Processing")}</option>
+                  <option value="Shipped">{tStatuses("Shipped")}</option>
+                  <option value="Delivered">{tStatuses("Delivered")}</option>
+                  <option value="Cancelled">{tStatuses("Cancelled")}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tracking Number
+                  {t("paymentStatus")}
+                </label>
+                <select
+                  value={formData.paymentStatus || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      paymentStatus: e.target.value as
+                        | "pending"
+                        | "paid"
+                        | "failed"
+                        | "refunded",
+                    })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange"
+                >
+                  <option value="pending">{tPayment("pending")}</option>
+                  <option value="paid">{tPayment("paid")}</option>
+                  <option value="failed">{tPayment("failed")}</option>
+                  <option value="refunded">{tPayment("refunded")}</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t("trackingNumber")}
                 </label>
                 <input
                   type="text"
@@ -350,13 +418,13 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     setFormData({ ...formData, trackingNumber: e.target.value })
                   }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange"
-                  placeholder="Enter tracking number"
+                  placeholder={t("trackingNumberPlaceholder")}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Estimated Delivery Date
+                  {t("estimatedDeliveryDate")}
                 </label>
                 <input
                   type="date"
@@ -372,32 +440,72 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-4 pt-4">
+            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
               <button
                 type="button"
-                onClick={onClose}
-                className="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isDeleting || isUpdating}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                Cancel
+                <Trash2 className="w-4 h-4" />
+                {tDetails("delete")}
               </button>
-              <button
-                type="submit"
-                disabled={isUpdating}
-                className="px-6 py-2 bg-orange text-white rounded-lg hover:bg-orange/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {isUpdating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    Update Order
-                  </>
-                )}
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  {t("cancel")}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating || isDeleting}
+                  className="px-6 py-2 bg-orange text-white rounded-lg hover:bg-orange/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {t("updating")}
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      {t("updateOrder")}
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
+
+            {showDeleteConfirm && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-red-800 mb-4">{tDetails("deleteConfirm")}</p>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {isDeleting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        {tDetails("deleting")}
+                      </>
+                    ) : (
+                      tDetails("delete")
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={isDeleting}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                  >
+                    {t("cancel")}
+                  </button>
+                </div>
+              </div>
+            )}
           </form>
         </div>
       </div>

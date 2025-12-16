@@ -82,6 +82,38 @@ const POST = async (req: NextRequest) => {
       productData.variants = sanitizeVariants(productData.variants);
     }
 
+    // Convert base64 image strings back to Buffer objects for storage
+    const imageBuffers: Buffer[] = [];
+    if (productData.imgSrc && Array.isArray(productData.imgSrc)) {
+      for (const img of productData.imgSrc) {
+        if (typeof img === "string" && img.length > 0) {
+          try {
+            const buffer = Buffer.from(img, "base64");
+            imageBuffers.push(buffer);
+          } catch (error) {
+            console.error("Error converting base64 to buffer:", error);
+            // Skip invalid images
+          }
+        }
+      }
+    }
+
+    // Validate that at least one image is provided
+    if (imageBuffers.length === 0) {
+      return NextResponse.json(
+        {
+          message: "Validation failed",
+          success: false,
+          error: "At least one product image is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Assign converted buffers to productData
+    // Cast through unknown first to allow type conversion
+    (productData as unknown as { imgSrc: Buffer[] }).imgSrc = imageBuffers;
+
     // If category is provided but categoryName is not, fetch it from the category
     if (productData.category && !productData.categoryName) {
       const category = await Category.findById(productData.category);

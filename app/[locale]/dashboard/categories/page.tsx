@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Loader2, Plus, Edit2, Save, X } from "lucide-react";
+import { Loader2, Plus, Edit2, Save, X, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface Category {
@@ -29,12 +29,20 @@ const CategoriesPage = () => {
     sortOrder: number;
   } | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch("/api/categories");
+      // Add cache-busting timestamp and use no-cache to ensure fresh data
+      const response = await fetch(`/api/categories?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
       const data = await response.json();
 
       if (data.success) {
@@ -84,6 +92,41 @@ const CategoriesPage = () => {
     setEditingValues(null);
   };
 
+  const handleDelete = useCallback(
+    async (categoryId: string, categorySlug: string) => {
+      try {
+        setDeleting(categoryId);
+        setError(null);
+        setSuccess(null);
+
+        const response = await fetch(`/api/categories/${categorySlug}`, {
+          method: "DELETE",
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || t("messages.deleteError"));
+        }
+
+        setSuccess(
+          t("messages.deleteSuccess", {
+            count: data.data?.productsReassigned || 0,
+          })
+        );
+        setDeleteConfirm(null);
+        await fetchCategories();
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : t("messages.deleteError")
+        );
+      } finally {
+        setDeleting(null);
+      }
+    },
+    [t, fetchCategories]
+  );
+
   const handleSave = async (categoryId: string) => {
     if (!editingValues) return;
 
@@ -132,9 +175,12 @@ const CategoriesPage = () => {
 
       if (data.success) {
         setSuccess(t("messages.updateSuccess"));
-        await fetchCategories();
         setEditingId(null);
         setEditingValues(null);
+        // Small delay to ensure cache invalidation completes
+        setTimeout(async () => {
+          await fetchCategories();
+        }, 100);
         setTimeout(() => setSuccess(null), 3000);
       } else {
         setError(data.message || t("messages.updateError"));
@@ -194,8 +240,10 @@ const CategoriesPage = () => {
 
       if (data.success) {
         setSuccess(t("messages.updateSuccess"));
-        // Refresh to ensure consistency with server
-        await fetchCategories();
+        // Small delay to ensure cache invalidation completes, then refresh
+        setTimeout(async () => {
+          await fetchCategories();
+        }, 100);
         setTimeout(() => setSuccess(null), 3000);
       } else {
         // Revert the optimistic update on error
@@ -446,14 +494,49 @@ const CategoriesPage = () => {
                               <X className="w-4 h-4" />
                             </button>
                           </div>
+                        ) : deleteConfirm === category._id ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() =>
+                                handleDelete(category._id, category.slug)
+                              }
+                              disabled={deleting === category._id}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                              title={t("buttons.delete")}
+                            >
+                              {deleting === category._id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm(null)}
+                              disabled={deleting === category._id}
+                              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+                              title={t("buttons.cancel")}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
                         ) : (
-                          <button
-                            onClick={() => handleEdit(category)}
-                            className="p-2 text-orange hover:bg-orange/10 rounded-lg transition-colors"
-                            title={t("buttons.edit")}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleEdit(category)}
+                              className="p-2 text-orange hover:bg-orange/10 rounded-lg transition-colors"
+                              title={t("buttons.edit")}
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirm(category._id)}
+                              disabled={deleting === category._id}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                              title={t("buttons.delete")}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -637,13 +720,59 @@ const CategoriesPage = () => {
                         </button>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => handleEdit(category)}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-orange text-white rounded-lg hover:bg-orange/90 transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                        <span>{t("buttons.edit")}</span>
-                      </button>
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => handleEdit(category)}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-orange text-white rounded-lg hover:bg-orange/90 transition-colors"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                          <span>{t("buttons.edit")}</span>
+                        </button>
+                        {deleteConfirm === category._id ? (
+                          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <p className="text-sm text-red-800 mb-2">
+                              {t("messages.deleteConfirm")}
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() =>
+                                  handleDelete(category._id, category.slug)
+                                }
+                                disabled={deleting === category._id}
+                                className="flex-1 px-3 py-1.5 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                              >
+                                {deleting === category._id ? (
+                                  <>
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                    {t("messages.deleting")}
+                                  </>
+                                ) : (
+                                  <>
+                                    <Trash2 className="w-3 h-3" />
+                                    {t("buttons.delete")}
+                                  </>
+                                )}
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirm(null)}
+                                disabled={deleting === category._id}
+                                className="flex-1 px-3 py-1.5 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 transition-colors disabled:opacity-50"
+                              >
+                                {t("buttons.cancel")}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setDeleteConfirm(category._id)}
+                            disabled={deleting === category._id}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span>{t("buttons.delete")}</span>
+                          </button>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

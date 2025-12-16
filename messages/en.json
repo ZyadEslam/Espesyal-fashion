@@ -578,12 +578,39 @@
       "paymentStatus": {
         "paid": "Paid",
         "pending": "Pending",
-        "failed": "Failed"
+        "failed": "Failed",
+        "refunded": "Refunded"
       },
       "details": {
         "title": "Order Details",
         "close": "Close",
-        "update": "Update Order"
+        "update": "Update Order",
+        "delete": "Delete Order",
+        "deleteConfirm": "Are you sure you want to delete this order? This action cannot be undone.",
+        "deleting": "Deleting...",
+        "deleteSuccess": "Order deleted successfully"
+      },
+      "updateModal": {
+        "title": "Order #{orderNumber}",
+        "updateOrder": "Update Order",
+        "updating": "Updating...",
+        "cancel": "Cancel",
+        "customerInformation": "Customer Information",
+        "orderDate": "Order Date",
+        "totalPrice": "Total Price",
+        "discount": "Discount:",
+        "payment": "Payment",
+        "shippingAddress": "Shipping Address",
+        "productsToPrepare": "Products to Prepare",
+        "orderStatus": "Order Status",
+        "paymentStatus": "Payment Status",
+        "trackingNumber": "Tracking Number",
+        "trackingNumberPlaceholder": "Enter tracking number",
+        "estimatedDeliveryDate": "Estimated Delivery Date",
+        "qty": "Qty:",
+        "size": "Size:",
+        "color": "Color:",
+        "sku": "SKU:"
       },
       "pagination": "Showing page {page} of {totalPages}",
       "prevPage": "Previous page",
@@ -607,12 +634,18 @@
         "createTitle": "Create Promo Code",
         "editTitle": "Edit Promo Code",
         "codeLabel": "Code",
+        "codePlaceholder": "SUMMER2024",
         "discountLabel": "Discount Percentage",
+        "discountPlaceholder": "10",
         "limitLabel": "Usage Limit",
         "startLabel": "Start Date",
         "endLabel": "End Date",
+        "stateLabel": "State",
+        "stateInactive": "Inactive",
+        "stateActive": "Active",
         "submitCreate": "Create Code",
         "submitUpdate": "Update Code",
+        "saving": "Saving...",
         "cancel": "Cancel"
       },
       "messages": {
@@ -655,14 +688,19 @@
       "buttons": {
         "save": "Save",
         "cancel": "Cancel",
-        "edit": "Edit"
+        "edit": "Edit",
+        "delete": "Delete"
       },
       "messages": {
         "fetchError": "Failed to fetch categories",
         "nameRequired": "Category name is required",
         "slugRequired": "Category slug is required",
         "updateError": "Failed to update category",
-        "updateSuccess": "Category updated successfully"
+        "updateSuccess": "Category updated successfully",
+        "deleteConfirm": "Are you sure you want to delete this category? All products in this category will be moved to 'Not Assigned'.",
+        "deleteSuccess": "Category deleted successfully. {count} product(s) moved to 'Not Assigned'.",
+        "deleteError": "Failed to delete category",
+        "deleting": "Deleting..."
       },
       "info": {
         "title": "How it works:",
@@ -714,6 +752,29 @@
         "success": "Admin updated successfully",
         "error": "Failed to update admin, please try again"
       }
+    },
+    "heroSectionEditor": {
+      "title": "Offer Section Editor",
+      "subtitle": "Edit the home page offer section content",
+      "selectLanguage": "Select Language",
+      "english": "English",
+      "arabic": "العربية",
+      "heroBadge": "Offer Badge",
+      "heroBadgePlaceholder": "e.g., Winter Is Here",
+      "mainHeading": "Main Heading",
+      "mainHeadingPlaceholder": "e.g., The largest sale of the year is here!",
+      "useCodeText": "Use Code Text",
+      "useCodePlaceholder": "e.g., Use code:",
+      "promoCode": "Promo Code",
+      "promoCodePlaceholder": "e.g., BFRIDAY",
+      "discountText": "Discount Text",
+      "discountTextPlaceholder": "e.g., for 25% OFF",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "allFieldsRequired": "All fields are required",
+      "updateSuccess": "Offer section updated successfully!",
+      "updateError": "Failed to update offer section",
+      "loadError": "Failed to load offer section"
     }
   }
 }

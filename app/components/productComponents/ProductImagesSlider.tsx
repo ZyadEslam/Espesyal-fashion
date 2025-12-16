@@ -138,6 +138,55 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set());
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [preloadedImages, setPreloadedImages] = useState<Set<number>>(
+    new Set()
+  );
+
+  // Get optimized image URLs with proper dimensions
+  const mainImageDimensions = getImageDimensions("product-detail");
+  const thumbnailDimensions = getImageDimensions("thumbnail");
+
+  // Preload all product images when component mounts
+  useEffect(() => {
+    if (!product._id || !product.imgSrc?.length) return;
+
+    const preloadImage = (originalIndex: number) => {
+      const imageUrl = getOptimizedImageUrl(
+        product._id as string,
+        originalIndex,
+        mainImageDimensions.width,
+        mainImageDimensions.height,
+        90
+      );
+
+      const img = new Image();
+      img.onload = () => {
+        setPreloadedImages((prev) => new Set([...prev, originalIndex]));
+        setLoadingImages((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(originalIndex);
+          return newSet;
+        });
+      };
+      img.onerror = () => {
+        setFailedImages((prev) => new Set([...prev, originalIndex]));
+        setLoadingImages((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(originalIndex);
+          return newSet;
+        });
+      };
+      img.src = imageUrl;
+    };
+
+    // Preload all images in background
+    product.imgSrc.forEach((_, index) => {
+      // Small delay to prioritize first image
+      setTimeout(() => preloadImage(index), index * 100);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product._id, product.imgSrc]);
 
   // Initialize loading state for all images
   useEffect(() => {
@@ -189,7 +238,51 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
       newSet.delete(originalIndex);
       return newSet;
     });
+    // Set image loaded when the currently selected image loads
+    const validImagesWithIndices = product.imgSrc
+      .map((img, origIndex) => {
+        const src =
+          typeof img === "string" ? img : (img as { src: string }).src;
+        return { src, originalIndex: origIndex };
+      })
+      .filter(({ originalIndex }) => !failedImages.has(originalIndex));
+
+    const safeIdx = Math.min(
+      selectedImageIndex,
+      validImagesWithIndices.length - 1
+    );
+    const currentImg = validImagesWithIndices[safeIdx];
+
+    if (currentImg && originalIndex === currentImg.originalIndex) {
+      setImageLoaded(true);
+    }
   };
+
+  // Reset image loaded state when selected image changes
+  // But if image is already preloaded, mark it as loaded immediately
+  // This must be before any early returns to follow React Hooks rules
+  useEffect(() => {
+    if (!product?.imgSrc?.length) return;
+
+    const validImages = product.imgSrc
+      .map((img, origIndex) => {
+        const src =
+          typeof img === "string" ? img : (img as { src: string }).src;
+        return { src, originalIndex: origIndex };
+      })
+      .filter(({ originalIndex }) => !failedImages.has(originalIndex));
+
+    if (validImages.length === 0) return;
+
+    const safeIdx = Math.min(selectedImageIndex, validImages.length - 1);
+    const currentImg = validImages[safeIdx];
+
+    if (currentImg && preloadedImages.has(currentImg.originalIndex)) {
+      setImageLoaded(true);
+    } else {
+      setImageLoaded(false);
+    }
+  }, [selectedImageIndex, preloadedImages, product.imgSrc, failedImages]);
 
   if (!product?.imgSrc?.length) {
     return (
@@ -233,9 +326,10 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   );
   const currentImage = validImagesWithIndices[safeSelectedIndex];
 
-  // Get optimized image URLs with proper dimensions
-  const mainImageDimensions = getImageDimensions("product-detail");
-  const thumbnailDimensions = getImageDimensions("thumbnail");
+  // Check if current image is preloaded for instant switching
+  const isCurrentImagePreloaded = preloadedImages.has(
+    currentImage.originalIndex
+  );
 
   // Generate optimized URLs using product ID directly
   const getOptimizedMainImageUrl = (originalIndex: number) => {
@@ -258,9 +352,11 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
           className="relative w-full h-[300px]"
           style={{ aspectRatio: "1 / 1" }}
         >
-          {loadingImages.has(currentImage.originalIndex) && (
-            <div className="absolute inset-0 animate-pulse bg-gray-200 rounded-lg"></div>
-          )}
+          {/* Loading skeleton - only show if image is not preloaded */}
+          {loadingImages.has(currentImage.originalIndex) &&
+            !isCurrentImagePreloaded && (
+              <div className="absolute inset-0 animate-pulse bg-gray-200 rounded-lg z-0"></div>
+            )}
           {failedImages.has(currentImage.originalIndex) ? (
             <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 rounded-lg">
               Image unavailable
@@ -268,14 +364,19 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
             <img
+              key={`main-image-${currentImage.originalIndex}-${safeSelectedIndex}`}
               src={getOptimizedMainImageUrl(currentImage.originalIndex)}
               alt={product.name}
-              className="w-full h-full object-contain"
+              className={`w-full h-full object-contain transition-opacity duration-200 ${
+                imageLoaded || isCurrentImagePreloaded
+                  ? "opacity-100"
+                  : "opacity-0"
+              }`}
               width={mainImageDimensions.width}
               height={mainImageDimensions.height}
               sizes="(max-width: 768px) 100vw, 33vw"
-              fetchPriority="high"
-              loading="eager"
+              fetchPriority={safeSelectedIndex === 0 ? "high" : "auto"}
+              loading={safeSelectedIndex === 0 ? "eager" : "lazy"}
               decoding="async"
               onError={() => handleImageError(currentImage.originalIndex)}
               onLoad={() => handleImageLoad(currentImage.originalIndex)}
@@ -302,12 +403,16 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
           return (
             <div
               key={originalIndex}
-              className={`rounded-lg cursor-pointer p-1 relative ${
+              className={`rounded-lg cursor-pointer p-1 relative transition-all duration-200 ${
                 safeSelectedIndex === filteredIndex
-                  ? "border-2 border-orange"
-                  : "bg-secondaryLight"
+                  ? "border-2 border-orange scale-105"
+                  : "bg-secondaryLight hover:border-2 hover:border-gray-300"
               }`}
-              onClick={() => setSelectedImageIndex(filteredIndex)}
+              onClick={() => {
+                if (safeSelectedIndex !== filteredIndex) {
+                  setSelectedImageIndex(filteredIndex);
+                }
+              }}
               style={{
                 width: `${thumbnailDimensions.width}px`,
                 height: `${thumbnailDimensions.height}px`,

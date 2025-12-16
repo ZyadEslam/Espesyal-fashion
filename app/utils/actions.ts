@@ -4,22 +4,60 @@ import { sanitizeVariants } from "./variantUtils";
 
 export const addProduct = async (formData: FormData) => {
   try {
-    const image1: File = formData.get("image1") as File;
-    const image2: File = formData.get("image2") as File;
-    const image3: File = formData.get("image3") as File;
-    const image4: File = formData.get("image4") as File;
+    const image1: File | null = formData.get("image1") as File | null;
+    const image2: File | null = formData.get("image2") as File | null;
+    const image3: File | null = formData.get("image3") as File | null;
+    const image4: File | null = formData.get("image4") as File | null;
 
-    const image1Buffer = await image1.arrayBuffer();
-    const image2Buffer = await image2.arrayBuffer();
-    const image3Buffer = await image3.arrayBuffer();
-    const image4Buffer = await image4.arrayBuffer();
-    // Create array of image files, filtering out null values
+    // Convert image files to base64 strings for JSON serialization
+    // Only process files that exist and have content
+    const convertImageToBase64 = async (
+      file: File | null
+    ): Promise<string | null> => {
+      // Check if file exists, has content, and is a valid file
+      if (
+        !file ||
+        file.size === 0 ||
+        file.name === "" ||
+        file.type === "" ||
+        !file.type.startsWith("image/")
+      ) {
+        return null;
+      }
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        // Additional check: ensure arrayBuffer has content
+        if (arrayBuffer.byteLength === 0) {
+          return null;
+        }
+        const buffer = Buffer.from(arrayBuffer);
+        return buffer.toString("base64");
+      } catch (error) {
+        console.error("Error converting image to base64:", error);
+        return null;
+      }
+    };
 
-    const buffer1 = Buffer.from(image1Buffer);
-    const buffer2 = Buffer.from(image2Buffer);
-    const buffer3 = Buffer.from(image3Buffer);
-    const buffer4 = Buffer.from(image4Buffer);
-    const imgFiles = [buffer1, buffer2, buffer3, buffer4].filter(Boolean);
+    const [base64Image1, base64Image2, base64Image3, base64Image4] =
+      await Promise.all([
+        convertImageToBase64(image1),
+        convertImageToBase64(image2),
+        convertImageToBase64(image3),
+        convertImageToBase64(image4),
+      ]);
+
+    // Filter out null values and create array of base64 strings
+    const imgFiles = [
+      base64Image1,
+      base64Image2,
+      base64Image3,
+      base64Image4,
+    ].filter((img): img is string => img !== null && img !== undefined);
+
+    // Validate that at least one image is provided
+    if (imgFiles.length === 0) {
+      throw new Error("At least one product image is required");
+    }
 
     let variantsPayload: unknown = [];
     const variantsField = formData.get("variants");
@@ -83,13 +121,7 @@ export const shippingFormAction = async (
     };
 
     // Validate required fields
-    const requiredFields = [
-      "name",
-      "phone",
-      "address",
-      "city",
-      "state",
-    ];
+    const requiredFields = ["name", "phone", "address", "city", "state"];
     const missingFields = requiredFields.filter(
       (field) => !addressData[field as keyof typeof addressData]
     );
@@ -148,7 +180,9 @@ export const placeOrderAction = async (
       totalPrice: Number(formData.get("totalPrice")),
       ...(promoCode && { promoCode }),
       ...(discountAmount && { discountAmount: Number(discountAmount) }),
-      ...(discountPercentage && { discountPercentage: Number(discountPercentage) }),
+      ...(discountPercentage && {
+        discountPercentage: Number(discountPercentage),
+      }),
     };
     if (!orderData.addressId) {
       return { success: false, message: "Please select a shipping address." };

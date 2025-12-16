@@ -20,6 +20,10 @@ export const productCreateSchema = z.object({
   brand: z.string().max(100).optional(),
   rating: z.number().min(0).max(5).optional(),
   hideFromHome: z.boolean().optional(),
+  imgSrc: z
+    .array(z.string().min(1, "Image data cannot be empty"))
+    .min(1, "At least one product image is required")
+    .max(4, "Maximum 4 images allowed"),
   variants: z
     .array(
       z.object({

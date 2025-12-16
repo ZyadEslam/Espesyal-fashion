@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { PromoCodeState } from "@/app/types/types";
 import { PromoCodeFormData } from "@/app/hooks/usePromoCodes";
 
@@ -19,6 +20,7 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({
   submitting,
   isEdit,
 }) => {
+  const t = useTranslations("dashboard.promoCodes.form");
   const handleChange = (field: keyof PromoCodeFormData, value: string) => {
     onChange({
       ...formData,
@@ -30,7 +32,7 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({
     <form onSubmit={onSubmit} className="p-4 sm:p-6 space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Code *
+          {t("codeLabel")} *
         </label>
         <input
           type="text"
@@ -38,13 +40,13 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({
           onChange={(e) => handleChange("code", e.target.value.toUpperCase())}
           required
           className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange"
-          placeholder="SUMMER2024"
+          placeholder={t("codePlaceholder")}
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Discount Percentage *
+          {t("discountLabel")} *
         </label>
         <input
           type="number"
@@ -55,14 +57,14 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({
           onChange={(e) => handleChange("discountPercentage", e.target.value)}
           required
           className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange"
-          placeholder="10"
+          placeholder={t("discountPlaceholder")}
         />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Start Date *
+            {t("startLabel")} *
           </label>
           <input
             type="date"
@@ -75,7 +77,7 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            End Date *
+            {t("endLabel")} *
           </label>
           <input
             type="date"
@@ -89,7 +91,7 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          State *
+          {t("stateLabel")} *
         </label>
         <select
           value={formData.state}
@@ -99,8 +101,8 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({
           required
           className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange focus:border-orange"
         >
-          <option value={PromoCodeState.INACTIVE}>Inactive</option>
-          <option value={PromoCodeState.ACTIVE}>Active</option>
+          <option value={PromoCodeState.INACTIVE}>{t("stateInactive")}</option>
+          <option value={PromoCodeState.ACTIVE}>{t("stateActive")}</option>
         </select>
       </div>
 
@@ -110,7 +112,7 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({
           onClick={onCancel}
           className="flex-1 px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
         >
-          Cancel
+          {t("cancel")}
         </button>
         <button
           type="submit"
@@ -120,12 +122,12 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({
           {submitting ? (
             <span className="flex items-center justify-center gap-2">
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Saving...
+              {t("saving")}
             </span>
           ) : isEdit ? (
-            "Update"
+            t("submitUpdate")
           ) : (
-            "Create"
+            t("submitCreate")
           )}
         </button>
       </div>
@@ -134,4 +136,3 @@ const PromoCodeForm: React.FC<PromoCodeFormProps> = ({
 };
 
 export default PromoCodeForm;
-

@@ -3,6 +3,9 @@ import connectDB from "@/app/utils/db";
 import Product from "@/app/models/product";
 import Category from "@/app/models/category";
 import { invalidateCategoryCaches } from "@/lib/cache";
+import { requireAdminAccess } from "@/lib/security/authMiddleware";
+import { checkAdminRateLimit } from "@/lib/security/rateLimiter";
+import { logAdminAction } from "@/lib/security/auditLogger";
 
 // GET products by category
 export async function GET(
@@ -210,6 +213,24 @@ function isValidObjectId(id: string): boolean {
   return /^[0-9a-fA-F]{24}$/.test(id);
 }
 
+// Helper function to get or create the default "Not Assigned" category
+async function getOrCreateDefaultCategory() {
+  let defaultCategory = await Category.findOne({ slug: "not-assigned" });
+
+  if (!defaultCategory) {
+    defaultCategory = await Category.create({
+      name: "Not Assigned",
+      slug: "not-assigned",
+      description: "Products without a category",
+      isActive: false, // Hidden from public view
+      isFeatured: false,
+      sortOrder: 9999, // Last in order
+    });
+  }
+
+  return defaultCategory;
+}
+
 // PATCH update existing category by ID or slug
 export async function PATCH(
   request: NextRequest,
@@ -330,6 +351,141 @@ export async function PATCH(
       {
         success: false,
         message: "Failed to update category",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE: Delete a category and reassign products to default category
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    // 1. Require admin authentication
+    const adminSession = await requireAdminAccess();
+    if (!adminSession) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Forbidden",
+          message: "Admin access required",
+        },
+        { status: 403 }
+      );
+    }
+
+    // 2. Rate limiting
+    const rateLimitResult = await checkAdminRateLimit(
+      request,
+      adminSession.user.id
+    );
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Too Many Requests",
+          message: "Rate limit exceeded",
+        },
+        { status: 429 }
+      );
+    }
+
+    await connectDB();
+    const { slug } = await params;
+
+    // Find the category to delete
+    let categoryToDelete;
+    if (isValidObjectId(slug)) {
+      categoryToDelete = await Category.findById(slug);
+    } else {
+      categoryToDelete = await Category.findOne({ slug });
+    }
+
+    if (!categoryToDelete) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Category not found",
+        },
+        { status: 404 }
+      );
+    }
+
+    // Prevent deletion of the default "Not Assigned" category
+    if (categoryToDelete.slug === "not-assigned") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Cannot delete the default 'Not Assigned' category",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Get or create the default category
+    const defaultCategory = await getOrCreateDefaultCategory();
+
+    // Reassign all products from the deleted category to the default category
+    const updateResult = await Product.updateMany(
+      { category: categoryToDelete._id },
+      {
+        $set: {
+          category: defaultCategory._id,
+          categoryName: defaultCategory.name,
+        },
+      }
+    );
+
+    // Remove products from the category's products array (optional cleanup)
+    await Category.findByIdAndUpdate(categoryToDelete._id, {
+      $set: { products: [] },
+    });
+
+    // Delete the category
+    await Category.findByIdAndDelete(categoryToDelete._id);
+
+    // Invalidate category caches
+    await invalidateCategoryCaches(categoryToDelete.slug);
+    await invalidateCategoryCaches(defaultCategory.slug);
+
+    // Log admin action
+    await logAdminAction(
+      adminSession.user.id,
+      adminSession.user.email || "",
+      "delete_category",
+      `/api/categories/${slug}`,
+      request,
+      {
+        categoryId: categoryToDelete._id.toString(),
+        categoryName: categoryToDelete.name,
+        productsReassigned: updateResult.modifiedCount,
+      }
+    );
+
+    return NextResponse.json({
+      success: true,
+      message: "Category deleted successfully",
+      data: {
+        deletedCategory: {
+          id: categoryToDelete._id.toString(),
+          name: categoryToDelete.name,
+        },
+        productsReassigned: updateResult.modifiedCount,
+        defaultCategory: {
+          id: defaultCategory._id.toString(),
+          name: defaultCategory.name,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to delete category",
         error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }

@@ -8,7 +8,7 @@ import {
   Save,
   Globe,
 } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 interface HeroContent {
   heroBadge: string;
@@ -21,6 +21,7 @@ interface HeroContent {
 
 const HeroSectionEditor = React.memo(() => {
   const currentLocale = useLocale();
+  const t = useTranslations("dashboard.heroSectionEditor");
   const [activeLocale, setActiveLocale] = useState<"en" | "ar">(
     (currentLocale as "en" | "ar") || "en"
   );
@@ -50,12 +51,10 @@ const HeroSectionEditor = React.memo(() => {
       if (result.success && result.data) {
         setFormData(result.data);
       } else {
-        throw new Error(result.error || "Failed to fetch hero section");
+        throw new Error(result.error || t("loadError"));
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load hero section"
-      );
+      setError(err instanceof Error ? err.message : t("loadError"));
     } finally {
       setLoading(false);
     }
@@ -96,7 +95,7 @@ const HeroSectionEditor = React.memo(() => {
         !formData.forDiscount.trim() ||
         !formData.promoCode.trim()
       ) {
-        setError("All fields are required");
+        setError(t("allFieldsRequired"));
         return;
       }
 
@@ -119,15 +118,13 @@ const HeroSectionEditor = React.memo(() => {
         const result = await response.json();
 
         if (!response.ok) {
-          throw new Error(result.error || "Failed to update hero section");
+          throw new Error(result.error || t("updateError"));
         }
 
-        setSuccess("Hero section updated successfully!");
+        setSuccess(t("updateSuccess"));
         await fetchHeroContent(activeLocale);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to update hero section"
-        );
+        setError(err instanceof Error ? err.message : t("updateError"));
       } finally {
         setSaving(false);
       }
@@ -156,10 +153,10 @@ const HeroSectionEditor = React.memo(() => {
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
-              Hero Section Editor
+              {t("title")}
             </h1>
             <p className="text-sm sm:text-base text-gray-600 mt-1">
-              Edit the home page hero section content
+              {t("subtitle")}
             </p>
           </div>
         </div>
@@ -186,7 +183,7 @@ const HeroSectionEditor = React.memo(() => {
           <div className="flex items-center gap-2 mb-4">
             <Globe className="w-5 h-5 text-orange" />
             <h2 className="text-lg font-semibold text-gray-900">
-              Select Language
+              {t("selectLanguage")}
             </h2>
           </div>
           <div className="flex gap-2">
@@ -198,7 +195,7 @@ const HeroSectionEditor = React.memo(() => {
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              English
+              {t("english")}
             </button>
             <button
               onClick={() => handleLocaleChange("ar")}
@@ -208,7 +205,7 @@ const HeroSectionEditor = React.memo(() => {
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              العربية
+              {t("arabic")}
             </button>
           </div>
         </div>
@@ -229,7 +226,7 @@ const HeroSectionEditor = React.memo(() => {
                   htmlFor="heroBadge"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Hero Badge
+                  {t("heroBadge")}
                 </label>
                 <input
                   id="heroBadge"
@@ -238,7 +235,7 @@ const HeroSectionEditor = React.memo(() => {
                   value={formData.heroBadge}
                   onChange={handleInputChange}
                   className="dashboard-input w-full"
-                  placeholder="e.g., Winter Is Here"
+                  placeholder={t("heroBadgePlaceholder")}
                   required
                 />
               </div>
@@ -249,7 +246,7 @@ const HeroSectionEditor = React.memo(() => {
                   htmlFor="largestSale"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Main Heading
+                  {t("mainHeading")}
                 </label>
                 <textarea
                   id="largestSale"
@@ -257,7 +254,7 @@ const HeroSectionEditor = React.memo(() => {
                   value={formData.largestSale}
                   onChange={handleInputChange}
                   className="dashboard-input w-full min-h-[80px] resize-y"
-                  placeholder="e.g., The largest sale of the year is here!"
+                  placeholder={t("mainHeadingPlaceholder")}
                   required
                 />
               </div>
@@ -268,7 +265,7 @@ const HeroSectionEditor = React.memo(() => {
                   htmlFor="useCode"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Use Code Text
+                  {t("useCodeText")}
                 </label>
                 <input
                   id="useCode"
@@ -277,7 +274,7 @@ const HeroSectionEditor = React.memo(() => {
                   value={formData.useCode}
                   onChange={handleInputChange}
                   className="dashboard-input w-full"
-                  placeholder="e.g., Use code:"
+                  placeholder={t("useCodePlaceholder")}
                   required
                 />
               </div>
@@ -288,7 +285,7 @@ const HeroSectionEditor = React.memo(() => {
                   htmlFor="promoCode"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Promo Code
+                  {t("promoCode")}
                 </label>
                 <input
                   id="promoCode"
@@ -297,7 +294,7 @@ const HeroSectionEditor = React.memo(() => {
                   value={formData.promoCode}
                   onChange={handleInputChange}
                   className="dashboard-input w-full uppercase"
-                  placeholder="e.g., BFRIDAY"
+                  placeholder={t("promoCodePlaceholder")}
                   required
                   style={{ textTransform: "uppercase" }}
                 />
@@ -309,7 +306,7 @@ const HeroSectionEditor = React.memo(() => {
                   htmlFor="forDiscount"
                   className="text-sm font-medium text-gray-700"
                 >
-                  Discount Text
+                  {t("discountText")}
                 </label>
                 <input
                   id="forDiscount"
@@ -318,7 +315,7 @@ const HeroSectionEditor = React.memo(() => {
                   value={formData.forDiscount}
                   onChange={handleInputChange}
                   className="dashboard-input w-full"
-                  placeholder="e.g., for 25% OFF"
+                  placeholder={t("discountTextPlaceholder")}
                   required
                 />
               </div>
@@ -333,12 +330,12 @@ const HeroSectionEditor = React.memo(() => {
                   {saving ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Saving...
+                      {t("saving")}
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      Save Changes
+                      {t("saveChanges")}
                     </>
                   )}
                 </button>

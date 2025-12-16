@@ -59,10 +59,14 @@ export const OrderRow: React.FC<OrderRowProps> = ({
           className={`inline-block px-2 py-1 rounded text-xs font-medium ${
             order.paymentStatus === "paid"
               ? "bg-green-100 text-green-800"
+              : order.paymentStatus === "refunded"
+              ? "bg-red-100 text-red-800"
               : "bg-yellow-100 text-yellow-800"
           }`}
         >
-          {tPayment(order.paymentStatus as "pending" | "paid" | "failed")}
+          {tPayment(
+            order.paymentStatus as "pending" | "paid" | "failed" | "refunded"
+          )}
         </span>
       </td>
       <td

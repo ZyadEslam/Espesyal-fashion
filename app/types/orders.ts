@@ -15,7 +15,13 @@ export interface OrderAddress {
   [key: string]: unknown;
 }
 
-export type OrderState = "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
+export type OrderState =
+  | "Pending"
+  | "Processing"
+  | "Shipped"
+  | "Delivered"
+  | "Cancelled";
+export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
 
 export interface Order {
   _id: string;
@@ -41,6 +47,7 @@ export interface Order {
 
 export interface OrderFormData {
   orderState?: OrderState;
+  paymentStatus?: PaymentStatus;
   trackingNumber?: string;
   estimatedDeliveryDate?: string;
 }
@@ -56,4 +63,3 @@ export interface OrdersResponse {
   orders: Order[];
   pagination: OrdersPagination;
 }
-

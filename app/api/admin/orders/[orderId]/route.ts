@@ -156,6 +156,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const {
       orderState,
+      paymentStatus,
       trackingNumber,
       estimatedDeliveryDate,
       shippedDate,
@@ -185,6 +186,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const updateData: Record<string, unknown> = {};
 
     if (orderState) updateData.orderState = orderState;
+    if (paymentStatus) updateData.paymentStatus = paymentStatus;
     if (trackingNumber !== undefined)
       updateData.trackingNumber = trackingNumber;
     if (estimatedDeliveryDate)
@@ -305,6 +307,53 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     console.error("Error updating order:", error);
     return NextResponse.json(
       { error: "Failed to update order" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE: Delete an order
+ */
+export async function DELETE(_req: NextRequest, { params }: Params) {
+  try {
+    const session = await requireAdmin();
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized: Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    await dbConnect();
+    const { orderId } = await params;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // Delete the order
+    await Order.findByIdAndDelete(orderId);
+
+    // Broadcast deletion via SSE
+    sseManager.broadcast("order-deleted", {
+      orderId: orderId,
+      orderNumber: orderId.slice(-8).toUpperCase(),
+      deletedAt: new Date().toISOString(),
+    });
+
+    return NextResponse.json(
+      {
+        message: "Order deleted successfully",
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    return NextResponse.json(
+      { error: "Failed to delete order" },
       { status: 500 }
     );
   }

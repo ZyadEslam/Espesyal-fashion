@@ -577,12 +577,39 @@
       "paymentStatus": {
         "paid": "مدفوع",
         "pending": "قيد الانتظار",
-        "failed": "فشل"
+        "failed": "فشل",
+        "refunded": "مرتجع"
       },
       "details": {
         "title": "تفاصيل الطلب",
         "close": "إغلاق",
-        "update": "تحديث الطلب"
+        "update": "تحديث الطلب",
+        "delete": "حذف الطلب",
+        "deleteConfirm": "هل أنت متأكد أنك تريد حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.",
+        "deleting": "جاري الحذف...",
+        "deleteSuccess": "تم حذف الطلب بنجاح"
+      },
+      "updateModal": {
+        "title": "طلب رقم #{orderNumber}",
+        "updateOrder": "تحديث الطلب",
+        "updating": "جاري التحديث...",
+        "cancel": "إلغاء",
+        "customerInformation": "معلومات العميل",
+        "orderDate": "تاريخ الطلب",
+        "totalPrice": "السعر الإجمالي",
+        "discount": "الخصم:",
+        "payment": "الدفع",
+        "shippingAddress": "عنوان الشحن",
+        "productsToPrepare": "المنتجات المراد تحضيرها",
+        "orderStatus": "حالة الطلب",
+        "paymentStatus": "حالة الدفع",
+        "trackingNumber": "رقم التتبع",
+        "trackingNumberPlaceholder": "أدخل رقم التتبع",
+        "estimatedDeliveryDate": "التاريخ المتوقع للتسليم",
+        "qty": "الكمية:",
+        "size": "المقاس:",
+        "color": "اللون:",
+        "sku": "رمز المنتج:"
       },
       "pagination": "عرض الصفحة {page} من {totalPages}",
       "prevPage": "الصفحة السابقة",
@@ -606,12 +633,18 @@
         "createTitle": "إنشاء كود خصم",
         "editTitle": "تعديل كود خصم",
         "codeLabel": "الكود",
+        "codePlaceholder": "SUMMER2024",
         "discountLabel": "نسبة الخصم",
+        "discountPlaceholder": "10",
         "limitLabel": "حد الاستخدام",
         "startLabel": "تاريخ البداية",
         "endLabel": "تاريخ الانتهاء",
+        "stateLabel": "الحالة",
+        "stateInactive": "غير نشط",
+        "stateActive": "نشط",
         "submitCreate": "إنشاء الكود",
         "submitUpdate": "تحديث الكود",
+        "saving": "جاري الحفظ...",
         "cancel": "إلغاء"
       },
       "messages": {
@@ -654,14 +687,19 @@
       "buttons": {
         "save": "حفظ",
         "cancel": "إلغاء",
-        "edit": "تعديل"
+        "edit": "تعديل",
+        "delete": "حذف"
       },
       "messages": {
         "fetchError": "فشل تحميل الفئات",
         "nameRequired": "اسم الفئة مطلوب",
         "slugRequired": "رابط الفئة مطلوب",
         "updateError": "فشل تحديث الفئة",
-        "updateSuccess": "تم تحديث الفئة بنجاح"
+        "updateSuccess": "تم تحديث الفئة بنجاح",
+        "deleteConfirm": "هل أنت متأكد أنك تريد حذف هذه الفئة؟ سيتم نقل جميع المنتجات في هذه الفئة إلى 'غير معين'.",
+        "deleteSuccess": "تم حذف الفئة بنجاح. تم نقل {count} منتج(ات) إلى 'غير معين'.",
+        "deleteError": "فشل حذف الفئة",
+        "deleting": "جاري الحذف..."
       },
       "info": {
         "title": "كيف يعمل:",
@@ -713,6 +751,29 @@
         "success": "تم تحديث المشرف بنجاح",
         "error": "فشل تحديث المشرف، حاول مرة أخرى"
       }
+    },
+    "heroSectionEditor": {
+      "title": "محرر قسم العروض",
+      "subtitle": "تحرير محتوى قسم العروض في الصفحة الرئيسية",
+      "selectLanguage": "اختر اللغة",
+      "english": "English",
+      "arabic": "العربية",
+      "heroBadge": "شارة العرض",
+      "heroBadgePlaceholder": "مثال: الشتاء هنا",
+      "mainHeading": "العنوان الرئيسي",
+      "mainHeadingPlaceholder": "مثال: أكبر تخفيض في السنة هنا!",
+      "useCodeText": "نص استخدام الكود",
+      "useCodePlaceholder": "مثال: استخدم الكود:",
+      "promoCode": "كود الخصم",
+      "promoCodePlaceholder": "مثال: BFRIDAY",
+      "discountText": "نص الخصم",
+      "discountTextPlaceholder": "مثال: خصم 25%",
+      "saveChanges": "حفظ التغييرات",
+      "saving": "جاري الحفظ...",
+      "allFieldsRequired": "جميع الحقول مطلوبة",
+      "updateSuccess": "تم تحديث قسم العروض بنجاح!",
+      "updateError": "فشل تحديث قسم العروض",
+      "loadError": "فشل تحميل قسم العروض"
     }
   }
 }

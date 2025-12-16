@@ -27,6 +27,7 @@ const OrdersPage = () => {
     totalPages,
     fetchOrders,
     updateOrder,
+    deleteOrder,
     addOrder,
     updateOrderInList,
   } = useOrders();
@@ -96,6 +97,19 @@ const OrdersPage = () => {
     setSelectedOrder(null);
   }, []);
 
+  const handleDeleteOrder = useCallback(
+    async (orderId: string) => {
+      try {
+        await deleteOrder(orderId);
+        handleCloseModal();
+        await fetchOrders(page, statusFilter);
+      } catch (err) {
+        console.error("Error deleting order:", err);
+      }
+    },
+    [deleteOrder, handleCloseModal, fetchOrders, page, statusFilter]
+  );
+
   return (
     <div className="max-w-7xl mx-auto">
       <OrdersHeader
@@ -137,6 +151,7 @@ const OrdersPage = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onUpdate={handleUpdateOrder}
+        onDelete={handleDeleteOrder}
       />
     </div>
   );
