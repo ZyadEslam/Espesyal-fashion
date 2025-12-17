@@ -72,18 +72,20 @@ export async function GET(req: NextRequest) {
     const total = await Order.countDocuments(query);
 
     // Fetch orders with populated data
+    // Note: userId populate is conditional since guest orders may have null userId
     const orders = await Order.find(query)
       .populate({
         path: "userId",
         select: "name email",
+        strictPopulate: false, // Allow null userId for guest orders
       })
       .populate({
         path: "addressId",
         select: "name phone address city state",
       })
       .populate({
-        path: "products",
-        select: "name price images",
+        path: "products.product",
+        select: "name price imgSrc",
       })
       .sort({ date: -1 }) // Most recent first
       .skip(skip)
@@ -116,7 +118,28 @@ export async function GET(req: NextRequest) {
 
     const formattedOrders = orders.map((order) => {
       // Convert through unknown first to handle Mongoose type mismatch
-      const orderTyped = order as unknown as OrderWithPopulated;
+      const orderTyped = order as unknown as OrderWithPopulated & {
+        address?: {
+          name?: string;
+          phone?: string;
+          address?: string;
+          city?: string;
+          state?: string;
+        };
+      };
+
+      // For guest orders, use address from order.address instead of userId
+      const isGuestOrder = !orderTyped.userId;
+      const userName = isGuestOrder
+        ? orderTyped.address?.name || "Guest"
+        : orderTyped.userId?.name || "Unknown";
+      // For guest orders, use phone number as contact info, otherwise use email
+      const userEmail = isGuestOrder
+        ? orderTyped.address?.phone
+          ? `Phone: ${orderTyped.address.phone}`
+          : "Guest Order"
+        : orderTyped.userId?.email || "Unknown";
+
       return {
         _id: orderTyped._id.toString(),
         orderNumber: orderTyped._id.toString().slice(-8).toUpperCase(),
@@ -125,10 +148,10 @@ export async function GET(req: NextRequest) {
         orderState: orderTyped.orderState,
         paymentStatus: orderTyped.paymentStatus,
         paymentMethod: orderTyped.paymentMethod,
-        userId: orderTyped.userId?._id?.toString(),
-        userName: orderTyped.userId?.name || "Unknown",
-        userEmail: orderTyped.userId?.email || "Unknown",
-        address: orderTyped.addressId,
+        userId: orderTyped.userId?._id?.toString() || null,
+        userName,
+        userEmail,
+        address: orderTyped.addressId || orderTyped.address,
         products: orderTyped.products || [],
         trackingNumber: orderTyped.trackingNumber,
         estimatedDeliveryDate: orderTyped.estimatedDeliveryDate,
@@ -137,6 +160,7 @@ export async function GET(req: NextRequest) {
         promoCode: orderTyped.promoCode,
         discountAmount: orderTyped.discountAmount || 0,
         discountPercentage: orderTyped.discountPercentage,
+        isGuestOrder,
       };
     });
 

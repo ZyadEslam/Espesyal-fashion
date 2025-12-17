@@ -99,18 +99,40 @@ export const orderItemSchema = z
     }
   );
 
-export const orderCreateSchema = z.object({
-  userId: objectIdSchema,
-  addressId: objectIdSchema,
-  products: z.array(orderItemSchema).min(1, "At least one product required"),
-  totalPrice: z.number().positive("Total price must be positive"),
-  promoCode: z.string().max(50).optional(),
-  discountAmount: z.number().min(0).optional(),
-  discountPercentage: z.number().min(0).max(100).optional(),
-  paymentMethod: z.enum(["cash_on_delivery", "stripe"]).optional(),
-  stripePaymentIntentId: z.string().max(200).optional(),
-  shippingFee: z.number().min(0).optional(),
+const addressSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100),
+  phone: z.string().min(10, "Phone number too short").max(20),
+  address: z.string().min(5, "Address is required").max(500),
+  city: z.string().min(1, "City is required").max(100),
+  state: z.string().min(1, "State is required").max(100),
 });
+
+export const orderCreateSchema = z
+  .object({
+    userId: objectIdSchema.optional(), // Optional for guest orders
+    addressId: objectIdSchema.optional(),
+    address: addressSchema.optional(),
+    products: z.array(orderItemSchema).min(1, "At least one product required"),
+    totalPrice: z.number().positive("Total price must be positive"),
+    promoCode: z.string().max(50).optional(),
+    discountAmount: z.number().min(0).optional(),
+    discountPercentage: z.number().min(0).max(100).optional(),
+    paymentMethod: z.enum(["cash_on_delivery", "stripe"]).optional(),
+    stripePaymentIntentId: z.string().max(200).optional(),
+    shippingFee: z.number().min(0).optional(),
+  })
+  .refine(
+    (data) => {
+      // Either addressId or address must be provided, but not both
+      const hasAddressId = !!data.addressId;
+      const hasAddress = !!data.address;
+      return hasAddressId !== hasAddress; // XOR: exactly one must be true
+    },
+    {
+      message: "Either addressId or address must be provided (but not both)",
+      path: ["addressId"],
+    }
+  );
 
 // User validation schemas
 export const userUpdateSchema = z.object({

@@ -20,7 +20,10 @@ export async function GET(
     const order = (await Order.findById(orderId)
       .populate("products.product")
       .populate("addressId")
-      .populate("userId")
+      .populate({
+        path: "userId",
+        strictPopulate: false, // Allow null userId for guest orders
+      })
       .lean()) as {
       _id: { toString: () => string };
       date: Date | string;
@@ -29,7 +32,14 @@ export async function GET(
       paymentStatus: string;
       paymentMethod: string;
       products: unknown;
-      addressId: unknown;
+      addressId?: unknown;
+      address?: {
+        name?: string;
+        phone?: string;
+        address?: string;
+        city?: string;
+        state?: string;
+      };
       userId?: unknown;
       trackingNumber?: string;
       estimatedDeliveryDate?: Date | string;
@@ -97,7 +107,8 @@ export async function GET(
           paymentStatus: order.paymentStatus,
           paymentMethod: order.paymentMethod,
           products: clientProducts,
-          address: order.addressId,
+          // Use addressId if available (saved address), otherwise use address (guest order)
+          address: order.addressId || order.address,
           trackingNumber: order.trackingNumber,
           estimatedDeliveryDate: order.estimatedDeliveryDate,
           shippedDate: order.shippedDate,

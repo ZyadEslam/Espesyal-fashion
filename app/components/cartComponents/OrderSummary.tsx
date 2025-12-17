@@ -1,11 +1,10 @@
 "use client";
 import React, { memo, useState, useEffect } from "react";
-import OrderForm from "./OrderForm";
 import { useCart } from "@/app/hooks/useCart";
 import { useTranslations } from "next-intl";
-import { useSession } from "next-auth/react";
-import { signIn } from "next-auth/react";
 import { useLocale } from "next-intl";
+import { useSession, signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Sparkles, Lock, ArrowRight } from "lucide-react";
 
 const OrderSummary = memo(() => {
@@ -15,6 +14,7 @@ const OrderSummary = memo(() => {
   const tCommon = useTranslations("common");
   const { status } = useSession();
   const locale = useLocale();
+  const router = useRouter();
   const [shippingFee, setShippingFee] = useState<number>(0);
 
   // Fetch shipping fee on component mount
@@ -53,6 +53,22 @@ const OrderSummary = memo(() => {
     } catch (error) {
       console.error("Sign in error:", error);
     }
+  };
+
+  const handleProceedToCheckout = () => {
+    if (cart.length === 0) return;
+
+    // Store cart data in sessionStorage for checkout page
+    const checkoutData = {
+      products: cart,
+      source: "cart",
+      subtotal: totalPrice,
+    };
+
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("checkoutData", JSON.stringify(checkoutData));
+    }
+    router.push(`/${locale}/checkout`);
   };
 
   return (
@@ -110,6 +126,16 @@ const OrderSummary = memo(() => {
           </div>
         </div>
 
+        {/* Proceed to Checkout Button */}
+        <button
+          onClick={handleProceedToCheckout}
+          disabled={cart.length === 0}
+          className="mt-6 w-full bg-orange py-3 text-white rounded-lg hover:bg-orange/90 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center gap-2"
+        >
+          <span>{tCart("proceedToCheckout")}</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
+
         {/* Creative Login Prompt for Guest Users */}
         {status === "unauthenticated" && (
           <div className="mt-6 p-4 bg-gradient-to-br from-orange/10 via-orange/5 to-transparent border border-orange/20 rounded-xl relative overflow-hidden">
@@ -149,8 +175,6 @@ const OrderSummary = memo(() => {
             </div>
           </div>
         )}
-
-        <OrderForm />
       </div>
     </div>
   );

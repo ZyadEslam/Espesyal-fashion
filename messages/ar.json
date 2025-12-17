@@ -42,7 +42,8 @@
     "noImage": "لا توجد صورة",
     "currency": "جنيه",
     "close": "إغلاق",
-    "closeMenu": "إغلاق القائمة"
+    "closeMenu": "إغلاق القائمة",
+    "buyNow": "اشتري الآن"
   },
   "nav": {
     "home": "الرئيسية",
@@ -59,6 +60,7 @@
     "shoppingCart": "سلة التسوق",
     "adminMode": "وضع الإدارة",
     "exit": "خروج",
+    "closeMenu": "إغلاق القائمة",
     "closeMenu": "إغلاق القائمة"
   },
   "shop": {
@@ -176,7 +178,10 @@
     "orderPlaced": "تم تأكيد الطلب بنجاح!",
     "redirecting": "جاري إعادة التوجيه...",
     "noCheckoutData": "لم يتم العثور على بيانات الدفع. يرجى العودة إلى السلة.",
-    "backToCart": "العودة إلى السلة"
+    "backToCart": "العودة إلى السلة",
+    "addressForOrder": "عنوان الشحن",
+    "useSavedAddress": "استخدام عنوان محفوظ",
+    "enterNewAddress": "إدخال عنوان جديد"
   },
   "orders": {
     "myOrders": "طلباتي",

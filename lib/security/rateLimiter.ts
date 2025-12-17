@@ -131,7 +131,7 @@ export async function checkProductCreationRateLimit(
   return checkRateLimit(identifier, RATE_LIMITS.PRODUCT_CREATION);
 }
 
-export async function checkOrderRateLimit(request: Request, userId: string) {
+export async function checkOrderRateLimit(request: Request, userId?: string) {
   const identifier = getRateLimitIdentifier(request, userId);
   return checkRateLimit(identifier, RATE_LIMITS.ORDER);
 }

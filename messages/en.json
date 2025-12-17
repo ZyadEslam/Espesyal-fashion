@@ -42,7 +42,8 @@
     "noImage": "No image",
     "currency": "EGP",
     "close": "Close",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "buyNow": "Buy Now"
   },
   "nav": {
     "home": "Home",
@@ -56,7 +57,8 @@
     "myAccount": "My Account",
     "menu": "Menu",
     "exitDashboard": "Exit Dashboard",
-    "shoppingCart": "Shopping Cart"
+    "shoppingCart": "Shopping Cart",
+    "closeMenu": "Close menu"
   },
   "shop": {
     "title": "Shop",
@@ -173,7 +175,10 @@
     "orderPlaced": "Order placed successfully!",
     "redirecting": "Redirecting...",
     "noCheckoutData": "No checkout data found. Please return to cart.",
-    "backToCart": "Back to Cart"
+    "backToCart": "Back to Cart",
+    "addressForOrder": "Shipping Address",
+    "useSavedAddress": "Use Saved Address",
+    "enterNewAddress": "Enter New Address"
   },
   "orders": {
     "myOrders": "My Orders",

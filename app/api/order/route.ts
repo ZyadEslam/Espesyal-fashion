@@ -117,21 +117,12 @@ const normalizeOrderItems = (
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Require authentication
+    // 1. Authentication is optional (allow guest orders)
     const session = await requireAuth();
-    if (!session) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized",
-          message: "Authentication required",
-        },
-        { status: 401 }
-      );
-    }
 
-    // 2. Rate limiting
-    const rateLimitResult = await checkOrderRateLimit(req, session.user.id);
+    // 2. Rate limiting (use IP for guests, userId for authenticated users)
+    const sessionUserId = session?.user?.id;
+    const rateLimitResult = await checkOrderRateLimit(req, sessionUserId);
     if (!rateLimitResult.success) {
       return NextResponse.json(
         {
@@ -214,8 +205,9 @@ export async function POST(req: NextRequest) {
     }
 
     const {
-      userId,
+      userId: orderUserId,
       addressId,
+      address,
       products,
       totalPrice,
       promoCode,
@@ -226,29 +218,38 @@ export async function POST(req: NextRequest) {
       shippingFee,
     } = validation.data;
 
-    // 4. Verify user owns the order (userId must match session user)
-    if (!verifyOwnership(session.user.id, userId, session.user.isAdmin)) {
-      const { ipAddress, userAgent } = extractRequestInfo(req);
-      await logSecurityEvent(AuditEventType.UNAUTHORIZED_ACCESS, {
-        userId: session.user.id,
-        userEmail: session.user.email,
-        ipAddress,
-        userAgent,
-        resource: "/api/order",
-        action: "POST",
-        result: "blocked",
-        details: { attemptedUserId: userId },
-      });
+    // 4. Verify user owns the order (only if authenticated)
+    // For guest orders, orderUserId will be undefined/null, which is allowed
+    if (session && orderUserId) {
+      // If user is authenticated and provided userId, verify ownership
+      if (
+        !verifyOwnership(session.user.id, orderUserId, session.user.isAdmin)
+      ) {
+        const { ipAddress, userAgent } = extractRequestInfo(req);
+        await logSecurityEvent(AuditEventType.UNAUTHORIZED_ACCESS, {
+          userId: session.user.id,
+          userEmail: session.user.email,
+          ipAddress,
+          userAgent,
+          resource: "/api/order",
+          action: "POST",
+          result: "blocked",
+          details: { attemptedUserId: orderUserId },
+        });
 
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Forbidden",
-          message: "Access denied",
-        },
-        { status: 403 }
-      );
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Forbidden",
+            message: "Access denied",
+          },
+          { status: 403 }
+        );
+      }
     }
+
+    // Use session userId if authenticated, otherwise use orderUserId (which may be undefined for guests)
+    const finalUserId = session?.user?.id || orderUserId || null;
 
     await dbConnect();
 
@@ -323,8 +324,9 @@ export async function POST(req: NextRequest) {
       }
 
       newOrder = new Order({
-        userId,
-        addressId,
+        ...(finalUserId && { userId: finalUserId }),
+        ...(addressId && { addressId }),
+        ...(address && { address }),
         products: normalizedProducts,
         totalPrice: +totalPrice,
         date: new Date().toISOString(),
@@ -354,7 +356,7 @@ export async function POST(req: NextRequest) {
       dbSession.endSession();
     }
 
-    // Get user info for broadcast
+    // Get user info for broadcast (if authenticated)
     interface UserDoc {
       _id?: { toString: () => string };
       name?: string;
@@ -362,17 +364,30 @@ export async function POST(req: NextRequest) {
       [key: string]: unknown;
     }
 
-    const user = (await User.findById(userId)
-      .select("name email")
-      .lean()) as unknown as UserDoc | null;
+    const user = finalUserId
+      ? ((await User.findById(finalUserId)
+          .select("name email")
+          .lean()) as unknown as UserDoc | null)
+      : null;
 
     // Broadcast new order via SSE to all connected admin clients
+    // For guest orders, use address info; for authenticated users, use user info
+    const isGuestOrder = !session;
+    const broadcastUserName = isGuestOrder
+      ? address?.name || "Guest"
+      : user?.name || "Unknown";
+    const broadcastUserEmail = isGuestOrder
+      ? address?.phone
+        ? `Phone: ${address.phone}`
+        : "Guest Order"
+      : user?.email || "Unknown";
+
     sseManager.broadcast("new-order", {
       orderId: newOrder._id.toString(),
       orderNumber: newOrder._id.toString().slice(-8).toUpperCase(),
-      userId: user?._id?.toString(),
-      userName: user?.name || "Unknown",
-      userEmail: user?.email || "Unknown",
+      userId: user?._id?.toString() || null,
+      userName: broadcastUserName,
+      userEmail: broadcastUserEmail,
       totalPrice: newOrder.totalPrice,
       orderState: newOrder.orderState,
       paymentStatus: newOrder.paymentStatus,
@@ -382,8 +397,8 @@ export async function POST(req: NextRequest) {
     // Log order creation
     const { ipAddress, userAgent } = extractRequestInfo(req);
     await logSecurityEvent(AuditEventType.ORDER_CREATED, {
-      userId: session.user.id,
-      userEmail: session.user.email,
+      userId: session?.user?.id || "guest",
+      userEmail: session?.user?.email || address?.name || "guest",
       ipAddress,
       userAgent,
       resource: "/api/order",
@@ -393,6 +408,7 @@ export async function POST(req: NextRequest) {
         orderId: newOrder._id.toString(),
         totalPrice: newOrder.totalPrice,
         paymentMethod: newOrder.paymentMethod,
+        isGuestOrder: !session,
       },
     });
 

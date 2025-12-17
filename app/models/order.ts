@@ -44,7 +44,7 @@ const orderSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: [true, "User ID is required"],
+    required: false, // Optional for guest orders
   },
   date: {
     type: Date,
@@ -64,11 +64,33 @@ const orderSchema = new mongoose.Schema({
   addressId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Address",
-    required: [true, "Order Address is required"],
+    required: false,
+  },
+  address: {
+    name: {
+      type: String,
+      required: false,
+    },
+    phone: {
+      type: String,
+      required: false,
+    },
+    address: {
+      type: String,
+      required: false,
+    },
+    city: {
+      type: String,
+      required: false,
+    },
+    state: {
+      type: String,
+      required: false,
+    },
   },
   totalPrice: {
     type: Number,
-    required: [true, "Order Address is required"],
+    required: [true, "Total price is required"],
   },
   orderState: {
     type: String,
@@ -125,6 +147,31 @@ const orderSchema = new mongoose.Schema({
     default: 0,
     min: [0, "Shipping fee cannot be negative"],
   },
+});
+
+// Add validation to ensure either addressId or address is provided
+orderSchema.pre("validate", function (next) {
+  if (!this.addressId && !this.address) {
+    return next(new Error("Either addressId or address is required"));
+  }
+  if (this.addressId && this.address) {
+    return next(new Error("Cannot provide both addressId and address"));
+  }
+  if (
+    this.address &&
+    (!this.address.name ||
+      !this.address.phone ||
+      !this.address.address ||
+      !this.address.city ||
+      !this.address.state)
+  ) {
+    return next(
+      new Error(
+        "Address fields (name, phone, address, city, state) are required when providing address directly"
+      )
+    );
+  }
+  next();
 });
 
 const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);

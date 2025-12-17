@@ -4,43 +4,46 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import {
-  CreditCard,
-  Wallet,
-  ArrowLeft,
-  Sparkles,
-  Lock,
-  ArrowRight,
-} from "lucide-react";
+import { CreditCard, Wallet, ArrowLeft } from "lucide-react";
 import LoadingOverlay from "@/app/components/LoadingOverlay";
 import ActionNotification from "@/app/UI/ActionNotification";
 import StripePaymentForm from "@/app/components/checkoutComponents/StripePaymentForm";
 import StripePreconnects from "@/app/components/checkoutComponents/StripePreconnects";
+import CheckoutAddressSection from "@/app/components/checkoutComponents/CheckoutAddressSection";
+import CheckoutOrderSummary from "@/app/components/checkoutComponents/CheckoutOrderSummary";
 import { api } from "@/app/utils/api";
-import { signIn } from "next-auth/react";
 import { useCart } from "@/app/hooks/useCart";
-
-interface Product {
-  _id?: string;
-  name?: string;
-  price?: number;
-  quantityInCart?: number;
-  quantity?: number;
-  selectedVariantId?: string;
-  selectedColor?: string;
-  selectedSize?: string;
-  variantSku?: string;
-}
+import { AddressProps } from "@/app/types/types";
+import { ProductCardProps } from "@/app/types/types";
 
 interface CheckoutData {
-  addressId: string;
-  products: Product[];
-  totalPrice: number;
-  promoCode: string | null;
-  discountAmount: number;
-  discountPercentage: number;
+  products: ProductCardProps[];
+  source: "cart" | "buy_now";
   subtotal: number;
+  promoCode?: string | null;
+  discountAmount?: number;
+  discountPercentage?: number;
   shippingFee?: number;
+}
+
+interface OrderData {
+  userId?: string;
+  addressId?: string;
+  address?: {
+    name: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+  };
+  products: ProductCardProps[];
+  totalPrice: number;
+  paymentMethod: "cash_on_delivery" | "stripe";
+  shippingFee: number;
+  promoCode?: string;
+  discountAmount?: number;
+  discountPercentage?: number;
+  stripePaymentIntentId?: string;
 }
 
 const CheckoutPage = () => {
@@ -48,19 +51,11 @@ const CheckoutPage = () => {
   const locale = useLocale();
   const router = useRouter();
   const session = useSession();
-  const { clearCart } = useCart();
+  const { clearCart, cart, totalPrice } = useCart();
   const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null);
-
-  const handleSignIn = async () => {
-    try {
-      await signIn("google", {
-        callbackUrl: `/${locale}/checkout`,
-        redirect: true,
-      });
-    } catch (error) {
-      console.error("Sign in error:", error);
-    }
-  };
+  const [selectedAddress, setSelectedAddress] = useState<AddressProps | null>(
+    null
+  );
   const [paymentMethod, setPaymentMethod] = useState<
     "cash_on_delivery" | "stripe"
   >("cash_on_delivery");
@@ -69,6 +64,11 @@ const CheckoutPage = () => {
     success: boolean;
     message: string;
   } | null>(null);
+  const [promoCode, setPromoCode] = useState<string | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountPercentage, setDiscountPercentage] = useState(0);
+  const [shippingFee, setShippingFee] = useState<number>(0);
+  const [finalTotal, setFinalTotal] = useState<number>(0);
 
   useEffect(() => {
     // Get checkout data from sessionStorage
@@ -76,38 +76,115 @@ const CheckoutPage = () => {
       const storedData = sessionStorage.getItem("checkoutData");
       if (storedData) {
         try {
-          setCheckoutData(JSON.parse(storedData));
+          const parsed = JSON.parse(storedData);
+          setCheckoutData(parsed);
+          // If from cart, use cart data
+          if (parsed.source === "cart") {
+            // Use cart from context
+            setCheckoutData({
+              products: cart,
+              source: "cart",
+              subtotal: totalPrice,
+            });
+          }
         } catch (error) {
           console.error("Error parsing checkout data:", error);
         }
+      } else {
+        // Fallback to cart if no sessionStorage data
+        if (cart.length > 0) {
+          setCheckoutData({
+            products: cart,
+            source: "cart",
+            subtotal: totalPrice,
+          });
+        }
       }
     }
+  }, [cart, totalPrice]);
+
+  // Fetch shipping fee
+  useEffect(() => {
+    const fetchShippingFee = async () => {
+      try {
+        const response = await fetch("/api/settings");
+        const result = await response.json();
+        if (result.success) {
+          setShippingFee(result.shippingFee || 0);
+        }
+      } catch (error) {
+        console.error("Error fetching shipping fee:", error);
+        setShippingFee(0);
+      }
+    };
+    fetchShippingFee();
   }, []);
 
+  // Calculate final total
+  useEffect(() => {
+    if (checkoutData) {
+      const subtotal = checkoutData.subtotal;
+      const discountedPrice = Math.max(subtotal - discountAmount, 0);
+      const total = discountedPrice + shippingFee;
+      setFinalTotal(total);
+    }
+  }, [checkoutData, discountAmount, shippingFee]);
+
+  const handlePromoCodeChange = (
+    code: string | null,
+    amount: number,
+    percentage: number
+  ) => {
+    setPromoCode(code);
+    setDiscountAmount(amount);
+    setDiscountPercentage(percentage);
+  };
+
   const handlePlaceOrder = async () => {
-    if (!checkoutData || !session.data?.user?.id) return;
+    if (!checkoutData || !selectedAddress) {
+      setOrderStatus({
+        success: false,
+        message: "Please fill in all required information",
+      });
+      return;
+    }
 
     setIsProcessing(true);
     setOrderStatus(null);
 
     try {
-      const orderData = {
-        addressId: checkoutData.addressId,
-        userId: session.data.user.id,
+      const orderData: OrderData = {
+        // Include userId only if user is authenticated
+        ...(session.status === "authenticated" &&
+          session.data?.user?.id && {
+            userId: session.data.user.id,
+          }),
         products: checkoutData.products,
-        totalPrice: checkoutData.totalPrice,
+        totalPrice: finalTotal,
         paymentMethod: paymentMethod,
-        ...(checkoutData.promoCode && { promoCode: checkoutData.promoCode }),
-        ...(checkoutData.discountAmount && {
-          discountAmount: checkoutData.discountAmount,
-        }),
-        ...(checkoutData.discountPercentage && {
-          discountPercentage: checkoutData.discountPercentage,
-        }),
-        ...(checkoutData.shippingFee !== undefined && {
-          shippingFee: checkoutData.shippingFee,
+        shippingFee: shippingFee,
+        ...(promoCode && { promoCode }),
+        ...(discountAmount > 0 && {
+          discountAmount: discountAmount,
+          discountPercentage: discountPercentage,
         }),
       };
+
+      // Handle address - if it's a temporary address (starts with "temp-"), send address data directly
+      // Otherwise, use addressId
+      if (selectedAddress._id.startsWith("temp-")) {
+        // Guest address - send address data directly
+        orderData.address = {
+          name: selectedAddress.name,
+          phone: selectedAddress.phone,
+          address: selectedAddress.address,
+          city: selectedAddress.city,
+          state: selectedAddress.state,
+        };
+      } else {
+        // Saved address - use addressId
+        orderData.addressId = selectedAddress._id;
+      }
 
       const response = await fetch("/api/order", {
         method: "POST",
@@ -123,11 +200,11 @@ const CheckoutPage = () => {
         setOrderStatus({ success: true, message: t("orderPlaced") });
         // Clear checkout data
         sessionStorage.removeItem("checkoutData");
-        // Clear server cart FIRST (before clearing local cart to prevent sync from reloading)
-        if (session.data?.user?.id) {
+        // Clear server cart FIRST (only if authenticated)
+        if (session.status === "authenticated" && session.data?.user?.id) {
           await api.clearCart(session.data.user.id);
         }
-        // Then clear cart from context (updates UI immediately and clears localStorage)
+        // Then clear cart from context
         clearCart();
         // Redirect to order confirmation page
         setTimeout(() => {
@@ -148,7 +225,7 @@ const CheckoutPage = () => {
   };
 
   const handleStripePaymentSuccess = async (paymentIntentId: string) => {
-    if (!checkoutData || !session.data?.user?.id) return;
+    if (!checkoutData || !selectedAddress) return;
 
     setIsProcessing(true);
     setOrderStatus(null);
@@ -157,24 +234,36 @@ const CheckoutPage = () => {
     clearCart();
 
     try {
-      const orderData = {
-        addressId: checkoutData.addressId,
-        userId: session.data.user.id,
+      const orderData: OrderData = {
+        // Include userId only if user is authenticated
+        ...(session.status === "authenticated" &&
+          session.data?.user?.id && {
+            userId: session.data.user.id,
+          }),
         products: checkoutData.products,
-        totalPrice: checkoutData.totalPrice,
+        totalPrice: finalTotal,
         paymentMethod: "stripe",
         stripePaymentIntentId: paymentIntentId,
-        ...(checkoutData.promoCode && { promoCode: checkoutData.promoCode }),
-        ...(checkoutData.discountAmount && {
-          discountAmount: checkoutData.discountAmount,
-        }),
-        ...(checkoutData.discountPercentage && {
-          discountPercentage: checkoutData.discountPercentage,
-        }),
-        ...(checkoutData.shippingFee !== undefined && {
-          shippingFee: checkoutData.shippingFee,
+        shippingFee: shippingFee,
+        ...(promoCode && { promoCode }),
+        ...(discountAmount > 0 && {
+          discountAmount: discountAmount,
+          discountPercentage: discountPercentage,
         }),
       };
+
+      // Handle address
+      if (selectedAddress._id.startsWith("temp-")) {
+        orderData.address = {
+          name: selectedAddress.name,
+          phone: selectedAddress.phone,
+          address: selectedAddress.address,
+          city: selectedAddress.city,
+          state: selectedAddress.state,
+        };
+      } else {
+        orderData.addressId = selectedAddress._id;
+      }
 
       const response = await fetch("/api/order", {
         method: "POST",
@@ -188,15 +277,12 @@ const CheckoutPage = () => {
 
       if (result.success) {
         setOrderStatus({ success: true, message: t("orderPlaced") });
-        // Clear checkout data
         sessionStorage.removeItem("checkoutData");
-        // Clear server cart FIRST (before clearing local cart to prevent sync from reloading)
-        if (session.data?.user?.id) {
+        // Clear server cart (only if authenticated)
+        if (session.status === "authenticated" && session.data?.user?.id) {
           await api.clearCart(session.data.user.id);
         }
-        // Then clear cart from context (updates UI immediately and clears localStorage)
         clearCart();
-        // Redirect to order confirmation page
         setTimeout(() => {
           router.push(`/${locale}/order-confirmation/${result.orderId}`);
         }, 1500);
@@ -214,7 +300,7 @@ const CheckoutPage = () => {
     }
   };
 
-  if (!checkoutData) {
+  if (!checkoutData || checkoutData.products.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-md w-full mx-4 text-center">
@@ -231,10 +317,7 @@ const CheckoutPage = () => {
     );
   }
 
-  const totalItems = checkoutData.products.reduce(
-    (total, item) => total + (item.quantityInCart || 1),
-    0
-  );
+  const canPlaceOrder = selectedAddress !== null;
 
   return (
     <div className="min-h-screen bg-gray-50/50">
@@ -264,8 +347,15 @@ const CheckoutPage = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Payment Method Selection */}
-          <div className="lg:col-span-2">
+          {/* Left Column: Address and Payment */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Address Section */}
+            <CheckoutAddressSection
+              onAddressChange={setSelectedAddress}
+              selectedAddress={selectedAddress}
+            />
+
+            {/* Payment Method Selection */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">
@@ -348,7 +438,7 @@ const CheckoutPage = () => {
                 {paymentMethod === "stripe" && (
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <StripePaymentForm
-                      amount={checkoutData.totalPrice}
+                      amount={finalTotal}
                       onPaymentSuccess={handleStripePaymentSuccess}
                       onPaymentError={(error) => {
                         setOrderStatus({ success: false, message: error });
@@ -362,7 +452,7 @@ const CheckoutPage = () => {
                 {paymentMethod === "cash_on_delivery" && (
                   <button
                     onClick={handlePlaceOrder}
-                    disabled={isProcessing}
+                    disabled={isProcessing || !canPlaceOrder}
                     className="mt-6 w-full bg-orange py-3 text-white rounded-lg hover:bg-orange/90 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
                   >
                     {t("placeOrder")}
@@ -372,98 +462,13 @@ const CheckoutPage = () => {
             </div>
           </div>
 
-          {/* Order Summary */}
+          {/* Right Column: Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-8">
-              <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">
-                  {t("orderSummary")}
-                </h2>
-
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">
-                      {t("items")} ({totalItems})
-                    </span>
-                    <span className="font-semibold text-gray-900">
-                      {checkoutData.subtotal.toFixed(2)} EGP
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">{t("shipping")}</span>
-                    <span className="font-semibold text-green-600">
-                      {checkoutData.shippingFee && checkoutData.shippingFee > 0
-                        ? `${checkoutData.shippingFee.toFixed(2)} EGP`
-                        : "Free"}
-                    </span>
-                  </div>
-
-                  {checkoutData.promoCode &&
-                    checkoutData.discountAmount > 0 && (
-                      <div className="flex justify-between text-green-600">
-                        <span className="text-gray-600">
-                          {t("discount")} ({checkoutData.promoCode})
-                        </span>
-                        <span className="font-semibold">
-                          -{checkoutData.discountAmount.toFixed(2)} EGP
-                        </span>
-                      </div>
-                    )}
-
-                  <hr className="border-gray-200" />
-
-                  <div className="flex justify-between">
-                    <span className="text-lg font-bold text-gray-900">
-                      {t("total")}
-                    </span>
-                    <span className="text-xl font-bold text-gray-900">
-                      {checkoutData.totalPrice.toFixed(2)} EGP
-                    </span>
-                  </div>
-                </div>
-
-                {/* Creative Login Prompt for Guest Users */}
-                {session.status === "unauthenticated" && (
-                  <div className="mt-6 p-4 bg-gradient-to-br from-orange/10 via-orange/5 to-transparent border border-orange/20 rounded-xl relative overflow-hidden">
-                    {/* Decorative elements */}
-                    <div className="absolute top-2 right-2 opacity-20">
-                      <Sparkles className="w-8 h-8 text-orange" />
-                    </div>
-                    <div className="absolute bottom-2 left-2 opacity-10">
-                      <Lock className="w-6 h-6 text-orange" />
-                    </div>
-
-                    <div className="relative z-10">
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="w-10 h-10 bg-orange/20 rounded-full flex items-center justify-center flex-shrink-0">
-                          <Lock className="w-5 h-5 text-orange" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 mb-1">
-                            Unlock Exclusive Benefits
-                          </h3>
-                          <p className="text-sm text-gray-600 leading-relaxed">
-                            Sign in to save your addresses, track orders, and
-                            enjoy faster checkout!
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleSignIn}
-                        className="w-full mt-3 flex items-center justify-center gap-2 bg-gradient-to-r from-orange to-orange/90 hover:from-orange/90 hover:to-orange text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
-                      >
-                        <span>Sign in with Google</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                      <p className="text-xs text-gray-500 text-center mt-2">
-                        Quick & secure • No password needed
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <CheckoutOrderSummary
+              products={checkoutData.products}
+              subtotal={checkoutData.subtotal}
+              onPromoCodeChange={handlePromoCodeChange}
+            />
           </div>
         </div>
       </div>

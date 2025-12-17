@@ -17,6 +17,13 @@ interface OrderWithPopulated {
   paymentMethod: string;
   userId?: { _id?: { toString: () => string }; name?: string; email?: string };
   addressId?: unknown;
+  address?: {
+    name?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+  };
   products?: unknown[];
   trackingNumber?: string;
   estimatedDeliveryDate?: Date | string;
@@ -100,6 +107,17 @@ export async function GET(_req: NextRequest, { params }: Params) {
       }
     );
 
+    // Check if this is a guest order and format user info accordingly
+    const isGuestOrder = !orderTyped.userId;
+    const userName = isGuestOrder
+      ? orderTyped.address?.name || "Guest"
+      : orderTyped.userId?.name || "Unknown";
+    const userEmail = isGuestOrder
+      ? orderTyped.address?.phone
+        ? `Phone: ${orderTyped.address.phone}`
+        : "Guest Order"
+      : orderTyped.userId?.email || "Unknown";
+
     const formattedOrder = {
       _id: orderTyped._id.toString(),
       orderNumber: orderTyped._id.toString().slice(-8).toUpperCase(),
@@ -108,10 +126,10 @@ export async function GET(_req: NextRequest, { params }: Params) {
       orderState: orderTyped.orderState,
       paymentStatus: orderTyped.paymentStatus,
       paymentMethod: orderTyped.paymentMethod,
-      userId: orderTyped.userId?._id?.toString(),
-      userName: orderTyped.userId?.name || "Unknown",
-      userEmail: orderTyped.userId?.email || "Unknown",
-      address: orderTyped.addressId, // Map addressId to address
+      userId: orderTyped.userId?._id?.toString() || null,
+      userName,
+      userEmail,
+      address: orderTyped.addressId || orderTyped.address, // Use addressId if available, otherwise use address object for guest orders
       products: formattedProducts,
       trackingNumber: orderTyped.trackingNumber,
       estimatedDeliveryDate: orderTyped.estimatedDeliveryDate,
@@ -120,6 +138,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       promoCode: orderTyped.promoCode,
       discountAmount: orderTyped.discountAmount || 0,
       discountPercentage: orderTyped.discountPercentage,
+      isGuestOrder,
     };
 
     return NextResponse.json(

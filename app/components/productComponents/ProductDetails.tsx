@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import RatingStars from "../RatingStars";
 import Toast from "../../UI/Toast";
 import { ProductCardProps } from "../../types/types";
-import { Plus, Minus, ShoppingCart, Check, Loader2 } from "lucide-react";
+import { Plus, Minus, ShoppingCart, Check, Loader2, Zap } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 
 import { useCart } from "../../hooks/useCart";
@@ -161,6 +161,47 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
     if (newQuantity < 1) return;
     if (availableQuantity && newQuantity > availableQuantity) return;
     setQuantity(newQuantity);
+  };
+
+  const handleBuyNow = () => {
+    if (isAddToCartDisabled) return;
+
+    // Prepare product data for checkout
+    let productData: ProductCardProps = {
+      ...data,
+      quantityInCart: quantity,
+    };
+
+    if (hasVariants && selectedVariant) {
+      productData = {
+        ...productData,
+        selectedVariantId: selectedVariant._id,
+        selectedColor: selectedVariant.color,
+        selectedSize: selectedVariant.size,
+        maxAvailable: selectedVariant.quantity,
+        variantSku: selectedVariant.sku,
+      };
+    } else {
+      productData = {
+        ...productData,
+        maxAvailable: data.totalStock,
+      };
+    }
+
+    // Calculate subtotal
+    const subtotal = (data.price || 0) * quantity;
+
+    // Store in sessionStorage
+    const checkoutData = {
+      products: [productData],
+      source: "buy_now",
+      subtotal: subtotal,
+    };
+
+    sessionStorage.setItem("checkoutData", JSON.stringify(checkoutData));
+
+    // Redirect to checkout
+    router.push(`/${locale}/checkout`);
   };
 
   useEffect(() => {
@@ -375,6 +416,18 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
               <span>{t("addToCart")}</span>
             </>
           )}
+        </button>
+        <button
+          className={`group relative w-full sm:w-auto flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg ${
+            isAddToCartDisabled
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed shadow-none hover:shadow-none"
+              : "bg-gradient-to-r from-secondary to-secondary/90 text-white hover:from-secondary/90 hover:to-secondary"
+          }`}
+          onClick={handleBuyNow}
+          disabled={isAddToCartDisabled}
+        >
+          <Zap className="w-5 h-5" />
+          <span>{tCommon("buyNow")}</span>
         </button>
       </div>
 
