@@ -52,7 +52,7 @@
   /* Orange alias for backward compatibility */
   --color-orange: var(--color-primary);
 
-  --breakpoint-sm: 368px;
+  --breakpoint-sm: 376px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
