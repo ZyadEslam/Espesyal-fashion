@@ -42,7 +42,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
       // Batch DOM reads - get all needed values at once
       const card = container.querySelector(".category-card");
       const cardWidth = card instanceof HTMLElement ? card.offsetWidth : 0;
-      const scrollAmount = cardWidth + 24; // include gap
+      // Gap is 16px (1rem) on mobile, 24px (1.5rem) on larger screens
+      const gap = window.innerWidth >= 640 ? 24 : 16;
+      const scrollAmount = cardWidth + gap;
 
       // Batch DOM write - perform scroll in the same frame
       requestAnimationFrame(() => {
@@ -108,10 +110,10 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           </button>
 
           <div
-            className="overflow-x-auto scrollbar-hide px-6 sm:px-10 lg:px-12 snap-x snap-mandatory"
+            className="overflow-x-auto scrollbar-hide px-4 sm:px-6 md:px-10 lg:px-12 snap-x snap-mandatory"
             ref={scrollContainerRef}
           >
-            <div className="flex gap-6 min-w-max">
+            <div className="flex gap-4 sm:gap-6 min-w-max">
               {products.map((product, index) => (
                 <motion.div
                   key={product._id}
@@ -119,7 +121,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.05 }}
                   viewport={{ once: true }}
-                  className="category-card w-[calc(50vw-1.5rem)] min-w-[220px] max-w-[260px] sm:w-60 md:w-64 lg:w-72 flex-shrink-0 snap-start"
+                  className="category-card w-[calc(100vw-2rem)] sm:w-60 md:w-64 lg:w-72 flex-shrink-0 snap-start"
                 >
                   <ProductCard
                     product={product}

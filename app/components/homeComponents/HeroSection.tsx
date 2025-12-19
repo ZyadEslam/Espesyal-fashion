@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
-import { Copy, Check, 
+import {
+  Copy,
+  Check,
   // Sparkles
- } from "lucide-react";
+} from "lucide-react";
 import { cachedFetchJson } from "../../utils/cachedFetch";
 
 interface HeroContent {
@@ -87,109 +89,125 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-black via-black/90 to-black/80 ">
-      {/* Creative Background Patterns */}
+    <div className="relative overflow-hidden rounded-2xl md:rounded-3xl bg-gradient-to-br from-secondary-300 via-primary-500  to-secondary-300 shadow-2xl">
+      {/* Elegant Background Patterns */}
       <div className="absolute inset-0">
-        {/* Grid Pattern */}
-        {/* <div
-          className="absolute inset-0 opacity-[0.09]"
+        {/* Subtle Pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.08]"
           style={{
-            backgroundImage: `
-              linear-gradient(to right, white 1px, transparent 1px),
-              linear-gradient(to bottom, white 1px, transparent 1px)
-            `,
-            backgroundSize: "40px 40px",
+            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+            backgroundSize: "60px 60px",
           }}
-        /> */}
+        />
 
-        {/* Sparkle Icons - Defer animation to reduce initial render cost */}
-        {/* {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={`sparkle-${i}`}
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: [0, 1, 0],
-              scale: [0.5, 1, 0.5],
-              rotate: [0, 180, 360],
-            }}
-            transition={{
-              duration: 3 + i * 0.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.3 + 0.5, // Slight delay to prioritize content
-            }}
-            className={`absolute ${
-              i === 0
-                ? "top-1/4 right-1/4"
-                : i === 1
-                ? "top-1/2 left-1/4"
-                : i === 2
-                ? "bottom-1/3 right-1/3"
-                : i === 3
-                ? "top-1/3 left-1/2"
-                : i === 4
-                ? "bottom-1/4 left-1/3"
-                : "top-2/3 right-1/2"
-            } text-white/50`}
-          >
-            <Sparkles className="w-4 h-4 md:w-6 md:h-6" />
-          </motion.div>
-        ))} */}
+        {/* Floating Orbs for Depth */}
+        <motion.div
+          className="absolute top-0 right-0 w-96 h-96 bg-secondary-200/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-0 left-0 w-80 h-80 bg-primary-200/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
+          }}
+        />
+
+        {/* Elegant Curved Lines */}
+        <svg
+          className="absolute inset-0 w-full h-full opacity-20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M0,100 Q250,50 500,100 T1000,100"
+            stroke="white"
+            strokeWidth="2"
+            fill="none"
+            className="hidden md:block"
+          />
+          <path
+            d="M0,200 Q300,150 600,200 T1200,200"
+            stroke="white"
+            strokeWidth="2"
+            fill="none"
+            className="hidden md:block"
+          />
+        </svg>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center text-center py-6 px-4 md:py-8 md:px-8">
-        {/* Hero Badge */}
+      <div className="relative z-10 flex flex-col items-center text-center py-12 px-4 md:py-16 md:px-8 lg:py-20">
+        {/* Hero Badge with Elegant Styling */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-3 md:mb-4"
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="mb-4 md:mb-6"
         >
-          <span className="inline-flex items-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight uppercase drop-shadow-lg">
-            {heroBadge}
+          <span className="inline-flex items-center text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tight drop-shadow-2xl">
+            <span className="bg-primary-500/20 backdrop-blur-md px-6 py-2 md:px-8 md:py-3 rounded-full border border-primary-500/40 shadow-lg">
+              {heroBadge}
+            </span>
           </span>
         </motion.div>
 
-        {/* Main Heading */}
+        {/* Main Heading with Modern Typography */}
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-4 md:mb-6 leading-tight px-2 drop-shadow-md max-w-3xl"
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 md:mb-8 leading-relaxed px-4 drop-shadow-xl max-w-4xl"
+          style={{
+            textShadow: "0 2px 20px rgba(0,0,0,0.3)",
+          }}
         >
           {largestSale}
         </motion.h1>
 
-        {/* Promo Code Badge */}
+        {/* Promo Code Badge - Modern & Elegant */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="w-full max-w-md"
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+          className="w-full max-w-lg"
         >
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 md:gap-3 bg-white/95 backdrop-blur-sm px-4 md:px-6 py-2.5 md:py-3 rounded-full shadow-xl border-2 border-white/50">
-            <span className=" font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">
+          <div className="inline-flex flex-wrap items-center justify-center gap-3 md:gap-4 bg-white backdrop-blur-md px-6 md:px-8 py-4 md:py-5 rounded-2xl shadow-2xl border border-primary-500/40 hover:shadow-3xl transition-all duration-300">
+            <span className="font-semibold text-sm sm:text-base md:text-lg text-gray-800 whitespace-nowrap">
               {useCode}
             </span>
-            <div className="flex items-center gap-1 md:gap-2">
-              <code className=" text-black px-2 md:px-3 py-1 rounded-lg font-bold text-sm sm:text-base md:text-lg tracking-wider ">
+            <div className="flex items-center gap-2 md:gap-3">
+              <code className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-4 md:px-5 py-2 md:py-2.5 rounded-xl font-bold text-base sm:text-lg md:text-xl tracking-wider shadow-lg">
                 {promoCode}
               </code>
               <button
                 onClick={handleCopyCode}
-                className="p-1 md:p-1.5 hover:bg-primary-100 rounded-lg transition-colors"
+                className="p-2 md:p-2.5 hover:bg-primary-50 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
                 aria-label="Copy code"
                 title="Copy code"
               >
                 {copied ? (
-                  <Check className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
+                  <Check className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
                 ) : (
-                  <Copy className="w-4 h-4 md:w-5 md:h-5 text-black" />
+                  <Copy className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
                 )}
               </button>
             </div>
-            <span className=" font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">
+            <span className="font-semibold text-sm sm:text-base md:text-lg text-gray-800 whitespace-nowrap">
               {forDiscount}
             </span>
           </div>

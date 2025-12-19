@@ -22,7 +22,7 @@
   --color-primary-900: #331f0b; /* Darkest - for text on light bg */
 
   /* Primary default (uses 400) */
-  --color-primary: var(--color-primary-400);
+  --color-primary: var(--color-primary-500);
 
   /* Secondary Color System - #ad9452 (Olive Gold) */
   --color-secondary-50: #f5f2e8; /* Lightest - for backgrounds */
@@ -169,9 +169,9 @@ html {
     font-weight: 600;
     letter-spacing: 0.05em;
     background: linear-gradient(
-      135deg,
-      var(--color-primary) 0%,
-      var(--color-secondary) 100%
+      to right,
+      var(--color-primary-500) 0%,
+      var(--color-primary-400) 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -185,7 +185,7 @@ html {
     display: none;
   }
   .layout-shell {
-    @apply w-[95%] mx-auto sm:container sm:mx-auto sm:px-6 lg:px-8;
+    @apply w-[95%] mx-auto sm:container sm:mx-auto sm:px-6 lg:px-4;
   }
 
   .section-spacing {

@@ -58,7 +58,8 @@
     "menu": "Menu",
     "exitDashboard": "Exit Dashboard",
     "shoppingCart": "Shopping Cart",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "adminMode": "Admin Mode"
   },
   "shop": {
     "title": "Shop",
