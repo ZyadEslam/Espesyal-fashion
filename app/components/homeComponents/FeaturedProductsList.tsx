@@ -45,4 +45,3 @@ const FeaturedProductsList = () => {
 };
 
 export default FeaturedProductsList;
-React.memo(FeaturedProductCard);

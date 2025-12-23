@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { motion } from "framer-motion";
 import { assets } from "@/public/assets/assets";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -42,13 +41,7 @@ const NewCollectionsSection = () => {
     <section className="py-12 bg-background">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12">
           <div className="inline-flex items-center bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
             {t("newCollections")}
           </div>
@@ -59,17 +52,13 @@ const NewCollectionsSection = () => {
           <p className="text-foreground/70 text-base max-w-2xl mx-auto">
             {t("beFirstToDiscover")}
           </p>
-        </motion.div>
+        </div>
 
         {/* Collections Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {newCollections.map((collection, index) => (
-            <motion.div
+          {newCollections.map((collection) => (
+            <div
               key={collection.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
               className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300"
             >
               {/* Collection Image */}
@@ -120,18 +109,12 @@ const NewCollectionsSection = () => {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Featured Collection Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          viewport={{ once: true }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary  to-primary/70 shadow-2xl"
-        >
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary  to-primary/70 shadow-2xl">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/20 to-transparent"></div>
             <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-primary/30 to-transparent rounded-full blur-3xl"></div>
@@ -175,7 +158,7 @@ const NewCollectionsSection = () => {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

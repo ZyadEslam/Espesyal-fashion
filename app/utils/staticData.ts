@@ -1,27 +1,15 @@
 export const team = [
   {
-    name: "Taghreed Elsayed",
-    role: "Founder & CEO",
-    description: "Visionary leader with 10+ years in e-commerce",
-    image: "/espesyal/product6.jpg",
+    name: "Nada Mahdy",
+    role: "Founder & Owner",
+    description: "Visionary Leader & Products Designer",
+    image: "",
   },
   {
     name: "Taghreed Elsayed",
-    role: "CTO",
-    description: "Tech innovator passionate about user experience",
-    image: "/espesyal/product7.jpg",
-  },
-  {
-    name: "Taghreed Elsayed",
-    role: "Head of Design",
-    description: "Award-winning designer with an eye for detail",
-    image: "/espesyal/product8.jpg",
-  },
-  {
-    name: "Taghreed Elsayed",
-    role: "Customer Success",
-    description: "Dedicated to ensuring customer satisfaction",
-    image: "/espesyal/product9.jpg",
+    role: "Founder & Owner",
+    description: "Business Development & Customer Experience",
+    image: "",
   },
 ];
 

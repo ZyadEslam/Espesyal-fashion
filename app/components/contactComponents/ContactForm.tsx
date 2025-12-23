@@ -1,5 +1,4 @@
 "use client";
-import { motion } from "framer-motion";
 import React from "react";
 import { useTranslations } from "next-intl";
 
@@ -7,12 +6,7 @@ const ContactForm = () => {
   const t = useTranslations("contact.form");
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -50 }}
-      animate={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      className="bg-white p-8 rounded-lg shadow-sm"
-    >
+    <div className="bg-white p-8 rounded-lg shadow-sm">
       <h2 className="text-2xl font-semibold mb-6 underlined-header !after:mx-0">
         {t("title")}
       </h2>
@@ -59,15 +53,11 @@ const ContactForm = () => {
             placeholder={t("messagePlaceholder")}
           ></textarea>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full bg-orange text-white px-6 py-3 rounded-lg font-medium hover:bg-orange/90 transition-colors"
-        >
+        <button className="w-full bg-orange text-white px-6 py-3 rounded-lg font-medium hover:bg-orange/90 transition-colors">
           {t("submitButton")}
-        </motion.button>
+        </button>
       </form>
-    </motion.div>
+    </div>
   );
 };
 export default ContactForm;

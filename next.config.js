@@ -92,14 +92,6 @@ const nextConfig = {
                 priority: 40,
                 enforce: true,
               },
-              // Framer Motion - large library, separate chunk
-              framerMotion: {
-                name: "framer-motion",
-                test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
-                chunks: "all",
-                priority: 35,
-                enforce: true,
-              },
               // Next.js and Next.js related
               nextjs: {
                 name: "nextjs",
@@ -122,7 +114,7 @@ const nextConfig = {
                   return (
                     module.size() > 160000 &&
                     /node_modules[/\\]/.test(module.identifier()) &&
-                    !/[\\/]node_modules[\\/](react|react-dom|framer-motion|next|next-intl|next-auth|lucide-react|@stripe)[\\/]/.test(
+                    !/[\\/]node_modules[\\/](react|react-dom|next|next-intl|next-auth|lucide-react|@stripe)[\\/]/.test(
                       module.identifier()
                     )
                   );
@@ -226,7 +218,7 @@ const nextConfig = {
   generateEtags: true,
   swcMinify: true, // Use SWC for minification (faster and better)
   experimental: {
-    optimizePackageImports: ["framer-motion", "lucide-react"],
+    optimizePackageImports: ["lucide-react"],
     instrumentationHook: true,
   },
   headers: async () => {

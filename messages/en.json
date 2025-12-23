@@ -291,6 +291,7 @@
     "followUsForOffers": "Follow Us for",
     "exclusiveOffers": "Exclusive Offers",
     "joinSocialMedia": "Join our social media community and be the first to discover exclusive products, special discounts, and behind-the-scenes content.",
+    "followUsOn": "Follow us on",
     "exclusiveAccess": "Exclusive Access",
     "firstAccess": "First access to new collections",
     "specialDiscounts": "Special Discounts",
@@ -343,7 +344,7 @@
       "button": "Contact Us",
       "instagram": "Instagram",
       "facebook": "Facebook",
-      "whatsapp": "WhatsApp",
+      "tiktok": "TikTok",
       "followUsOn": "Follow us on"
     }
   },

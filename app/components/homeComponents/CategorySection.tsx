@@ -1,7 +1,6 @@
 "use client";
 import React, { useRef } from "react";
-import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import {
   ArrowLeftIcon,
@@ -11,7 +10,6 @@ import {
 } from "lucide-react";
 import { ProductCardProps } from "../../types/types";
 import ProductCard from "../productComponents/ProductCard";
-import { useLocale } from "next-intl";
 
 interface CategorySectionProps {
   categoryName: string;
@@ -64,28 +62,19 @@ const CategorySection: React.FC<CategorySectionProps> = ({
     <section className="section-spacing">
       <div className="layout-shell">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
+        <div
           className={`mb-8 flex flex-row lg:flex-row justify-between lg:items-center ${
             isArabic ? "text-right sm:text-right" : "text-left sm:text-left"
           }`}
         >
-          <h2 className="text-2xl uppercase lg:text-3xl font-bold text-foreground mb-4">
+          <h2 className="text-2xl uppercase lg:text-3xl font-bold text-gray-800 mb-4">
             {categoryName}
           </h2>
           {/* View All Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            viewport={{ once: true }}
-          >
+          <div>
             <Link
               href={`/${locale}/shop?category=${categorySlug}`}
-              className={`inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-all duration-300 hover:text-primary ${
+              className={`inline-flex items-center gap-2 text-sm font-semibold text-gray-800 transition-all duration-300 hover:text-primary ${
                 isArabic ? "flex-row-reverse" : ""
               }`}
             >
@@ -96,8 +85,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                 <ArrowRightIcon className="w-6 h-6 bg-gray-200 rounded-full p-1" />
               )}
             </Link>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* Scrollable Carousel */}
         <div className="relative">
@@ -115,12 +104,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           >
             <div className="flex gap-4 sm:gap-6 min-w-max">
               {products.map((product, index) => (
-                <motion.div
+                <div
                   key={product._id}
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.05 }}
-                  viewport={{ once: true }}
                   className="category-card w-[calc(100vw-2rem)] sm:w-60 md:w-64 lg:w-72 flex-shrink-0 snap-start"
                 >
                   <ProductCard
@@ -128,7 +113,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                     isLCP={isFirstCategory && index === 0} // First product in first category is LCP candidate
                     isAboveFold={isFirstCategory && index < 3} // First 3 products in first category are above the fold
                   />
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>

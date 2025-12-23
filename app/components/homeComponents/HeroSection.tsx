@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import {
   Copy,
@@ -89,7 +88,7 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl md:rounded-3xl bg-gradient-to-br from-secondary-300 via-primary-500  to-secondary-300 shadow-2xl">
+    <div className="relative overflow-hidden rounded-sm md:rounded-md bg-gradient-to-br from-secondary-300 via-primary-500  to-secondary-300 shadow-2xl">
       {/* Elegant Background Patterns */}
       <div className="absolute inset-0">
         {/* Subtle Pattern */}
@@ -102,31 +101,8 @@ const HeroSection = () => {
         />
 
         {/* Floating Orbs for Depth */}
-        <motion.div
-          className="absolute top-0 right-0 w-96 h-96 bg-secondary-200/20 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-0 left-0 w-80 h-80 bg-primary-200/20 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-        />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-secondary-200/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-primary-200/20 rounded-full blur-3xl" />
 
         {/* Elegant Curved Lines */}
         <svg
@@ -153,39 +129,26 @@ const HeroSection = () => {
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center text-center py-12 px-4 md:py-16 md:px-8 lg:py-20">
         {/* Hero Badge with Elegant Styling */}
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="mb-4 md:mb-6"
-        >
+        <div className="mb-4 md:mb-6">
           <span className="inline-flex items-center text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tight drop-shadow-2xl">
             <span className="bg-primary-500/20 backdrop-blur-md px-6 py-2 md:px-8 md:py-3 rounded-full border border-primary-500/40 shadow-lg">
               {heroBadge}
             </span>
           </span>
-        </motion.div>
+        </div>
 
         {/* Main Heading with Modern Typography */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+        <h1
           className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 md:mb-8 leading-relaxed px-4 drop-shadow-xl max-w-4xl"
           style={{
             textShadow: "0 2px 20px rgba(0,0,0,0.3)",
           }}
         >
           {largestSale}
-        </motion.h1>
+        </h1>
 
         {/* Promo Code Badge - Modern & Elegant */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-          className="w-full max-w-lg"
-        >
+        <div className="w-full max-w-lg">
           <div className="inline-flex flex-wrap items-center justify-center gap-3 md:gap-4 bg-white backdrop-blur-md px-6 md:px-8 py-4 md:py-5 rounded-2xl shadow-2xl border border-primary-500/40 hover:shadow-3xl transition-all duration-300">
             <span className="font-semibold text-sm sm:text-base md:text-lg text-gray-800 whitespace-nowrap">
               {useCode}
@@ -211,7 +174,7 @@ const HeroSection = () => {
               {forDiscount}
             </span>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

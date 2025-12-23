@@ -1,5 +1,4 @@
 "use client";
-import { motion } from "framer-motion";
 import React from "react";
 import { useTranslations } from "next-intl";
 import LocationMap from "./LocationMap";
@@ -8,12 +7,7 @@ const ContactInfo = () => {
   const t = useTranslations("contact.info");
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 50 }}
-      animate={{ opacity: 1, x: 0 }}
-      viewport={{ once: true }}
-      className="space-y-8"
-    >
+    <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-semibold mb-6 underlined-header">
           {t("title")}
@@ -96,7 +90,7 @@ const ContactInfo = () => {
       <div className="h-[300px] rounded-lg overflow-hidden">
         <LocationMap />
       </div>
-    </motion.div>
+    </div>
   );
 };
 

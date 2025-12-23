@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { motion } from "framer-motion";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -9,25 +8,15 @@ const HeroSection = () => {
 
   return (
     <section className="relative h-[60vh] flex items-center justify-center bg-gradient-to-r from-gray-50 to-gray-100 overflow-hidden">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8 }}
-        className="container mx-auto px-4 text-center relative z-10"
-      >
+      <div className="container mx-auto px-4 text-center relative z-10">
         <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
-          <motion.span className="text-orange">{t("title")}</motion.span>
+          <span className="text-orange">{t("title")}</span>
         </h1>
         <p className="text-lg md:text-xl text-gray-100 max-w-2xl mx-auto">
           {t("subtitle")}
         </p>
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.9 }}
-        transition={{ duration: 1, delay: 0.5 }}
-        className="absolute inset-0"
-      >
+      </div>
+      <div className="absolute inset-0 opacity-90">
         <Image
           src="/espesyal/product5.jpg"
           alt="About Us - Background"
@@ -35,7 +24,7 @@ const HeroSection = () => {
           className="w-full h-full object-cover"
           priority
         />
-      </motion.div>
+      </div>
     </section>
   );
 };

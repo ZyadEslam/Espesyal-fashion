@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, XCircle, ShoppingCart } from "lucide-react";
 
 interface toastProps {
@@ -47,63 +46,55 @@ const Toast = ({
   if (!isVisible) return null;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: 50, scale: 0.9 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.9 }}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-          duration: 0.3,
-        }}
-        className={`fixed bottom-6 right-6 z-[9999] min-w-[280px] max-w-[400px] rounded-xl shadow-2xl overflow-hidden ${
-          isSuccess
-            ? "bg-gradient-to-r from-green-500 to-green-600"
-            : "bg-gradient-to-r from-red-500 to-red-600"
-        }`}
-      >
-        <div className="flex items-center gap-3 px-4 py-3.5">
-          {/* Icon */}
-          <div className="flex-shrink-0">
-            {isSuccess ? (
-              isAdded ? (
-                <ShoppingCart className="w-5 h-5 text-white" />
-              ) : (
-                <CheckCircle2 className="w-5 h-5 text-white" />
-              )
+    <div
+      className={`fixed bottom-6 right-6 z-[9999] min-w-[280px] max-w-[400px] rounded-xl shadow-2xl overflow-hidden ${
+        isSuccess
+          ? "bg-gradient-to-r from-green-500 to-green-600"
+          : "bg-gradient-to-r from-red-500 to-red-600"
+      }`}
+    >
+      <div className="flex items-center gap-3 px-4 py-3.5">
+        {/* Icon */}
+        <div className="flex-shrink-0">
+          {isSuccess ? (
+            isAdded ? (
+              <ShoppingCart className="w-5 h-5 text-white" />
             ) : (
-              <XCircle className="w-5 h-5 text-white" />
-            )}
-          </div>
-
-          {/* Message */}
-          <p className="flex-1 text-white font-medium text-sm sm:text-base leading-tight">
-            {message}
-          </p>
-
-          {/* Close Button */}
-          <button
-            onClick={handleDismiss}
-            className="flex-shrink-0 p-1 rounded-lg hover:bg-white/20 transition-colors"
-            aria-label="Close notification"
-          >
-            <XCircle className="w-4 h-4 text-white opacity-80 hover:opacity-100" />
-          </button>
+              <CheckCircle2 className="w-5 h-5 text-white" />
+            )
+          ) : (
+            <XCircle className="w-5 h-5 text-white" />
+          )}
         </div>
 
-        {/* Progress Bar */}
-        {autoHide && (
-          <motion.div
-            initial={{ width: "100%" }}
-            animate={{ width: "0%" }}
-            transition={{ duration: duration / 1000, ease: "linear" }}
-            className="h-1 bg-white/30"
+        {/* Message */}
+        <p className="flex-1 text-white font-medium text-sm sm:text-base leading-tight">
+          {message}
+        </p>
+
+        {/* Close Button */}
+        <button
+          onClick={handleDismiss}
+          className="flex-shrink-0 p-1 rounded-lg hover:bg-white/20 transition-colors"
+          aria-label="Close notification"
+        >
+          <XCircle className="w-4 h-4 text-white opacity-80 hover:opacity-100" />
+        </button>
+      </div>
+
+      {/* Progress Bar */}
+      {autoHide && (
+        <div className="h-1 bg-white/30" style={{ width: "100%" }}>
+          <div
+            className="h-full bg-white/50 transition-all ease-linear"
+            style={{
+              width: "0%",
+              animation: `shrink ${duration}ms linear forwards`,
+            }}
           />
-        )}
-      </motion.div>
-    </AnimatePresence>
+        </div>
+      )}
+    </div>
   );
 };
 

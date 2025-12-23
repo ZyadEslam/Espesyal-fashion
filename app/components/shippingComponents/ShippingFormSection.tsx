@@ -1,6 +1,5 @@
 "use client";
 import React, { useRef, useEffect, useActionState } from "react";
-import { motion } from "framer-motion";
 import { shippingFormAction } from "@/app/utils/actions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -74,11 +73,7 @@ const ShippingFormComponent = () => {
         message={t("creatingAddress")}
         icon={<LocationEdit />}
       />
-      <motion.div
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-      >
+      <div>
         <form
           ref={formRef}
           action={formAction}
@@ -179,7 +174,7 @@ const ShippingFormComponent = () => {
 
           <SubmitButton />
         </form>
-      </motion.div>
+      </div>
     </>
   );
 };

@@ -5,7 +5,7 @@ import LoadingSpinner from "../../UI/LoadingSpinner";
 import { generateMetadata as generateSEOMetadata } from "../../utils/seo";
 import { Breadcrumb } from "../../components/seo/SEOComponents";
 
-// Lazy load components that use framer-motion for better code splitting
+// Lazy load components for better code splitting
 const MissionSection = lazy(() => import("../../components/aboutComponents/MissionSection"));
 const ValuesSection = lazy(() => import("../../components/aboutComponents/ValuesSection"));
 const TeamSection = lazy(() => import("../../components/aboutComponents/TeamSection"));

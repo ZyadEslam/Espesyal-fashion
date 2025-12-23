@@ -1,10 +1,9 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import { StaticImageData } from "next/image";
+import type { StaticImageData } from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 
 interface FeaturedProductProps {
   title: string;
@@ -28,13 +27,7 @@ const FeaturedProductCard = ({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6 }}
-      className="group relative md:w-[28%] sm:w-[100%] h-[400px] overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 bg-white border border-gray-100 hover:border-orange/20"
-    >
+    <div className="group relative md:w-[28%] sm:w-[100%] h-[400px] overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 bg-white border border-gray-100 hover:border-orange/20">
       <Link href="/shop" className="block h-full">
         {/* Image Container */}
         <div className="relative w-full h-full">
@@ -57,13 +50,7 @@ const FeaturedProductCard = ({
 
         {/* Content Overlay */}
         <div className="absolute inset-0 flex flex-col justify-end p-6">
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="transform transition-transform duration-300 group-hover:-translate-y-2"
-          >
+          <div className="transform transition-transform duration-300 group-hover:-translate-y-2">
             {/* Title */}
             <h3 className="text-white text-2xl font-semibold mb-2 leading-tight group-hover:text-orange transition-colors duration-300">
               {title}
@@ -75,22 +62,20 @@ const FeaturedProductCard = ({
             </p>
 
             {/* Button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={handleExploreClick}
               className="bg-orange text-white px-6 py-2.5 rounded-full font-medium hover:bg-orange/90 transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm border border-orange/20"
               suppressHydrationWarning
             >
               Explore more
-            </motion.button>
-          </motion.div>
+            </button>
+          </div>
         </div>
 
         {/* Hover Effect Border */}
         <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-orange/30 transition-all duration-300 pointer-events-none"></div>
       </Link>
-    </motion.div>
+    </div>
   );
 };
 

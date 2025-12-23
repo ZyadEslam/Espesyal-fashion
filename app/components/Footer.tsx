@@ -53,10 +53,10 @@ const Footer = () => {
                 <Phone className="w-4 h-4 text-orange" />
               </div>
               <a
-                href="tel:+201040431147"
+                href="tel:+201080972324"
                 className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base"
               >
-                +201040431147
+                +201080972324
               </a>
             </div>
 
@@ -66,10 +66,10 @@ const Footer = () => {
                 <Mail className="w-4 h-4 text-orange" />
               </div>
               <a
-                href="mailto:zyadelbehiry@gmail.com"
+                href="mailto:espesyaleg@gmail.com"
                 className="text-gray-700 hover:text-orange transition-colors text-sm sm:text-base break-all"
               >
-                zyadelbehiry@gmail.com
+                espesyaleg@gmail.com
               </a>
             </div>
           </div>
