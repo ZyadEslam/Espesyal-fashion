@@ -56,10 +56,17 @@ const DashboardPage = memo(() => {
   );
 
   const removeImageHandler = useCallback((imageKey: string) => {
-    setImages((prev) => ({
-      ...prev,
-      [imageKey]: assets.upload_area,
-    }));
+    setImages((prev) => {
+      // Clean up blob URL before removing to prevent memory leaks
+      const currentImage = prev[imageKey as keyof ImageState];
+      if (typeof currentImage === "string" && currentImage.startsWith("blob:")) {
+        URL.revokeObjectURL(currentImage);
+      }
+      return {
+        ...prev,
+        [imageKey]: assets.upload_area,
+      };
+    });
   }, []);
 
   const serializedVariants = useMemo(
@@ -77,12 +84,19 @@ const DashboardPage = memo(() => {
   );
 
   const handleFormReset = useCallback(() => {
-    // Reset images to default
-    setImages({
-      image1: assets.upload_area,
-      image2: assets.upload_area,
-      image3: assets.upload_area,
-      image4: assets.upload_area,
+    // Clean up any blob URLs before resetting
+    setImages((prev) => {
+      Object.values(prev).forEach((image) => {
+        if (typeof image === "string" && image.startsWith("blob:")) {
+          URL.revokeObjectURL(image);
+        }
+      });
+      return {
+        image1: assets.upload_area,
+        image2: assets.upload_area,
+        image3: assets.upload_area,
+        image4: assets.upload_area,
+      };
     });
     // Reset variants to one empty row
     setVariants([createVariantRow()]);

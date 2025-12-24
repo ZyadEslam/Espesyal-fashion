@@ -192,6 +192,15 @@ const nextConfig = {
       })
     );
 
+    // Ignore framer-motion if not installed - prevents HMR errors in Turbopack
+    if (!checkPackage("framer-motion")) {
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^framer-motion$/,
+        })
+      );
+    }
+
     // Mark redis as external for server-side only (it's only used in API routes)
     if (isServer) {
       config.externals = config.externals || [];
@@ -257,7 +266,7 @@ const nextConfig = {
                 {
                   key: "Content-Security-Policy",
                   value:
-                    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.stripe.com; frame-src https://js.stripe.com;",
+                    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.stripe.com; frame-src https://js.stripe.com;",
                 },
               ]
             : []),

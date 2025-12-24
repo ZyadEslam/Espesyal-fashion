@@ -169,7 +169,8 @@ const UserNav = memo(() => {
               <div className="flex-1 flex justify-center">
                 <Link
                   href={getLocalizedPath("/")}
-                  className="flex items-center space-x-2 sm:space-x-3 group"
+                  className="flex flex-row items-center space-x-2 sm:space-x-3 group"
+                  dir="ltr"
                 >
                   <div className="relative">
                     <Image

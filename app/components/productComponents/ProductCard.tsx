@@ -55,15 +55,41 @@ const ProductCard = memo(
       setImageError(true);
     }, []);
 
+    // Calculate discount percentage
+    const discountPercentage = useMemo(() => {
+      if (product.discount) {
+        // If discount is provided as a string (e.g., "25")
+        const discount = parseFloat(product.discount);
+        return isNaN(discount) ? null : discount;
+      }
+      if (product.oldPrice && product.oldPrice > product.price) {
+        // Calculate discount from oldPrice and current price
+        const discount =
+          ((product.oldPrice - product.price) / product.oldPrice) * 100;
+        return Math.round(discount);
+      }
+      return null;
+    }, [product.discount, product.oldPrice, product.price]);
+
+    const hasDiscount = discountPercentage !== null && discountPercentage > 0;
+
     return (
-      <div className="group relative bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden ">
+      <div className="group relative bg-white rounded-2xl transition-all duration-300 overflow-hidden h-full flex flex-col">
         {/* Product Link */}
-        <Link href={`/product/${product._id}`} className="block">
+        <Link href={`/product/${product._id}`} className="h-full flex flex-col">
           {/* Product Image Container */}
           <div
-            className="relative bg-secondaryLight rounded-t-2xl flex items-center justify-center overflow-hidden"
+            className="relative bg-secondaryLight rounded-t-2xl flex items-center justify-center overflow-hidden flex-shrink-0"
             style={{ aspectRatio: "1 / 1" }}
           >
+            {/* Discount Badge */}
+            {hasDiscount && (
+              <div className="absolute top-2 right-0 z-10 bg-primary text-white px-2 py-1 rounded-md shadow-lg flex items-center justify-center">
+                <span className="text-xs font-bold">
+                  -{discountPercentage}%
+                </span>
+              </div>
+            )}
             {imageSrc && !imageError ? (
               isLCP || isAboveFold ? (
                 // Render LCP and above-fold images directly without lazy loading
@@ -112,23 +138,30 @@ const ProductCard = memo(
           </div>
 
           {/* Product Details */}
-          <div className="p-4 space-y-3">
+          <div className="p-4 space-y-3 flex-1 flex flex-col">
             {/* Product Name */}
             <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 group-hover:text-orange transition-colors duration-200">
               {product.name}
             </h3>
 
             {/* Product Description */}
-            <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
+            <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed flex-shrink-0">
               {product.description}
             </p>
 
             {/* Price */}
-            <div className="flex items-center justify-start pt-2">
-              <div className="flex flex-col">
-                <span className="font-bold text-lg text-gray-900">
-                  {product.price} {t("currency")}
-                </span>
+            <div className="flex items-center justify-start pt-2 mt-auto">
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-lg text-gray-900">
+                    {product.price} {t("currency")}
+                  </span>
+                  {product.oldPrice && product.oldPrice > product.price && (
+                    <span className="text-sm text-gray-500 line-through">
+                      {product.oldPrice} {t("currency")}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -88,95 +88,92 @@ const HeroSection = () => {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-sm md:rounded-md bg-gradient-to-br from-secondary-300 via-primary-500  to-secondary-300 shadow-2xl">
-      {/* Elegant Background Patterns */}
-      <div className="absolute inset-0">
-        {/* Subtle Pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-            backgroundSize: "60px 60px",
-          }}
-        />
+    <section className="relative overflow-hidden h-[70vh]  bg-gradient-to-br from-[#0F2027] via-[#203A43] to-[#2c5364] rounded-lg md:rounded-xl shadow-2xl">
+      {/* Pattern Background Image */}
+      <div
+        className="absolute inset-0 opacity-80"
+        style={{
+          backgroundImage: `url('/espesyal/orange-grunge-twisting-pattern.png')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
 
-        {/* Floating Orbs for Depth */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-secondary-200/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-primary-200/20 rounded-full blur-3xl" />
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/50 to-black/70"></div>
 
-        {/* Elegant Curved Lines */}
-        <svg
-          className="absolute inset-0 w-full h-full opacity-20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M0,100 Q250,50 500,100 T1000,100"
-            stroke="white"
-            strokeWidth="2"
-            fill="none"
-            className="hidden md:block"
-          />
-          <path
-            d="M0,200 Q300,150 600,200 T1200,200"
-            stroke="white"
-            strokeWidth="2"
-            fill="none"
-            className="hidden md:block"
-          />
-        </svg>
-      </div>
+      {/* Content Container */}
+      <div className="relative z-10 h-full container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="h-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 py-12 md:py-16">
+          {/* Left Side - Badge & Heading */}
+          <div className="flex-1 flex flex-col justify-center items-start space-y-6 md:space-y-8 animate-fade-in">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-gradient-to-r from-primary-500/20 to-primary-600/20 backdrop-blur-md rounded-full border border-primary-400/30 shadow-xl">
+              <div className="relative">
+                <span className="absolute inset-0 bg-primary-400 rounded-full blur-md opacity-60 animate-pulse"></span>
+                <span className="relative w-2.5 h-2.5 bg-primary-400 rounded-full"></span>
+              </div>
+              <span className="text-sm md:text-base font-bold text-white tracking-wider uppercase">
+                {heroBadge}
+              </span>
+            </div>
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center text-center py-12 px-4 md:py-16 md:px-8 lg:py-20">
-        {/* Hero Badge with Elegant Styling */}
-        <div className="mb-4 md:mb-6">
-          <span className="inline-flex items-center text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tight drop-shadow-2xl">
-            <span className="bg-primary-500/20 backdrop-blur-md px-6 py-2 md:px-8 md:py-3 rounded-full border border-primary-500/40 shadow-lg">
-              {heroBadge}
-            </span>
-          </span>
-        </div>
+            {/* Main Heading */}
+            <div className="space-y-4">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] max-w-2xl">
+                <span className="block bg-gradient-to-r from-white via-white to-primary-200 bg-clip-text text-transparent">
+                  {largestSale}
+                </span>
+              </h1>
+              <div className="flex items-center gap-3">
+                <div className="h-1 w-16 bg-gradient-to-r from-primary-400 to-transparent rounded-full"></div>
+                <div className="h-2 w-2 bg-primary-400 rounded-full shadow-lg shadow-primary-400/50"></div>
+                <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary-400/50 to-transparent rounded-full"></div>
+              </div>
+            </div>
+             {/* Right Side - Promo Code */}
+          <div className="flex-shrink-0 w-full md:w-auto animate-fade-in-up-delay">
+            <div className="inline-flex items-center gap-3 px-4 py-3  backdrop-blur-md rounded-full border border-white/20 shadow-lg">
+              {/* Text */}
+              <div className="flex items-center gap-2">
+                <span className="text-white text-sm md:text-base font-medium whitespace-nowrap">
+                  {useCode}
+                </span>
+                <span className="text-white text-xs md:text-sm whitespace-nowrap">
+                  {forDiscount}
+                </span>
+              </div>
 
-        {/* Main Heading with Modern Typography */}
-        <h1
-          className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 md:mb-8 leading-relaxed px-4 drop-shadow-xl max-w-4xl"
-          style={{
-            textShadow: "0 2px 20px rgba(0,0,0,0.3)",
-          }}
-        >
-          {largestSale}
-        </h1>
+              {/* Divider */}
+              <div className="h-6 w-px bg-white"></div>
 
-        {/* Promo Code Badge - Modern & Elegant */}
-        <div className="w-full max-w-lg">
-          <div className="inline-flex flex-wrap items-center justify-center gap-3 md:gap-4 bg-white backdrop-blur-md px-6 md:px-8 py-4 md:py-5 rounded-2xl shadow-2xl border border-primary-500/40 hover:shadow-3xl transition-all duration-300">
-            <span className="font-semibold text-sm sm:text-base md:text-lg text-gray-800 whitespace-nowrap">
-              {useCode}
-            </span>
-            <div className="flex items-center gap-2 md:gap-3">
-              <code className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-4 md:px-5 py-2 md:py-2.5 rounded-xl font-bold text-base sm:text-lg md:text-xl tracking-wider shadow-lg">
+              {/* Code */}
+              <code className="px-3 py-1.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-lg md:text-xl font-bold tracking-wider rounded-lg">
                 {promoCode}
               </code>
+
+              {/* Copy Button */}
               <button
                 onClick={handleCopyCode}
-                className="p-2 md:p-2.5 hover:bg-primary-50 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
-                aria-label="Copy code"
+                className="p-2 hover:bg-white rounded-lg transition-all duration-200 hover:scale-110 active:scale-95"
+                aria-label="Copy promo code"
                 title="Copy code"
               >
                 {copied ? (
-                  <Check className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
+                  <Check className="w-4 h-4 md:w-5 md:h-5 text-green-300" />
                 ) : (
-                  <Copy className="w-5 h-5 md:w-6 md:h-6 text-gray-800" />
+                  <Copy className="w-4 h-4 md:w-5 md:h-5 text-white  transition-colors" />
                 )}
               </button>
             </div>
-            <span className="font-semibold text-sm sm:text-base md:text-lg text-gray-800 whitespace-nowrap">
-              {forDiscount}
-            </span>
           </div>
+          </div>
+
+         
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

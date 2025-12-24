@@ -30,7 +30,8 @@ const Footer = () => {
             {/* Logo with Brand Name */}
             <Link
               href={getLocalizedPath("/")}
-              className="inline-flex items-center space-x-2 group"
+              className="inline-flex flex-row items-center space-x-2 group"
+              dir="ltr"
             >
               <Image
                 src={assets.espesialLogo}
