@@ -74,7 +74,7 @@ const ProductCard = memo(
     const hasDiscount = discountPercentage !== null && discountPercentage > 0;
 
     return (
-      <div className="group relative bg-white rounded-2xl transition-all duration-300 overflow-hidden h-full flex flex-col">
+      <div className="group relative bg-white rounded-2xl transition-all duration-300 overflow-hidden h-full flex flex-col mb-2 sm:mb-4">
         {/* Product Link */}
         <Link href={`/product/${product._id}`} className="h-full flex flex-col">
           {/* Product Image Container */}
@@ -82,12 +82,32 @@ const ProductCard = memo(
             className="relative bg-secondaryLight rounded-t-2xl flex items-center justify-center overflow-hidden flex-shrink-0"
             style={{ aspectRatio: "1 / 1" }}
           >
-            {/* Discount Badge */}
+            {/* Discount Badge - Modern Tag Style */}
             {hasDiscount && (
-              <div className="absolute top-2 right-0 z-10 bg-primary text-white px-2 py-1 rounded-md shadow-lg flex items-center justify-center">
-                <span className="text-xs font-bold">
-                  -{discountPercentage}%
-                </span>
+              <div className="absolute top-0 -right-1 sm:top-0 sm:-right-1.5 z-10">
+                <div className="relative flex items-center">
+                  {/* Tag body */}
+                  <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 pl-2 pr-3 sm:pl-2.5 sm:pr-4 py-1 sm:py-1.5  rounded-bl-full shadow-lg">
+                    {/* Inner highlight */}
+                    <div className="absolute inset-0 rounded-l-full bg-gradient-to-b from-white/20 to-transparent" />
+                    {/* Text */}
+                    <div className="relative flex items-center gap-0.5">
+                      <span className="text-white/90 text-[10px] sm:text-xs font-bold">
+                        -
+                      </span>
+                      <span className="text-white text-xs sm:text-sm font-black tracking-tight">
+                        {discountPercentage}
+                      </span>
+                      <span className="text-white/90 text-[10px] sm:text-xs font-bold">
+                        %
+                      </span>
+                    </div>
+                  </div>
+                  {/* Arrow point */}
+                  {/* <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-gradient-to-br from-primary-500 to-primary-700 rotate-45 shadow-sm" /> */}
+                  {/* Tag hole */}
+                  {/* <div className="absolute left-0.5 sm:left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white/90 rounded-full shadow-inner" /> */}
+                </div>
               </div>
             )}
             {imageSrc && !imageError ? (
@@ -138,26 +158,26 @@ const ProductCard = memo(
           </div>
 
           {/* Product Details */}
-          <div className="p-4 space-y-3 flex-1 flex flex-col">
+          <div className="p-2 sm:p-4 space-y-1.5 sm:space-y-3 flex-1 flex flex-col">
             {/* Product Name */}
-            <h3 className="font-semibold text-gray-900 text-sm leading-tight line-clamp-2 group-hover:text-orange transition-colors duration-200">
+            <h3 className="font-semibold text-gray-900 text-xs sm:text-sm leading-tight line-clamp-2 group-hover:text-orange transition-colors duration-200">
               {product.name}
             </h3>
 
             {/* Product Description */}
-            <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed flex-shrink-0">
+            <p className="text-[10px] sm:text-xs text-gray-500 line-clamp-2 leading-relaxed flex-shrink-0 hidden sm:block">
               {product.description}
             </p>
 
             {/* Price */}
-            <div className="flex items-center justify-start pt-2 mt-auto">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-lg text-gray-900">
+            <div className="flex items-center justify-start pt-1 sm:pt-2 mt-auto">
+              <div className="flex flex-col gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                  <span className="font-bold text-sm sm:text-lg text-gray-900">
                     {product.price} {t("currency")}
                   </span>
                   {product.oldPrice && product.oldPrice > product.price && (
-                    <span className="text-sm text-gray-500 line-through">
+                    <span className="text-[10px] sm:text-sm text-gray-500 line-through">
                       {product.oldPrice} {t("currency")}
                     </span>
                   )}

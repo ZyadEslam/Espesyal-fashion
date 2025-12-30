@@ -1,8 +1,105 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import Product from "@/app/models/product";
 import connectDB from "@/app/utils/db";
 import sharp from "sharp";
 import { createHash } from "crypto";
+
+// ============================================================================
+// IN-MEMORY LRU CACHE FOR PROCESSED IMAGES
+// ============================================================================
+// This significantly reduces database load and improves response times
+// by caching already-processed images in memory.
+
+interface CacheEntry {
+  buffer: Buffer;
+  contentType: string;
+  etag: string;
+  timestamp: number;
+}
+
+class ImageCache {
+  private cache = new Map<string, CacheEntry>();
+  private maxSize: number;
+  private maxAge: number; // milliseconds
+
+  constructor(maxSize = 100, maxAgeMinutes = 30) {
+    this.maxSize = maxSize;
+    this.maxAge = maxAgeMinutes * 60 * 1000;
+  }
+
+  private generateKey(
+    id: string,
+    index: number,
+    width: number | null,
+    height: number | null,
+    quality: number,
+    format: string
+  ): string {
+    return `${id}-${index}-${width || "auto"}-${height || "auto"}-${quality}-${format}`;
+  }
+
+  get(
+    id: string,
+    index: number,
+    width: number | null,
+    height: number | null,
+    quality: number,
+    format: string
+  ): CacheEntry | null {
+    const key = this.generateKey(id, index, width, height, quality, format);
+    const entry = this.cache.get(key);
+
+    if (!entry) return null;
+
+    // Check if entry has expired
+    if (Date.now() - entry.timestamp > this.maxAge) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return entry;
+  }
+
+  set(
+    id: string,
+    index: number,
+    width: number | null,
+    height: number | null,
+    quality: number,
+    format: string,
+    buffer: Buffer,
+    contentType: string,
+    etag: string
+  ): void {
+    const key = this.generateKey(id, index, width, height, quality, format);
+
+    // Evict oldest entries if cache is full
+    if (this.cache.size >= this.maxSize) {
+      const oldestKey = this.cache.keys().next().value;
+      if (oldestKey) this.cache.delete(oldestKey);
+    }
+
+    this.cache.set(key, {
+      buffer,
+      contentType,
+      etag,
+      timestamp: Date.now(),
+    });
+  }
+
+  // Clear cache for a specific product (useful when product images are updated)
+  invalidateProduct(id: string): void {
+    for (const key of this.cache.keys()) {
+      if (key.startsWith(`${id}-`)) {
+        this.cache.delete(key);
+      }
+    }
+  }
+}
+
+// Singleton cache instance - persists across requests in serverless environment
+const imageCache = new ImageCache(200, 60); // 200 images, 60 minutes TTL
 
 export async function GET(
   request: NextRequest,
@@ -45,26 +142,73 @@ export async function GET(
       return new NextResponse("Invalid product ID", { status: 400 });
     }
 
-    const product = await Product.findById(id);
+    // Check in-memory cache first
+    const cachedImage = imageCache.get(
+      id,
+      imageIndex,
+      width,
+      height,
+      quality,
+      outputFormat
+    );
+    if (cachedImage) {
+      // Check if client has cached version
+      const ifNoneMatch = request.headers.get("if-none-match");
+      if (ifNoneMatch === `"${cachedImage.etag}"`) {
+        return new NextResponse(null, {
+          status: 304,
+          headers: {
+            ETag: `"${cachedImage.etag}"`,
+            "Cache-Control": "public, max-age=31536000, immutable",
+          },
+        });
+      }
+
+      return new NextResponse(cachedImage.buffer, {
+        headers: {
+          "Content-Type": cachedImage.contentType,
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "Content-Length": cachedImage.buffer.length.toString(),
+          ETag: `"${cachedImage.etag}"`,
+          Vary: "Accept",
+          "X-Cache": "HIT", // Indicates cache hit for debugging
+        },
+      });
+    }
+
+    // Use aggregation to fetch ONLY the specific image we need, not the entire document
+    // This is a MAJOR optimization - avoids loading all images into memory
+    const result = await Product.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      {
+        $project: {
+          _id: 1,
+          imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+          image: { $arrayElemAt: ["$imgSrc", imageIndex] },
+        },
+      },
+    ]);
+
+    const product = result[0];
 
     if (!product) {
       console.error(`Product not found with ID: ${id}`);
       return new NextResponse("Product not found", { status: 404 });
     }
 
-    if (!product.imgSrc || product.imgSrc.length === 0) {
+    if (product.imageCount === 0) {
       console.error(`No images found for product ${id}`);
       return new NextResponse("No images found", { status: 404 });
     }
 
-    if (imageIndex >= product.imgSrc.length || imageIndex < 0) {
+    if (imageIndex >= product.imageCount || imageIndex < 0) {
       console.error(
-        `Image index ${imageIndex} out of bounds for product ${id}`
+        `Image index ${imageIndex} out of bounds for product ${id} (has ${product.imageCount} images)`
       );
       return new NextResponse("Image index out of bounds", { status: 404 });
     }
 
-    const imageData = product.imgSrc[imageIndex];
+    const imageData = product.image;
 
     // Check if the image data is valid (not empty)
     if (!imageData || imageData === "") {
@@ -242,6 +386,19 @@ export async function GET(
       // Generate ETag for caching
       const etag = createHash("md5").update(optimizedBuffer).digest("hex");
 
+      // Store in cache for future requests
+      imageCache.set(
+        id,
+        imageIndex,
+        width,
+        height,
+        quality,
+        outputFormat,
+        optimizedBuffer,
+        finalContentType,
+        etag
+      );
+
       // Check if client has cached version
       const ifNoneMatch = request.headers.get("if-none-match");
       if (ifNoneMatch === `"${etag}"`) {
@@ -261,6 +418,7 @@ export async function GET(
           "Content-Length": optimizedBuffer.length.toString(),
           ETag: `"${etag}"`,
           Vary: "Accept",
+          "X-Cache": "MISS", // Indicates cache miss for debugging
         },
       });
     } catch (error) {
@@ -299,3 +457,7 @@ export async function GET(
     return new NextResponse("Error serving image", { status: 500 });
   }
 }
+
+// Note: imageCache is internal to this module
+// For cache invalidation when products are updated, the cache will automatically
+// expire based on TTL (60 minutes), or you can call the image API with cache-busting params

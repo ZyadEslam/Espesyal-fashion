@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import connectDB from "../../utils/db";
 import Category from "../../models/category";
 import Product from "../../models/product";
@@ -43,9 +44,6 @@ export async function fetchInitialProducts(
     const slug = categorySlug || "all";
 
     if (slug === "all") {
-      // Build product query for all products
-      const productQuery: Record<string, unknown> = {};
-
       // Build sort object
       const sort: Record<string, 1 | -1> = {};
       sort[sortBy] = sortOrder === "desc" ? -1 : 1;
@@ -53,25 +51,36 @@ export async function fetchInitialProducts(
       // Calculate pagination
       const skip = (page - 1) * limit;
 
-      // Batch queries: fetch products, count, and brands in parallel
+      // OPTIMIZED: Use aggregation to get image count without loading full buffer data
+      // This is a MAJOR performance improvement - avoids loading MB of image data
       const [productsRaw, totalProducts, brands] = await Promise.all([
-        // Get products with pagination
-        Product.find(productQuery)
-          .sort(sort)
-          .skip(skip)
-          .limit(limit)
-          .select(
-            "name description price oldPrice discount rating brand categoryName imgSrc"
-          )
-          .lean()
-          .exec(),
+        // Get products with pagination using aggregation (excludes imgSrc buffer data)
+        Product.aggregate([
+          { $sort: sort },
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              name: 1,
+              description: 1,
+              price: 1,
+              oldPrice: 1,
+              discount: 1,
+              rating: 1,
+              brand: 1,
+              categoryName: 1,
+              // Get image count without loading actual buffer data
+              imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+            },
+          },
+        ]),
         // Get total count for pagination
-        Product.countDocuments(productQuery),
+        Product.countDocuments({}),
         // Get unique brands
         Product.distinct("brand"),
       ]);
 
-      // Convert to proper format - convert imgSrc buffers to API endpoints
+      // Convert to proper format - generate API endpoints based on image count
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const products: ProductCardProps[] = productsRaw.map((p: any) => ({
         _id: p._id.toString(),
@@ -83,9 +92,9 @@ export async function fetchInitialProducts(
         rating: p.rating,
         brand: p.brand,
         categoryName: p.categoryName,
-        imgSrc: (p.imgSrc || []).map(
-          (_: unknown, index: number) =>
-            `/api/product/image/${p._id}?index=${index}`
+        imgSrc: Array.from(
+          { length: p.imageCount || 0 },
+          (_, i) => `/api/product/image/${p._id}?index=${i}`
         ) as unknown as ProductCardProps["imgSrc"],
       }));
 
@@ -117,9 +126,6 @@ export async function fetchInitialProducts(
       throw new Error("Category not found");
     }
 
-    // Build product query
-    const productQuery: Record<string, unknown> = { category: category._id };
-
     // Build sort object
     const sort: Record<string, 1 | -1> = {};
     sort[sortBy] = sortOrder === "desc" ? -1 : 1;
@@ -127,25 +133,37 @@ export async function fetchInitialProducts(
     // Calculate pagination
     const skip = (page - 1) * limit;
 
-    // Batch queries: fetch products, count, and brands in parallel
+    // OPTIMIZED: Use aggregation to get image count without loading full buffer data
+    // This is a MAJOR performance improvement - avoids loading MB of image data
     const [productsRaw, totalProducts, brands] = await Promise.all([
-      // Get products with pagination
-      Product.find(productQuery)
-        .sort(sort)
-        .skip(skip)
-        .limit(limit)
-        .select(
-          "name description price oldPrice discount rating brand categoryName imgSrc"
-        )
-        .lean()
-        .exec(),
+      // Get products with pagination using aggregation (excludes imgSrc buffer data)
+      Product.aggregate([
+        { $match: { category: new mongoose.Types.ObjectId(category._id.toString()) } },
+        { $sort: sort },
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $project: {
+            name: 1,
+            description: 1,
+            price: 1,
+            oldPrice: 1,
+            discount: 1,
+            rating: 1,
+            brand: 1,
+            categoryName: 1,
+            // Get image count without loading actual buffer data
+            imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+          },
+        },
+      ]),
       // Get total count for pagination
-      Product.countDocuments(productQuery),
+      Product.countDocuments({ category: category._id }),
       // Get unique brands for this category
       Product.distinct("brand", { category: category._id }),
     ]);
 
-    // Convert to proper format - convert imgSrc buffers to API endpoints
+    // Convert to proper format - generate API endpoints based on image count
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const products: ProductCardProps[] = productsRaw.map((p: any) => ({
       _id: p._id.toString(),
@@ -157,9 +175,9 @@ export async function fetchInitialProducts(
       rating: p.rating,
       brand: p.brand,
       categoryName: p.categoryName,
-      imgSrc: (p.imgSrc || []).map(
-        (_: unknown, index: number) =>
-          `/api/product/image/${p._id}?index=${index}`
+      imgSrc: Array.from(
+        { length: p.imageCount || 0 },
+        (_, i) => `/api/product/image/${p._id}?index=${i}`
       ) as unknown as ProductCardProps["imgSrc"],
     }));
 

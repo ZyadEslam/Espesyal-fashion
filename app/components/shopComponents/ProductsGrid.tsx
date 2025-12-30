@@ -34,15 +34,15 @@ const ProductsGrid = memo(
     }
 
     const gridClass = {
-      "2": "grid-cols-1 md:grid-cols-2",
-      "3": "grid-cols-1 md:grid-cols-3",
-      "4": "grid-cols-1 md:grid-cols-4",
-      "5": "grid-cols-1 md:grid-cols-4",
-      "6": "grid-cols-1 md:grid-cols-4",
+      "2": "grid-cols-2 md:grid-cols-2",
+      "3": "grid-cols-2 md:grid-cols-3",
+      "4": "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
+      "5": "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
+      "6": "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
     }[gridCols];
 
     return (
-      <div className={`grid ${gridClass} gap-4 sm:gap-6 ${className}`}>
+      <div className={`grid ${gridClass} gap-3 sm:gap-4 md:gap-6 ${className}`}>
         {products.map((product: ProductCardProps, index: number) => (
           <ProductCard
             key={product._id}

@@ -19,6 +19,31 @@ export const getProductImages = (
 };
 
 /**
+ * Generate a tiny blur placeholder data URL
+ * Uses a 10x10 pixel placeholder that will be stretched and blurred by CSS
+ * This is generated client-side as a simple gradient placeholder
+ */
+export const getBlurPlaceholder = (): string => {
+  // Return a tiny SVG blur placeholder (much smaller than base64 images)
+  // This creates a neutral gray gradient that works well with any image
+  return `data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f3f4f6'/%3E%3Cstop offset='100%25' stop-color='%23e5e7eb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23g)' width='10' height='10'/%3E%3C/svg%3E`;
+};
+
+/**
+ * Generate URL for blur placeholder from the API
+ * Returns a tiny version of the actual image for LQIP (Low Quality Image Placeholder)
+ * @param productId - Product ID
+ * @param index - Image index (default: 0)
+ */
+export const getBlurPlaceholderUrl = (
+  productId: string,
+  index: number = 0
+): string => {
+  // Request a tiny 20x20 image with very low quality for blur effect
+  return `/api/product/image/${productId}?index=${index}&w=20&h=20&q=20`;
+};
+
+/**
  * Generate optimized image URL with size parameters
  * @param productId - Product ID
  * @param index - Image index (default: 0)

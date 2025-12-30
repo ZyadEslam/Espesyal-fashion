@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import Product from "@/app/models/product";
 import Category from "@/app/models/category";
 import connectDB from "@/app/utils/db";
@@ -68,25 +69,31 @@ export async function GET(request: NextRequest, { params }: Params) {
       );
     }
 
-    interface ProductDoc {
-      _id: { toString: () => string };
-      name: string;
-      description: string;
-      price: number;
-      oldPrice?: number;
-      discount?: number;
-      rating: number;
-      brand: string;
-      categoryName: string;
-      imgSrc?: unknown[];
-      hideFromHome?: boolean;
-      createdAt?: Date | string;
-      [key: string]: unknown;
-    }
+    // OPTIMIZED: Use aggregation to get image count without loading full buffer data
+    // This is a MAJOR performance improvement - avoids loading MB of image data
+    const result = await Product.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      {
+        $project: {
+          name: 1,
+          description: 1,
+          price: 1,
+          oldPrice: 1,
+          discount: 1,
+          rating: 1,
+          brand: 1,
+          categoryName: 1,
+          variants: 1,
+          hideFromHome: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          // Get image count without loading actual buffer data
+          imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+        },
+      },
+    ]);
 
-    const product = (await Product.findById(
-      id
-    ).lean()) as unknown as ProductDoc | null;
+    const product = result[0];
 
     if (!product) {
       return NextResponse.json(
@@ -99,9 +106,10 @@ export async function GET(request: NextRequest, { params }: Params) {
     const productObj = {
       ...product,
       _id: product._id.toString(),
-      // Instead of converting to base64, we'll use the image API endpoint
-      imgSrc: (product.imgSrc || []).map(
-        (_: unknown, index: number) => `/api/product/image/${id}?index=${index}`
+      // Generate API endpoints based on image count (not actual buffer data)
+      imgSrc: Array.from(
+        { length: product.imageCount || 0 },
+        (_, i) => `/api/product/image/${id}?index=${i}`
       ),
       // Convert variant _id fields to strings
       variants: Array.isArray(product.variants)
@@ -115,6 +123,9 @@ export async function GET(request: NextRequest, { params }: Params) {
           }))
         : product.variants,
     };
+    
+    // Remove imageCount from response (internal use only)
+    delete (productObj as { imageCount?: number }).imageCount;
 
     const responseData = {
       product: productObj,

@@ -148,9 +148,9 @@ const ShopLayout = memo(
       : t("allProducts");
 
     return (
-      <div className={`max-w-7xl mx-auto ${className}`}>
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>
         {/* Main Content Area */}
-        <div className="grid grid-cols-12 gap-8">
+        <div className="grid grid-cols-12 gap-4 sm:gap-6 lg:gap-8">
           {/* Sidebar Filters */}
           <aside className="col-span-12 lg:col-span-3">
             <div className="lg:sticky lg:top-24 space-y-6 bg-white rounded-lg p-6 shadow-sm">

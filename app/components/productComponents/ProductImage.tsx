@@ -1,5 +1,9 @@
-import React from "react";
-import { getImageSizes, getImageSrcSet } from "../../utils/imageUtils";
+import React, { useState, useCallback } from "react";
+import {
+  getImageSizes,
+  getImageSrcSet,
+  getBlurPlaceholder,
+} from "../../utils/imageUtils";
 
 interface ProductImageProps {
   imageSrc: string;
@@ -11,6 +15,7 @@ interface ProductImageProps {
   width?: number;
   height?: number;
   productId?: string;
+  showPlaceholder?: boolean;
 }
 
 const ProductImage = ({
@@ -23,7 +28,10 @@ const ProductImage = ({
   width = 400,
   height = 400,
   productId,
+  showPlaceholder = true,
 }: ProductImageProps) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const sizes = getImageSizes(context);
 
   // Generate srcset for responsive images if productId is provided
@@ -39,23 +47,55 @@ const ProductImage = ({
         )
       : undefined;
 
+  const handleLoad = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
+
+  const onError = useCallback(() => {
+    setHasError(true);
+    handleImageError?.();
+  }, [handleImageError]);
+
+  // Static blur placeholder (tiny SVG)
+  const blurPlaceholder = getBlurPlaceholder();
+
   // Use regular img tag for our custom API routes to bypass Next.js Image validation
   // Our API route handles all optimization (resizing, format conversion, etc.)
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={imageSrc}
-      srcSet={srcset}
-      alt={productName || "Product Image"}
-      width={width}
-      height={height}
-      sizes={sizes}
-      fetchPriority={fetchPriority}
-      loading={loading}
-      className="block h-full w-full max-h-full max-w-full object-contain object-center mx-auto transition-transform duration-300 hover:scale-[1.02]"
-      onError={handleImageError}
-      decoding="async"
-    />
+    <div className="relative w-full h-full">
+      {/* Blur placeholder - shows while image is loading */}
+      {showPlaceholder && !isLoaded && !hasError && (
+        <div
+          className="absolute inset-0 animate-pulse"
+          style={{
+            backgroundImage: `url("${blurPlaceholder}")`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            filter: "blur(8px)",
+            transform: "scale(1.1)", // Prevent blur edges from showing
+          }}
+        />
+      )}
+
+      {/* Main image */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={imageSrc}
+        srcSet={srcset}
+        alt={productName || "Product Image"}
+        width={width}
+        height={height}
+        sizes={sizes}
+        fetchPriority={fetchPriority}
+        loading={loading}
+        className={`block h-full w-full max-h-full max-w-full object-contain object-center mx-auto transition-all duration-300 hover:scale-[1.02] ${
+          isLoaded ? "opacity-100" : "opacity-0"
+        }`}
+        onLoad={handleLoad}
+        onError={onError}
+        decoding="async"
+      />
+    </div>
   );
 };
 

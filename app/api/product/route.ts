@@ -181,25 +181,42 @@ const GET = async () => {
 
     // Cache miss - fetch from database
     await connectDB();
-    // Only select the fields we need for the product list
-    const products = await Product.find()
-      .select(
-        "name description price oldPrice discount rating brand category categoryName imgSrc hideFromHome variants createdAt updatedAt totalStock"
-      )
-      .lean({ virtuals: true })
-      .exec();
+    
+    // OPTIMIZED: Use aggregation to get image count without loading full buffer data
+    // This is a MAJOR performance improvement - avoids loading MB of image data into memory
+    const products = await Product.aggregate([
+      {
+        $project: {
+          name: 1,
+          description: 1,
+          price: 1,
+          oldPrice: 1,
+          discount: 1,
+          rating: 1,
+          brand: 1,
+          category: 1,
+          categoryName: 1,
+          hideFromHome: 1,
+          variants: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          // Get image count without loading actual buffer data
+          imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+        },
+      },
+    ]);
 
     console.log(`Fetched ${products.length} products from the database.`);
 
-    // Convert to plain objects and remove image buffers
-    const productsWithoutBuffers = products.map((product) => {
-      const productObj = { ...product };
+    // Convert to plain objects with proper formatting
+    const productsFormatted = products.map((product) => {
+      const productObj = { 
+        ...product,
+        _id: product._id.toString(),
+        // Ensure hideFromHome is set (default to false)
+        hideFromHome: product.hideFromHome ?? false,
+      };
 
-      // Replace image buffers with image count
-      productObj.imageCount = productObj.imgSrc?.length || 0;
-      delete productObj.imgSrc;
-      // Ensure hideFromHome is set (default to false)
-      productObj.hideFromHome = productObj.hideFromHome ?? false;
       // Convert variant _id fields to strings
       if (Array.isArray(productObj.variants)) {
         productObj.variants = productObj.variants.map(
@@ -213,11 +230,18 @@ const GET = async () => {
           })
         );
       }
+      
+      // Calculate totalStock from variants
+      productObj.totalStock = productObj.variants?.reduce(
+        (sum: number, v: { quantity?: number }) => sum + (v?.quantity || 0),
+        0
+      ) || 0;
+      
       return productObj;
     });
 
     const responseData = {
-      products: productsWithoutBuffers,
+      products: productsFormatted,
       success: true,
     };
 

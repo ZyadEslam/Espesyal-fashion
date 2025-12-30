@@ -32,11 +32,11 @@ const ProductsGroup = memo(
     // Memoize the grid class to prevent recalculation
     const gridClass = useMemo(() => {
       const gridClasses = {
-        "2": "grid-cols-1 md:grid-cols-2",
-        "3": "grid-cols-1 md:grid-cols-3",
-        "4": "grid-cols-1 md:grid-cols-4",
-        "5": "grid-cols-1 md:grid-cols-4",
-        "6": "grid-cols-1 md:grid-cols-4",
+        "2": "grid-cols-2 md:grid-cols-2",
+        "3": "grid-cols-2 md:grid-cols-3",
+        "4": "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
+        "5": "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
+        "6": "grid-cols-2 sm:grid-cols-3 md:grid-cols-4",
       };
       return gridClasses[gridCols];
     }, [gridCols]);
@@ -62,7 +62,7 @@ const ProductsGroup = memo(
 
     return (
       <section className={customClassName}>
-        <div className={`grid ${gridClass} gap-3 md:gap-6`}>
+        <div className={`grid ${gridClass} gap-3 sm:gap-4 md:gap-6`}>
           {productsToRender.map((product: ProductCardProps, index: number) => (
             <ProductCard 
               key={product._id} 

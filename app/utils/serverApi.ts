@@ -8,39 +8,45 @@ import Category from "@/app/models/category";
 import connectDB from "@/app/utils/db";
 import { ProductCardProps } from "../types/types";
 
-type ProductDoc = {
-  _id: { toString: () => string };
-  name: string;
-  description: string;
-  price: number;
-  oldPrice?: number;
-  discount?: number;
-  rating: number;
-  brand: string;
-  categoryName: string;
-  imgSrc?: unknown[];
-  hideFromHome?: boolean;
-  variants?: unknown[];
-  totalStock?: number;
-  createdAt?: Date | string;
-} & Record<string, unknown>;
-
 /**
  * Get a single product by ID (server-side only)
+ * OPTIMIZED: Uses aggregation to get image count without loading full buffer data
  */
 export async function getProductById(
   id: string
 ): Promise<ProductCardProps | null> {
   try {
     await connectDB();
+    const mongoose = await import("mongoose");
 
     if (!id) {
       throw new Error("Product ID is required");
     }
 
-    const product = (await Product.findById(
-      id
-    ).lean()) as unknown as ProductDoc | null;
+    // Use aggregation to get image count without loading the actual image buffers
+    // This is a MAJOR optimization - avoids loading MB of image data into memory
+    const result = await Product.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      {
+        $project: {
+          name: 1,
+          description: 1,
+          price: 1,
+          oldPrice: 1,
+          discount: 1,
+          rating: 1,
+          brand: 1,
+          categoryName: 1,
+          variants: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          // Get image count without loading actual buffer data
+          imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+        },
+      },
+    ]);
+
+    const product = result[0];
 
     if (!product) {
       return null;
@@ -67,10 +73,14 @@ export async function getProductById(
               : undefined,
           })) as ProductCardProps["variants"]
         : (product.variants as ProductCardProps["variants"]),
-      totalStock: product.totalStock,
-      // Convert image buffers to API endpoints (return as strings, matching API route format)
-      imgSrc: (product.imgSrc || []).map(
-        (_: unknown, index: number) => `/api/product/image/${id}?index=${index}`
+      totalStock: product.variants?.reduce(
+        (sum: number, v: { quantity?: number }) => sum + (v?.quantity || 0),
+        0
+      ) || 0,
+      // Generate API endpoints based on image count (not actual buffer data)
+      imgSrc: Array.from(
+        { length: product.imageCount || 0 },
+        (_, i) => `/api/product/image/${id}?index=${i}`
       ) as unknown as ProductCardProps["imgSrc"],
     };
 
@@ -83,19 +93,35 @@ export async function getProductById(
 
 /**
  * Get all products (server-side only)
+ * OPTIMIZED: Uses aggregation to get image count without loading full buffer data
  */
 export async function getAllProducts(): Promise<ProductCardProps[]> {
   try {
     await connectDB();
 
-    const products = (await Product.find()
-      .select(
-        "name description price oldPrice discount rating brand category categoryName imgSrc hideFromHome variants createdAt updatedAt totalStock"
-      )
-      .lean({ virtuals: true })
-      .exec()) as unknown as (ProductDoc & {
-      category?: { toString: () => string } | string;
-    })[];
+    // Use aggregation to get image count without loading the actual image buffers
+    // This is a MAJOR optimization - avoids loading MB of image data into memory
+    const products = await Product.aggregate([
+      {
+        $project: {
+          name: 1,
+          description: 1,
+          price: 1,
+          oldPrice: 1,
+          discount: 1,
+          rating: 1,
+          brand: 1,
+          category: 1,
+          categoryName: 1,
+          hideFromHome: 1,
+          variants: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          // Get image count without loading actual buffer data
+          imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+        },
+      },
+    ]);
 
     // Convert to ProductCardProps format
     const formattedProducts: ProductCardProps[] = products.map((product) => ({
@@ -119,10 +145,13 @@ export async function getAllProducts(): Promise<ProductCardProps[]> {
               : undefined,
           })) as ProductCardProps["variants"]
         : (product.variants as ProductCardProps["variants"]),
-      totalStock: product.totalStock,
-      // Convert image buffers to API endpoints (return as strings, matching API route format)
+      totalStock: product.variants?.reduce(
+        (sum: number, v: { quantity?: number }) => sum + (v?.quantity || 0),
+        0
+      ) || 0,
+      // Generate API endpoints based on image count (not actual buffer data)
       imgSrc: Array.from(
-        { length: product.imgSrc?.length || 0 },
+        { length: product.imageCount || 0 },
         (_, i) => `/api/product/image/${product._id}?index=${i}`
       ) as unknown as ProductCardProps["imgSrc"],
     }));
@@ -181,6 +210,7 @@ export async function getActiveCategories(): Promise<ServerCategory[]> {
 
 /**
  * Get products by category ID (server-side only)
+ * OPTIMIZED: Uses aggregation to get image count without loading full buffer data
  * @param categoryId - Category ID or slug
  * @param limit - Maximum number of products to return
  */
@@ -190,6 +220,7 @@ export async function getProductsByCategory(
 ): Promise<ProductCardProps[]> {
   try {
     await connectDB();
+    const mongoose = await import("mongoose");
 
     // Check if categoryId is an ObjectId or slug
     const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(categoryId);
@@ -210,17 +241,33 @@ export async function getProductsByCategory(
       return [];
     }
 
-    const products = (await Product.find({
-      category: category._id,
-      hideFromHome: { $ne: true },
-    })
-      .select(
-        "name description price oldPrice discount rating brand categoryName imgSrc hideFromHome createdAt"
-      )
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .lean()
-      .exec()) as unknown as ProductDoc[];
+    // Use aggregation to get image count without loading the actual image buffers
+    // This is a MAJOR optimization - avoids loading MB of image data into memory
+    const products = await Product.aggregate([
+      {
+        $match: {
+          category: new mongoose.Types.ObjectId(category._id.toString()),
+          hideFromHome: { $ne: true },
+        },
+      },
+      { $sort: { createdAt: -1 } },
+      { $limit: limit },
+      {
+        $project: {
+          name: 1,
+          description: 1,
+          price: 1,
+          oldPrice: 1,
+          discount: 1,
+          rating: 1,
+          brand: 1,
+          categoryName: 1,
+          createdAt: 1,
+          // Get image count without loading actual buffer data
+          imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+        },
+      },
+    ]);
 
     return products.map((product) => ({
       _id: product._id.toString(),
@@ -232,9 +279,10 @@ export async function getProductsByCategory(
       rating: product.rating,
       brand: product.brand,
       categoryName: product.categoryName,
-      imgSrc: (product.imgSrc || []).map(
-        (_: unknown, index: number) =>
-          `/api/product/image/${product._id}?index=${index}`
+      // Generate API endpoints based on image count (not actual buffer data)
+      imgSrc: Array.from(
+        { length: product.imageCount || 0 },
+        (_, i) => `/api/product/image/${product._id}?index=${i}`
       ) as unknown as ProductCardProps["imgSrc"],
     }));
   } catch (error) {
