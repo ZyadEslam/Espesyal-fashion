@@ -31,7 +31,7 @@ const ProductCardSkeleton = () => {
 // Group of product skeletons - matches ProductCard grid layout
 const ProductSkeletonGroup = ({ count = 10 }: { count?: number }) => {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6">
       {Array.from({ length: count }).map((_, index) => (
         <ProductCardSkeleton key={`product-skeleton-${index}`} />
       ))}
@@ -42,7 +42,7 @@ const ProductSkeletonGroup = ({ count = 10 }: { count?: number }) => {
 // Alternative grid layout version - matches ProductCard dimensions
 const ProductSkeletonGrid = ({ count = 6 }: { count?: number }) => {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-6">
       {Array.from({ length: count }).map((_, index) => (
         <div key={`grid-skeleton-${index}`} className="w-full">
           <ProductCardSkeleton />

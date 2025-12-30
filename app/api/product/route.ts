@@ -200,6 +200,19 @@ const GET = async () => {
       delete productObj.imgSrc;
       // Ensure hideFromHome is set (default to false)
       productObj.hideFromHome = productObj.hideFromHome ?? false;
+      // Convert variant _id fields to strings
+      if (Array.isArray(productObj.variants)) {
+        productObj.variants = productObj.variants.map(
+          (variant: { _id?: { toString: () => string } | string; [key: string]: unknown }) => ({
+            ...variant,
+            _id: variant._id
+              ? typeof variant._id === "string"
+                ? variant._id
+                : variant._id.toString()
+              : undefined,
+          })
+        );
+      }
       return productObj;
     });
 

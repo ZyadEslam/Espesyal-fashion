@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+// import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import {
   Copy,
@@ -7,6 +8,7 @@ import {
   // Sparkles
 } from "lucide-react";
 import { cachedFetchJson } from "../../utils/cachedFetch";
+// import { assets } from "@/public/assets/assets";
 
 interface HeroContent {
   heroBadge: string;
@@ -87,6 +89,8 @@ const HeroSection = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const isRTL = locale === "ar";
+
   return (
     <section className="relative overflow-hidden h-[70vh]  bg-gradient-to-br from-[#0F2027] via-[#203A43] to-[#2c5364] rounded-lg md:rounded-xl shadow-2xl">
       {/* Pattern Background Image */}
@@ -101,76 +105,123 @@ const HeroSection = () => {
       />
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/50 to-black/70"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/50 to-black/70 z-[1]"></div>
+
 
       {/* Content Container */}
       <div className="relative z-10 h-full container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="h-full flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 py-12 md:py-16">
+        <div
+          className={`h-full flex flex-col md:flex-row items-center ${
+            isRTL ? "justify-center" : "justify-between"
+          } gap-8 md:gap-12 py-12 md:py-16`}
+        >
           {/* Left Side - Badge & Heading */}
-          <div className="flex-1 flex flex-col justify-center items-start space-y-6 md:space-y-8 animate-fade-in">
+          <div
+            className={`flex-1 flex flex-col justify-center space-y-6 md:space-y-8 animate-fade-in ${
+              isRTL ? "items-center text-center" : "items-start"
+            }`}
+          >
             {/* Badge */}
-            <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-gradient-to-r from-primary-500/20 to-primary-600/20 backdrop-blur-md rounded-full border border-primary-400/30 shadow-xl">
+            <div
+              className={`inline-flex items-center gap-3 px-5 py-2.5 bg-gradient-to-r from-primary-500/20 to-primary-600/20 backdrop-blur-md rounded-full border border-primary-400/30 shadow-xl ${
+                isRTL ? "justify-center" : ""
+              }`}
+            >
               <div className="relative">
                 <span className="absolute inset-0 bg-primary-400 rounded-full blur-md opacity-60 animate-pulse"></span>
                 <span className="relative w-2.5 h-2.5 bg-primary-400 rounded-full"></span>
               </div>
-              <span className="text-sm md:text-base font-bold text-white tracking-wider uppercase">
+              <span
+                className={`text-sm md:text-base font-bold text-white tracking-wider uppercase ${
+                  isRTL ? "text-center" : ""
+                }`}
+              >
                 {heroBadge}
               </span>
             </div>
 
             {/* Main Heading */}
-            <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] max-w-2xl">
-                <span className="block bg-gradient-to-r from-white via-white to-primary-200 bg-clip-text text-transparent">
+            <div className={`space-y-4 ${isRTL ? "w-full" : ""}`}>
+              <h1
+                className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] ${
+                  isRTL ? "max-w-full text-center" : "max-w-2xl"
+                }`}
+              >
+                <span
+                  className={`block bg-gradient-to-r from-white via-white to-primary-200 bg-clip-text text-transparent ${
+                    isRTL ? "text-center" : ""
+                  }`}
+                >
                   {largestSale}
                 </span>
               </h1>
-              <div className="flex items-center gap-3">
+              <div
+                className={`flex items-center gap-3 ${
+                  isRTL ? "justify-center" : ""
+                }`}
+              >
                 <div className="h-1 w-16 bg-gradient-to-r from-primary-400 to-transparent rounded-full"></div>
                 <div className="h-2 w-2 bg-primary-400 rounded-full shadow-lg shadow-primary-400/50"></div>
                 <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary-400/50 to-transparent rounded-full"></div>
               </div>
             </div>
-             {/* Right Side - Promo Code */}
-          <div className="flex-shrink-0 w-full md:w-auto animate-fade-in-up-delay">
-            <div className="inline-flex items-center gap-3 px-4 py-3  backdrop-blur-md rounded-full border border-white/20 shadow-lg">
-              {/* Text */}
-              <div className="flex items-center gap-2">
-                <span className="text-white text-sm md:text-base font-medium whitespace-nowrap">
-                  {useCode}
-                </span>
-                <span className="text-white text-xs md:text-sm whitespace-nowrap">
-                  {forDiscount}
-                </span>
-              </div>
-
-              {/* Divider */}
-              <div className="h-6 w-px bg-white"></div>
-
-              {/* Code */}
-              <code className="px-3 py-1.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-lg md:text-xl font-bold tracking-wider rounded-lg">
-                {promoCode}
-              </code>
-
-              {/* Copy Button */}
-              <button
-                onClick={handleCopyCode}
-                className="p-2 hover:bg-white rounded-lg transition-all duration-200 hover:scale-110 active:scale-95"
-                aria-label="Copy promo code"
-                title="Copy code"
+            {/* Right Side - Promo Code */}
+            <div
+              className={`flex-shrink-0 w-full md:w-auto animate-fade-in-up-delay ${
+                isRTL ? "flex justify-center" : ""
+              }`}
+            >
+              <div
+                className={`inline-flex items-center gap-3 px-4 py-3 backdrop-blur-md rounded-full border border-white/20 shadow-lg ${
+                  isRTL ? "flex-wrap justify-center" : ""
+                }`}
               >
-                {copied ? (
-                  <Check className="w-4 h-4 md:w-5 md:h-5 text-green-300" />
-                ) : (
-                  <Copy className="w-4 h-4 md:w-5 md:h-5 text-white  transition-colors" />
-                )}
-              </button>
+                {/* Text */}
+                <div
+                  className={`flex items-center gap-2 ${
+                    isRTL ? "flex-wrap justify-center" : ""
+                  }`}
+                >
+                  <span
+                    className={`text-white text-sm md:text-base font-medium ${
+                      isRTL ? "whitespace-normal" : "whitespace-nowrap"
+                    }`}
+                  >
+                    {useCode}
+                  </span>
+                  <span
+                    className={`text-white text-xs md:text-sm ${
+                      isRTL ? "whitespace-normal" : "whitespace-nowrap"
+                    }`}
+                  >
+                    {forDiscount}
+                  </span>
+                </div>
+
+                {/* Divider */}
+                <div className="h-6 w-px bg-white"></div>
+
+                {/* Code */}
+                <code className="px-3 py-1.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-lg md:text-xl font-bold tracking-wider rounded-lg">
+                  {promoCode}
+                </code>
+
+                {/* Copy Button */}
+                <button
+                  onClick={handleCopyCode}
+                  className="p-2 hover:bg-white rounded-lg transition-all duration-200 hover:scale-110 active:scale-95"
+                  aria-label="Copy promo code"
+                  title="Copy code"
+                >
+                  {copied ? (
+                    <Check className="w-4 h-4 md:w-5 md:h-5 text-green-300" />
+                  ) : (
+                    <Copy className="w-4 h-4 md:w-5 md:h-5 text-white  transition-colors" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-          </div>
-
-         
         </div>
       </div>
     </section>

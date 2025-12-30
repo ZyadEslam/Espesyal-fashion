@@ -1,15 +1,10 @@
 "use client";
-import { AddressProps } from "@/app/types/types";
-import { useSession } from "next-auth/react";
 import React, { useEffect, useMemo, useState } from "react";
-import AddressSelection from "./AddressSelection";
 import { useCart } from "@/app/hooks/useCart";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
 const OrderForm = () => {
-  const [selectedAddress, setSelectedAddress] = useState<AddressProps>();
-  const session = useSession();
   const router = useRouter();
   const locale = useLocale();
   const tCart = useTranslations("cart");
@@ -24,11 +19,10 @@ const OrderForm = () => {
   const [promoError, setPromoError] = useState("");
   const [validatingPromo, setValidatingPromo] = useState(false);
 
-  // Shipping fee state
-  const [shippingFee, setShippingFee] = useState<number>(0);
+  // Shipping fee state - will be calculated at checkout based on address
+  const [shippingFee] = useState<number | null>(null);
 
-  const isOrderValidToPlace =
-    selectedAddress && cart.length > 0 && session.status === "authenticated";
+  const isOrderValidToPlace = cart.length > 0;
 
   const totalItems = useMemo(() => {
     return cart.reduce((total, item) => {
@@ -36,29 +30,12 @@ const OrderForm = () => {
     }, 0);
   }, [cart]);
 
-  // Fetch shipping fee on component mount
-  useEffect(() => {
-    const fetchShippingFee = async () => {
-      try {
-        const response = await fetch("/api/settings");
-        const result = await response.json();
-        if (result.success) {
-          setShippingFee(result.shippingFee || 0);
-        }
-      } catch (error) {
-        console.error("Error fetching shipping fee:", error);
-        setShippingFee(0);
-      }
-    };
-    fetchShippingFee();
-  }, []);
-
-  // Calculate final price with discount and shipping
+  // Calculate final price with discount (shipping calculated at checkout)
   const finalPrice = useMemo(() => {
     const subtotal = totalPrice;
     const discountedPrice = Math.max(subtotal - discountAmount, 0);
-    return discountedPrice + shippingFee;
-  }, [totalPrice, discountAmount, shippingFee]);
+    return discountedPrice;
+  }, [totalPrice, discountAmount]);
 
   useEffect(() => {
     // Recalculate discount when total price or percentage changes
@@ -131,14 +108,13 @@ const OrderForm = () => {
 
     // Store order data in sessionStorage to pass to checkout page
     const orderData = {
-      addressId: selectedAddress?._id,
       products: cart,
       totalPrice: finalPrice,
       promoCode: appliedPromoCode || null,
       discountAmount: discountAmount,
       discountPercentage: discountPercentage,
       subtotal: totalPrice,
-      shippingFee: shippingFee,
+      shippingFee: shippingFee ?? 0,
     };
 
     sessionStorage.setItem("checkoutData", JSON.stringify(orderData));
@@ -149,15 +125,6 @@ const OrderForm = () => {
 
   return (
     <form onSubmit={submitHandler} className="flex flex-col gap-4">
-      <div className="order-summary-pair">
-        <label className="font-medium text-gray-600">
-          {tCart("selectAddress")}
-        </label>
-        <AddressSelection
-          setSelectedAddress={setSelectedAddress}
-          selectedAddress={selectedAddress as AddressProps}
-        />
-      </div>
       <div className="order-summary-pair">
         <label className="font-medium text-gray-600">
           {tCart("promoCode")}
@@ -225,10 +192,8 @@ const OrderForm = () => {
         </div>
         <div className="flex justify-between">
           <p className="text-gray-500">{tCart("shippingFee")}</p>
-          <p>
-            {shippingFee > 0
-              ? `${shippingFee.toFixed(2)} ${tCommon("currency")}`
-              : tCart("freeShipping")}
+          <p className="text-right text-sm text-gray-500">
+            {tCart("shippingCalculatedAfterAddress")}
           </p>
         </div>
         {appliedPromoCode && discountAmount > 0 && (
@@ -255,9 +220,7 @@ const OrderForm = () => {
         className="bg-orange py-3 text-white cursor-pointer hover:bg-orange/90 disabled:cursor-not-allowed disabled:bg-gray-400"
         disabled={!isOrderValidToPlace}
       >
-        {session.status === "unauthenticated"
-          ? tCart("loginToOrder")
-          : cart.length === 0
+        {cart.length === 0
           ? tCart("cartEmptyShort")
           : tCart("proceedToCheckout")}
       </button>

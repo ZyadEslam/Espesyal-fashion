@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -13,7 +13,7 @@ import CheckoutAddressSection from "@/app/components/checkoutComponents/Checkout
 import CheckoutOrderSummary from "@/app/components/checkoutComponents/CheckoutOrderSummary";
 import { api } from "@/app/utils/api";
 import { useCart } from "@/app/hooks/useCart";
-import { AddressProps } from "@/app/types/types";
+import { AddressProps, CityCategory } from "@/app/types/types";
 import { ProductCardProps } from "@/app/types/types";
 
 interface CheckoutData {
@@ -28,8 +28,7 @@ interface CheckoutData {
 
 interface OrderData {
   userId?: string;
-  addressId?: string;
-  address?: {
+  address: {
     name: string;
     phone: string;
     address: string;
@@ -69,6 +68,7 @@ const CheckoutPage = () => {
   const [discountPercentage, setDiscountPercentage] = useState(0);
   const [shippingFee, setShippingFee] = useState<number>(0);
   const [finalTotal, setFinalTotal] = useState<number>(0);
+  const [cityCategory, setCityCategory] = useState<CityCategory | undefined>(undefined);
 
   useEffect(() => {
     // Get checkout data from sessionStorage
@@ -103,21 +103,21 @@ const CheckoutPage = () => {
     }
   }, [cart, totalPrice]);
 
-  // Fetch shipping fee
+  // Handle direct city category change from the form (for immediate shipping fee update)
+  const handleCityCategoryChange = useCallback((category: CityCategory) => {
+    setCityCategory(category);
+  }, []);
+
+  // Update city category when address changes
   useEffect(() => {
-    const fetchShippingFee = async () => {
-      try {
-        const response = await fetch("/api/settings");
-        const result = await response.json();
-        if (result.success) {
-          setShippingFee(result.shippingFee || 0);
-        }
-      } catch (error) {
-        console.error("Error fetching shipping fee:", error);
-        setShippingFee(0);
-      }
-    };
-    fetchShippingFee();
+    if (selectedAddress?.cityCategory) {
+      setCityCategory(selectedAddress.cityCategory);
+    }
+  }, [selectedAddress]);
+
+  // Handle shipping fee change from order summary
+  const handleShippingFeeChange = useCallback((fee: number) => {
+    setShippingFee(fee);
   }, []);
 
   // Calculate final total
@@ -140,6 +140,80 @@ const CheckoutPage = () => {
     setDiscountPercentage(percentage);
   };
 
+  const validateStock = async (products: ProductCardProps[]): Promise<{ valid: boolean; message?: string }> => {
+    try {
+      for (const product of products) {
+        // Fetch current product data to get latest stock
+        const response = await fetch(`/api/product/${product._id}`, {
+          cache: "no-store",
+        });
+        const result = await response.json();
+        
+        if (!result.success || !result.product) {
+          return {
+            valid: false,
+            message: `Product "${product.name}" is no longer available`,
+          };
+        }
+
+        const currentProduct = result.product;
+        const requestedQuantity = product.quantityInCart || product.quantity || 1;
+
+        // Check stock for variants
+        if (currentProduct.variants && currentProduct.variants.length > 0) {
+          const variantId = product.selectedVariantId;
+          const variantColor = product.selectedColor;
+          const variantSize = product.selectedSize;
+
+          let variant = null;
+          if (variantId) {
+            variant = currentProduct.variants.find(
+              (v: { _id?: string }) => v._id === variantId
+            );
+          } else if (variantColor || variantSize) {
+            variant = currentProduct.variants.find(
+              (v: { color?: string; size?: string }) => {
+                const colorMatch = variantColor ? v.color === variantColor : true;
+                const sizeMatch = variantSize ? v.size === variantSize : true;
+                return colorMatch && sizeMatch;
+              }
+            );
+          }
+
+          if (!variant) {
+            return {
+              valid: false,
+              message: `Selected combination for "${product.name}" is no longer available`,
+            };
+          }
+
+          if (variant.quantity < requestedQuantity) {
+            return {
+              valid: false,
+              message: `Insufficient stock for ${product.name} (${variant.color || ""} ${variant.size || ""}). Available: ${variant.quantity}, Requested: ${requestedQuantity}`,
+            };
+          }
+        } else {
+          // Check stock for products without variants
+          const availableStock = currentProduct.totalStock || 0;
+          if (availableStock < requestedQuantity) {
+            return {
+              valid: false,
+              message: `Insufficient stock for "${product.name}". Available: ${availableStock}, Requested: ${requestedQuantity}`,
+            };
+          }
+        }
+      }
+      return { valid: true };
+    } catch (error) {
+      console.error("Error validating stock:", error);
+      return {
+        valid: false,
+        message: "Error checking stock availability. Please try again.",
+      };
+    }
+  };
+
   const handlePlaceOrder = async () => {
     if (!checkoutData || !selectedAddress) {
       setOrderStatus({
@@ -152,6 +226,17 @@ const CheckoutPage = () => {
     setIsProcessing(true);
     setOrderStatus(null);
 
+    // Validate stock before proceeding
+    const stockValidation = await validateStock(checkoutData.products);
+    if (!stockValidation.valid) {
+      setIsProcessing(false);
+      setOrderStatus({
+        success: false,
+        message: stockValidation.message || "Stock validation failed",
+      });
+      return;
+    }
+
     try {
       const orderData: OrderData = {
         // Include userId only if user is authenticated
@@ -159,6 +244,14 @@ const CheckoutPage = () => {
           session.data?.user?.id && {
             userId: session.data.user.id,
           }),
+        // Always send address data directly (no saved addresses)
+        address: {
+          name: selectedAddress.name,
+          phone: selectedAddress.phone,
+          address: selectedAddress.address,
+          city: selectedAddress.city,
+          state: selectedAddress.state,
+        },
         products: checkoutData.products,
         totalPrice: finalTotal,
         paymentMethod: paymentMethod,
@@ -169,22 +262,6 @@ const CheckoutPage = () => {
           discountPercentage: discountPercentage,
         }),
       };
-
-      // Handle address - if it's a temporary address (starts with "temp-"), send address data directly
-      // Otherwise, use addressId
-      if (selectedAddress._id.startsWith("temp-")) {
-        // Guest address - send address data directly
-        orderData.address = {
-          name: selectedAddress.name,
-          phone: selectedAddress.phone,
-          address: selectedAddress.address,
-          city: selectedAddress.city,
-          state: selectedAddress.state,
-        };
-      } else {
-        // Saved address - use addressId
-        orderData.addressId = selectedAddress._id;
-      }
 
       const response = await fetch("/api/order", {
         method: "POST",
@@ -230,6 +307,17 @@ const CheckoutPage = () => {
     setIsProcessing(true);
     setOrderStatus(null);
 
+    // Validate stock before proceeding
+    const stockValidation = await validateStock(checkoutData.products);
+    if (!stockValidation.valid) {
+      setIsProcessing(false);
+      setOrderStatus({
+        success: false,
+        message: stockValidation.message || "Stock validation failed",
+      });
+      return;
+    }
+
     // Clear cart immediately when payment succeeds
     clearCart();
 
@@ -240,6 +328,14 @@ const CheckoutPage = () => {
           session.data?.user?.id && {
             userId: session.data.user.id,
           }),
+        // Always send address data directly (no saved addresses)
+        address: {
+          name: selectedAddress.name,
+          phone: selectedAddress.phone,
+          address: selectedAddress.address,
+          city: selectedAddress.city,
+          state: selectedAddress.state,
+        },
         products: checkoutData.products,
         totalPrice: finalTotal,
         paymentMethod: "stripe",
@@ -251,19 +347,6 @@ const CheckoutPage = () => {
           discountPercentage: discountPercentage,
         }),
       };
-
-      // Handle address
-      if (selectedAddress._id.startsWith("temp-")) {
-        orderData.address = {
-          name: selectedAddress.name,
-          phone: selectedAddress.phone,
-          address: selectedAddress.address,
-          city: selectedAddress.city,
-          state: selectedAddress.state,
-        };
-      } else {
-        orderData.addressId = selectedAddress._id;
-      }
 
       const response = await fetch("/api/order", {
         method: "POST",
@@ -352,6 +435,7 @@ const CheckoutPage = () => {
             {/* Address Section */}
             <CheckoutAddressSection
               onAddressChange={setSelectedAddress}
+              onCityCategoryChange={handleCityCategoryChange}
               selectedAddress={selectedAddress}
             />
 
@@ -467,7 +551,9 @@ const CheckoutPage = () => {
             <CheckoutOrderSummary
               products={checkoutData.products}
               subtotal={checkoutData.subtotal}
+              cityCategory={cityCategory}
               onPromoCodeChange={handlePromoCodeChange}
+              onShippingFeeChange={handleShippingFeeChange}
             />
           </div>
         </div>

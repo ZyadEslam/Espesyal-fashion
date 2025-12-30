@@ -10,6 +10,7 @@ import {
 import { ProductSchema, Breadcrumb } from "@/app/components/seo/SEOComponents";
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
+import { getOptimizedImageUrl } from "@/app/utils/imageUtils";
 
 const ProductImagesSlider = lazy(
   () => import("../../../components/productComponents/ProductImagesSlider")
@@ -159,8 +160,22 @@ export default async function ProductPage({ params }: Props) {
     sku: product._id,
   };
 
+  // Generate preload URL for first image - matches the URL used in ProductImagesSlider
+  const firstImagePreloadUrl = product._id
+    ? getOptimizedImageUrl(product._id as string, 0, 600, 600, 85)
+    : null;
+
   return (
     <div className="w-full px-4 sm:px-[5%] md:px-[8.5%] py-4 sm:py-6 md:py-8">
+      {/* Preload first product image for faster LCP */}
+      {firstImagePreloadUrl && (
+        <link
+          rel="preload"
+          as="image"
+          href={firstImagePreloadUrl}
+          fetchPriority="high"
+        />
+      )}
       <ProductSchema product={productSEOData} />
 
       <Breadcrumb items={breadcrumbItems} />

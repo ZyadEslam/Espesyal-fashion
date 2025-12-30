@@ -27,14 +27,14 @@ const ProductImage = ({
   const sizes = getImageSizes(context);
 
   // Generate srcset for responsive images if productId is provided
-  // Optimized sizes to match actual display dimensions (no unnecessary larger sizes)
+  // Sizes account for retina/high-DPI displays (2x-3x) to ensure sharp images on all devices
   const srcset =
     productId && context !== "thumbnail"
       ? getImageSrcSet(
           productId,
           0,
           context === "product-card"
-            ? [220, 260, 320] // Match actual display sizes: mobile ~220px, tablet ~260px, desktop ~320px
+            ? [320, 480, 640, 800] // 320 for 1x, 480-640 for 2x, 800 for 3x retina
             : [400, 600, 800, 1200]
         )
       : undefined;

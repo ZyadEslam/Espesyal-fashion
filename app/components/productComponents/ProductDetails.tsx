@@ -166,6 +166,29 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
   const handleBuyNow = () => {
     if (isAddToCartDisabled) return;
 
+    // Validate stock before proceeding
+    if (hasVariants && selectedVariant) {
+      if (selectedVariant.quantity < quantity) {
+        handleShowToast(
+          true,
+          t("insufficientStock", {
+            available: selectedVariant.quantity,
+            requested: quantity,
+          }) || `Insufficient stock. Available: ${selectedVariant.quantity}, Requested: ${quantity}`
+        );
+        return;
+      }
+    } else if (data.totalStock !== undefined && data.totalStock < quantity) {
+      handleShowToast(
+        true,
+        t("insufficientStock", {
+          available: data.totalStock,
+          requested: quantity,
+        }) || `Insufficient stock. Available: ${data.totalStock}, Requested: ${quantity}`
+      );
+      return;
+    }
+
     // Prepare product data for checkout
     let productData: ProductCardProps = {
       ...data,
@@ -300,7 +323,7 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
                     selectedSize === option.size
                       ? "bg-secondary text-white border-orange"
                       : "bg-white text-gray-700 border-gray-300 hover:border-orange hover:text-orange"
-                  }`}
+                  } ${option.available === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
                   disabled={option.available === 0}
                 >
                   {option.size}
@@ -308,6 +331,33 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
               ))}
             </div>
           </div>
+
+          {/* Stock Display for Selected Combination */}
+          {selectedVariant && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                    {t("stockAvailability") || "Stock Availability"}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {selectedColor} • {selectedSize}
+                  </p>
+                </div>
+                <div className="text-right">
+                  {selectedVariant.quantity > 0 ? (
+                    <span className="text-lg font-bold text-green-600">
+                      {selectedVariant.quantity} {t("inStock") || "in stock"}
+                    </span>
+                  ) : (
+                    <span className="text-lg font-bold text-red-600">
+                      {t("outOfStock") || "Out of stock"}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -338,11 +388,11 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
             <Plus className="w-4 h-4" />
           </button>
         </div>
-        {selectedVariant && (
+        {!hasVariants && data.totalStock !== undefined && (
           <p className="text-xs text-gray-500 mt-1">
-            {selectedVariant.quantity > 0
-              ? `${selectedVariant.quantity} ${t("itemsAvailable")}`
-              : t("outOfStock")}
+            {data.totalStock > 0
+              ? `${data.totalStock} ${t("itemsAvailable") || "items available"}`
+              : t("outOfStock") || "Out of stock"}
           </p>
         )}
       </div>

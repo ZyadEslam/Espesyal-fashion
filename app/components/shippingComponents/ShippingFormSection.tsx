@@ -1,14 +1,15 @@
 "use client";
-import React, { useRef, useEffect, useActionState } from "react";
+import React, { useRef, useEffect, useActionState, useState } from "react";
 import { shippingFormAction } from "@/app/utils/actions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SubmitButton from "./SubmitBtn";
 import { useSession } from "next-auth/react";
 import ActionNotification from "@/app/UI/ActionNotification";
-import { ArrowLeft, LocationEdit } from "lucide-react";
+import { ArrowLeft, LocationEdit, ChevronDown } from "lucide-react";
 import LoadingOverlay from "../LoadingOverlay";
 import { useLocale, useTranslations } from "next-intl";
+import { CityCategory } from "@/app/types/types";
 
 const initialState = {
   success: false,
@@ -18,6 +19,7 @@ const initialState = {
 const ShippingFormComponent = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [countdown, setCountdown] = React.useState(3);
+  const [cityCategory, setCityCategory] = useState<CityCategory>("cairo");
   const [formState, formAction] = useActionState(
     shippingFormAction,
     initialState
@@ -142,34 +144,66 @@ const ShippingFormComponent = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* City Category Dropdown */}
+          <div>
+            <label htmlFor="cityCategory" className="address-form-label">
+              {tForm("cityRequired")}
+            </label>
+            <div className="relative">
+              <select
+                id="cityCategory"
+                name="cityCategory"
+                value={cityCategory}
+                onChange={(e) => setCityCategory(e.target.value as CityCategory)}
+                className="address-form-input appearance-none cursor-pointer"
+                required
+              >
+                <option value="cairo">{tForm("cityOptions.cairo")}</option>
+                <option value="giza">{tForm("cityOptions.giza")}</option>
+                <option value="other">{tForm("cityOptions.other")}</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Show city input only when "other" is selected */}
+          {cityCategory === "other" && (
             <div>
               <label htmlFor="city" className="address-form-label">
-                {tForm("cityRequired")}
+                {tForm("otherCityName")}
               </label>
               <input
                 type="text"
                 id="city"
                 name="city"
                 className="address-form-input"
-                placeholder={tForm("cityPlaceholder")}
+                placeholder={tForm("otherCityPlaceholder")}
                 required
               />
             </div>
+          )}
 
-            <div>
-              <label htmlFor="state" className="address-form-label">
-                {tForm("stateRequired")}
-              </label>
-              <input
-                type="text"
-                id="state"
-                name="state"
-                className="address-form-input"
-                placeholder={tForm("statePlaceholder")}
-                required
-              />
-            </div>
+          {/* Hidden city field for cairo/giza */}
+          {cityCategory !== "other" && (
+            <input
+              type="hidden"
+              name="city"
+              value={cityCategory === "cairo" ? tForm("cityOptions.cairo") : tForm("cityOptions.giza")}
+            />
+          )}
+
+          <div>
+            <label htmlFor="state" className="address-form-label">
+              {tForm("stateRequired")}
+            </label>
+            <input
+              type="text"
+              id="state"
+              name="state"
+              className="address-form-input"
+              placeholder={tForm("statePlaceholder")}
+              required
+            />
           </div>
 
           <SubmitButton />

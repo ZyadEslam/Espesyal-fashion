@@ -61,7 +61,7 @@ const ProductsGroup = ({
 
   return (
     <section className={`${customClassName}`}>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-6">
         {productsToRender.map((product: ProductCardProps, index: number) => (
           <ProductCard
             key={product._id}

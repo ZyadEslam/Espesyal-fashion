@@ -126,3 +126,26 @@ export const syncCartOnLogin = async (userId: string) => {
 export const uniqueListItems = (list: ProductCardProps[]) => {
   return Array.from(new Map(list.map((item) => [item._id, item])).values());
 };
+
+/**
+ * Calculate delivery cost based on city
+ * @param city - The city name (cairo, giza, or other)
+ * @param cairoGizaDeliveryCost - Delivery cost for Cairo and Giza
+ * @param otherCitiesDeliveryCost - Delivery cost for other cities
+ * @returns The delivery cost for the given city
+ */
+export const calculateDeliveryCost = (
+  city: string | undefined | null,
+  cairoGizaDeliveryCost: number,
+  otherCitiesDeliveryCost: number
+): number => {
+  if (!city) return 0;
+  
+  const normalizedCity = city.toLowerCase().trim();
+  
+  if (normalizedCity === "cairo" || normalizedCity === "giza") {
+    return cairoGizaDeliveryCost;
+  }
+  
+  return otherCitiesDeliveryCost;
+};

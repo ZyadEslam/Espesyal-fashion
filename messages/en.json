@@ -98,6 +98,8 @@
     "rating": "Rating",
     "inStock": "In Stock",
     "outOfStock": "Out of Stock",
+    "stockAvailability": "Stock Availability",
+    "insufficientStock": "Insufficient stock. Available: {available}, Requested: {requested}",
     "quickView": "Quick View",
     "selectedOptions": "Selected Options",
     "size": "Size",
@@ -400,10 +402,24 @@
       "streetAddressPlaceholder": "123 Main Street, Apartment 4B",
       "city": "City",
       "cityRequired": "City *",
-      "cityPlaceholder": "New York",
+      "cityPlaceholder": "Cairo",
+      "cityOptions": {
+        "cairo": "Cairo",
+        "giza": "Giza",
+        "other": "Other City"
+      },
+      "otherCityName": "City Name *",
+      "otherCityPlaceholder": "Enter your city name",
       "state": "State",
       "stateRequired": "State *",
-      "statePlaceholder": "NY"
+      "statePlaceholder": "Cairo",
+      "validation": {
+        "nameRequired": "Name is required",
+        "phoneRequired": "Phone is required",
+        "addressRequired": "Address is required",
+        "cityRequired": "City is required",
+        "stateRequired": "State is required"
+      }
     },
     "submit": {
       "saving": "Saving...",
@@ -664,13 +680,16 @@
     },
     "shippingSettings": {
       "title": "Shipping Settings",
-      "subtitle": "Manage shipping fees for orders",
-      "currentShippingFee": "Current Shipping Fee",
-      "shippingFeeHint": "Set the shipping fee that will be applied to all orders. Set to 0 for free shipping.",
-      "updateButton": "Update Shipping Fee",
+      "subtitle": "Manage shipping fees by delivery zone",
+      "cairoGizaShippingFee": "Cairo & Giza Shipping Fee",
+      "cairoGizaHint": "Shipping fee for orders delivered within Cairo and Giza. Set to 0 for free shipping.",
+      "otherCitiesShippingFee": "Other Cities Shipping Fee",
+      "otherCitiesHint": "Shipping fee for orders delivered outside Cairo and Giza. Set to 0 for free shipping.",
+      "updateButton": "Update Shipping Fees",
       "updating": "Updating...",
-      "updateSuccess": "Shipping fee updated successfully",
-      "updateError": "Failed to update shipping fee. Please try again."
+      "updateSuccess": "Shipping fees updated successfully",
+      "updateError": "Failed to update shipping fees. Please try again.",
+      "fetchError": "Failed to fetch shipping fees"
     },
     "categories": {
       "badge": "Management",

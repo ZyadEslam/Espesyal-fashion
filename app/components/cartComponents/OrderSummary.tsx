@@ -15,7 +15,10 @@ const OrderSummary = memo(() => {
   const { status } = useSession();
   const locale = useLocale();
   const router = useRouter();
-  const [shippingFee, setShippingFee] = useState<number>(0);
+  const [shippingFees, setShippingFees] = useState<{
+    insideCairoGiza: number;
+    outsideCities: number;
+  }>({ insideCairoGiza: 0, outsideCities: 0 });
 
   // Fetch shipping fee on component mount
   useEffect(() => {
@@ -24,18 +27,21 @@ const OrderSummary = memo(() => {
         const response = await fetch("/api/settings");
         const result = await response.json();
         if (result.success) {
-          setShippingFee(result.shippingFee || 0);
+          setShippingFees({
+            insideCairoGiza: result.shippingFeeInside ?? result.shippingFee ?? 0,
+            outsideCities: result.shippingFeeOutside ?? result.shippingFee ?? 0,
+          });
         }
       } catch (error) {
         console.error("Error fetching shipping fee:", error);
-        setShippingFee(0);
+        setShippingFees({ insideCairoGiza: 0, outsideCities: 0 });
       }
     };
     fetchShippingFee();
   }, []);
 
   // Calculate total with shipping
-  const totalWithShipping = totalPrice + shippingFee;
+  const totalWithShipping = totalPrice + shippingFees.insideCairoGiza;
 
   const handleSignIn = async () => {
     try {
@@ -107,10 +113,20 @@ const OrderSummary = memo(() => {
 
           <div className="flex justify-between items-center py-2">
             <span className="text-gray-600">{tCheckout("shipping")}</span>
-            <span className="font-semibold text-green-600">
-              {shippingFee > 0
-                ? `${shippingFee.toFixed(2)} ${tCommon("currency")}`
-                : tCart("freeShipping")}
+            <span className="text-right">
+              <span className="block font-semibold text-green-600">
+                {shippingFees.insideCairoGiza > 0
+                  ? `${shippingFees.insideCairoGiza.toFixed(2)} ${tCommon("currency")}`
+                  : tCart("freeShipping")}
+              </span>
+              {shippingFees.outsideCities !== shippingFees.insideCairoGiza && (
+                <span className="block text-xs text-gray-500">
+                  {tCart("shippingOutsideNote", {
+                    amount: shippingFees.outsideCities.toFixed(2),
+                    currency: tCommon("currency"),
+                  })}
+                </span>
+              )}
             </span>
           </div>
 

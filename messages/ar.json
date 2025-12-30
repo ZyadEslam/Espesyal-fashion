@@ -100,6 +100,8 @@
     "rating": "التقييم",
     "inStock": "متوفر",
     "outOfStock": "غير متوفر",
+    "stockAvailability": "الكميه في المخزن",
+    "insufficientStock": "المخزون غير كافٍ. المتوفر: {available}، المطلوب: {requested}",
     "quickView": "عرض سريع",
     "selectedOptions": "الخيارات المحددة",
     "size": "المقاس",
@@ -402,9 +404,23 @@
       "city": "المدينة",
       "cityRequired": "المدينة *",
       "cityPlaceholder": "القاهرة",
+      "cityOptions": {
+        "cairo": "القاهرة",
+        "giza": "الجيزة",
+        "other": "مدينة أخرى"
+      },
+      "otherCityName": "اسم المدينة *",
+      "otherCityPlaceholder": "أدخل اسم مدينتك",
       "state": "المحافظة",
       "stateRequired": "المحافظة *",
-      "statePlaceholder": "القاهرة"
+      "statePlaceholder": "القاهرة",
+      "validation": {
+        "nameRequired": "الاسم مطلوب",
+        "phoneRequired": "رقم الهاتف مطلوب",
+        "addressRequired": "العنوان مطلوب",
+        "cityRequired": "المدينة مطلوبة",
+        "stateRequired": "المحافظة مطلوبة"
+      }
     },
     "submit": {
       "saving": "جاري الحفظ...",
@@ -662,13 +678,16 @@
     },
     "shippingSettings": {
       "title": "إعدادات الشحن",
-      "subtitle": "إدارة رسوم الشحن للطلبات",
-      "currentShippingFee": "رسوم الشحن الحالية",
-      "shippingFeeHint": "قم بتعيين رسوم الشحن التي سيتم تطبيقها على جميع الطلبات. اضبط على 0 للشحن المجاني.",
+      "subtitle": "إدارة رسوم الشحن حسب منطقة التوصيل",
+      "cairoGizaShippingFee": "رسوم شحن القاهرة والجيزة",
+      "cairoGizaHint": "رسوم الشحن للطلبات داخل القاهرة والجيزة. اضبط على 0 للشحن المجاني.",
+      "otherCitiesShippingFee": "رسوم شحن المحافظات الأخرى",
+      "otherCitiesHint": "رسوم الشحن للطلبات خارج القاهرة والجيزة. اضبط على 0 للشحن المجاني.",
       "updateButton": "تحديث رسوم الشحن",
       "updating": "جاري التحديث...",
       "updateSuccess": "تم تحديث رسوم الشحن بنجاح",
-      "updateError": "فشل تحديث رسوم الشحن. يرجى المحاولة مرة أخرى."
+      "updateError": "فشل تحديث رسوم الشحن. يرجى المحاولة مرة أخرى.",
+      "fetchError": "فشل تحميل رسوم الشحن"
     },
     "categories": {
       "badge": "الإدارة",

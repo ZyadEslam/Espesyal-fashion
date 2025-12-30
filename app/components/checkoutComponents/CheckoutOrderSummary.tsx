@@ -1,23 +1,27 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { ProductCardProps } from "@/app/types/types";
+import { ProductCardProps, CityCategory } from "@/app/types/types";
 import { X } from "lucide-react";
 
 interface CheckoutOrderSummaryProps {
   products: ProductCardProps[];
   subtotal: number;
+  cityCategory?: CityCategory;
   onPromoCodeChange?: (
     promoCode: string | null,
     discountAmount: number,
     discountPercentage: number
   ) => void;
+  onShippingFeeChange?: (fee: number) => void;
 }
 
 const CheckoutOrderSummary = ({
   products,
   subtotal,
+  cityCategory,
   onPromoCodeChange,
+  onShippingFeeChange,
 }: CheckoutOrderSummaryProps) => {
   const tCheckout = useTranslations("checkout");
   const tCart = useTranslations("cart");
@@ -29,23 +33,44 @@ const CheckoutOrderSummary = ({
   const [promoError, setPromoError] = useState("");
   const [validatingPromo, setValidatingPromo] = useState(false);
   const [shippingFee, setShippingFee] = useState<number>(0);
+  const [cairoGizaFee, setCairoGizaFee] = useState<number>(0);
+  const [otherCitiesFee, setOtherCitiesFee] = useState<number>(0);
 
-  // Fetch shipping fee on component mount
+  // Fetch shipping fees on component mount
   useEffect(() => {
-    const fetchShippingFee = async () => {
+    const fetchShippingFees = async () => {
       try {
         const response = await fetch("/api/settings");
         const result = await response.json();
         if (result.success) {
-          setShippingFee(result.shippingFee || 0);
+          setCairoGizaFee(result.cairoGizaShippingFee || 0);
+          setOtherCitiesFee(result.otherCitiesShippingFee || 0);
         }
       } catch (error) {
-        console.error("Error fetching shipping fee:", error);
-        setShippingFee(0);
+        console.error("Error fetching shipping fees:", error);
+        setCairoGizaFee(0);
+        setOtherCitiesFee(0);
       }
     };
-    fetchShippingFee();
+    fetchShippingFees();
   }, []);
+
+  // Calculate shipping fee based on city category
+  useEffect(() => {
+    let fee = 0;
+    if (cityCategory === "cairo" || cityCategory === "giza") {
+      fee = cairoGizaFee;
+    } else if (cityCategory === "other") {
+      fee = otherCitiesFee;
+    } else {
+      // Default to Cairo/Giza fee if no city selected
+      fee = cairoGizaFee;
+    }
+    setShippingFee(fee);
+    if (onShippingFeeChange) {
+      onShippingFeeChange(fee);
+    }
+  }, [cityCategory, cairoGizaFee, otherCitiesFee, onShippingFeeChange]);
 
   // Recalculate discount when subtotal or percentage changes
   useEffect(() => {

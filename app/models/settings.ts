@@ -4,9 +4,21 @@ const settingsSchema = new mongoose.Schema(
   {
     shippingFee: {
       type: Number,
-      required: [true, "Shipping fee is required"],
+      required: false,
       default: 0,
       min: [0, "Shipping fee cannot be negative"],
+    },
+    cairoGizaShippingFee: {
+      type: Number,
+      required: false,
+      default: 0,
+      min: [0, "Cairo/Giza shipping fee cannot be negative"],
+    },
+    otherCitiesShippingFee: {
+      type: Number,
+      required: false,
+      default: 0,
+      min: [0, "Other cities shipping fee cannot be negative"],
     },
   },
   {

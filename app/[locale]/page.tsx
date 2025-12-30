@@ -68,7 +68,7 @@ export default async function Home() {
   return (
     <main className="min-h-screen">
       {/* Black Friday Campaign Hero Section - Render immediately */}
-      <section className="py-6 md:py-4">
+      <section className="py-6 md:py-6~">
         <div className="layout-shell">
           <HeroSection />
         </div>

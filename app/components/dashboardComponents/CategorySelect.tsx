@@ -64,22 +64,45 @@ const CategorySelect: React.FC<CategorySelectProps> = ({
 
   const handleCategoryCreated = async (
     categoryId: string,
-    _categoryName: string // eslint-disable-line @typescript-eslint/no-unused-vars
+    categoryName: string
   ) => {
-    // Refresh categories list
+    // Immediately add the new category to the list for instant UI update
+    const newCategory: Category = {
+      _id: categoryId,
+      name: categoryName,
+      slug: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+    };
+    
+    // Add to state immediately (check for duplicates first)
+    setCategories((prev) => {
+      // Check if category already exists
+      if (prev.some((cat) => cat._id === categoryId)) {
+        return prev;
+      }
+      return [...prev, newCategory];
+    });
+    setSelectedValue(categoryId);
+    onChange?.(categoryId);
+    setShowCategoryForm(false);
+
+    // Then refresh categories list in the background with cache-busting
     try {
-      const response = await fetch("/api/categories");
+      const response = await fetch(`/api/categories?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
       const data = await response.json();
 
-      if (data.success) {
+      if (data.success && data.data) {
+        // Update with fresh data from server (this will include the new category)
         setCategories(data.data || []);
-        setSelectedValue(categoryId);
-        onChange?.(categoryId);
       }
     } catch (error) {
       console.error("Error refreshing categories:", error);
+      // If refresh fails, keep the manually added category
     }
-    setShowCategoryForm(false);
   };
 
   const labelClass = `text-sm font-medium text-gray-700 ${

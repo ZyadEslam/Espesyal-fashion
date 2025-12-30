@@ -103,6 +103,17 @@ export async function GET(request: NextRequest, { params }: Params) {
       imgSrc: (product.imgSrc || []).map(
         (_: unknown, index: number) => `/api/product/image/${id}?index=${index}`
       ),
+      // Convert variant _id fields to strings
+      variants: Array.isArray(product.variants)
+        ? product.variants.map((variant: { _id?: { toString: () => string } | string; [key: string]: unknown }) => ({
+            ...variant,
+            _id: variant._id
+              ? typeof variant._id === "string"
+                ? variant._id
+                : variant._id.toString()
+              : undefined,
+          }))
+        : product.variants,
     };
 
     const responseData = {

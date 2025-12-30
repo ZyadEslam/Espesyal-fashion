@@ -47,6 +47,7 @@ export const getOptimizedImageUrl = (
 
 /**
  * Generate srcset for responsive images
+ * Sizes are optimized for both 1x displays AND retina displays (2x, 3x DPR)
  * @param productId - Product ID
  * @param index - Image index (default: 0)
  * @param sizes - Array of widths to generate
@@ -55,7 +56,7 @@ export const getOptimizedImageUrl = (
 export const getImageSrcSet = (
   productId: string,
   index: number = 0,
-  sizes: number[] = [220, 260, 320] // Default optimized for product cards
+  sizes: number[] = [320, 480, 640, 800] // Optimized for product cards including retina displays
 ): string => {
   return sizes
     .map((width) => {

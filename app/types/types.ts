@@ -50,6 +50,8 @@ export interface TableRowProps {
   product: ProductCardProps;
 }
 
+export type CityCategory = "cairo" | "giza" | "other";
+
 export interface AddressProps {
   _id: string;
   name: string;
@@ -57,6 +59,7 @@ export interface AddressProps {
   address: string;
   city: string;
   state: string;
+  cityCategory?: CityCategory;
 }
 
 export enum PromoCodeState {

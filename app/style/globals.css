@@ -185,7 +185,7 @@ html {
     display: none;
   }
   .layout-shell {
-    @apply w-[95%] mx-auto sm:container sm:mx-auto sm:px-6 lg:px-4;
+    @apply w-[95%] mx-auto md:container md:mx-auto md:px-6 lg:px-4;
   }
 
   .section-spacing {

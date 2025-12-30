@@ -141,18 +141,4 @@ export const api = {
       return NextResponse.json(err, { status: 401 });
     }
   },
-  getAddresses: async () => {
-    try {
-      const response = await fetch("/api/order-address");
-      const result = await response.json();
-      if (result.success) {
-        return NextResponse.json(
-          { addresses: result.addresses },
-          { status: 200 }
-        );
-      }
-    } catch (error) {
-      return NextResponse.json(error, { status: 500 });
-    }
-  },
 };

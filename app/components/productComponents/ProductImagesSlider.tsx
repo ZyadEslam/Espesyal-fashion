@@ -132,6 +132,7 @@ import { ProductCardProps } from "../../types/types";
 import {
   getOptimizedImageUrl,
   getImageDimensions,
+  getImageSrcSet,
 } from "../../utils/imageUtils";
 
 const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
@@ -148,19 +149,26 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   const thumbnailDimensions = getImageDimensions("thumbnail");
 
   // Preload all product images when component mounts
+  // First image gets highest priority, others load in background
   useEffect(() => {
     if (!product._id || !product.imgSrc?.length) return;
 
-    const preloadImage = (originalIndex: number) => {
+    const preloadImage = (originalIndex: number, isFirst: boolean) => {
+      // First image uses smaller size for faster initial load (600px is enough for most screens)
+      // Other images use full size for when user switches
       const imageUrl = getOptimizedImageUrl(
         product._id as string,
         originalIndex,
-        mainImageDimensions.width,
-        mainImageDimensions.height,
-        90
+        isFirst ? 600 : mainImageDimensions.width,
+        isFirst ? 600 : mainImageDimensions.height,
+        isFirst ? 85 : 90
       );
 
-      const img = new Image();
+      const img = new window.Image();
+      // Set high priority for first image
+      if (isFirst) {
+        img.fetchPriority = "high";
+      }
       img.onload = () => {
         setPreloadedImages((prev) => new Set([...prev, originalIndex]));
         setLoadingImages((prev) => {
@@ -180,10 +188,15 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
       img.src = imageUrl;
     };
 
-    // Preload all images in background
+    // Load first image IMMEDIATELY with no delay
+    preloadImage(0, true);
+
+    // Preload other images in background with delay to not compete with first image
     product.imgSrc.forEach((_, index) => {
-      // Small delay to prioritize first image
-      setTimeout(() => preloadImage(index), index * 100);
+      if (index > 0) {
+        // Delay other images to let first image load first
+        setTimeout(() => preloadImage(index, false), 500 + index * 150);
+      }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product._id, product.imgSrc]);
@@ -332,17 +345,35 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   );
 
   // Generate optimized URLs using product ID directly
+  // First image uses smaller size for faster initial load
   const getOptimizedMainImageUrl = (originalIndex: number) => {
     if (product._id) {
+      const isFirstImage = originalIndex === 0;
       return getOptimizedImageUrl(
         product._id as string,
         originalIndex,
-        mainImageDimensions.width,
-        mainImageDimensions.height,
-        90
+        isFirstImage ? 600 : mainImageDimensions.width, // 600px for first image, 800px for others
+        isFirstImage ? 600 : mainImageDimensions.height,
+        isFirstImage ? 85 : 90 // Slightly lower quality for first image = faster load
       );
     }
     return currentImage.src;
+  };
+
+  // Generate srcset for main image to support retina displays
+  // First image uses smaller sizes for faster initial load
+  const getMainImageSrcSet = (originalIndex: number) => {
+    if (product._id) {
+      const isFirstImage = originalIndex === 0;
+      // First image: prioritize speed with smaller sizes
+      // Other images: full quality range for when user is already viewing the page
+      return getImageSrcSet(
+        product._id as string,
+        originalIndex,
+        isFirstImage ? [400, 600, 800] : [400, 600, 800, 1200]
+      );
+    }
+    return undefined;
   };
 
   return (
@@ -366,18 +397,19 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
             <img
               key={`main-image-${currentImage.originalIndex}-${safeSelectedIndex}`}
               src={getOptimizedMainImageUrl(currentImage.originalIndex)}
+              srcSet={getMainImageSrcSet(currentImage.originalIndex)}
               alt={product.name}
               className={`w-full h-full object-contain transition-opacity duration-200 ${
                 imageLoaded || isCurrentImagePreloaded
                   ? "opacity-100"
                   : "opacity-0"
               }`}
-              width={mainImageDimensions.width}
-              height={mainImageDimensions.height}
+              width={currentImage.originalIndex === 0 ? 600 : mainImageDimensions.width}
+              height={currentImage.originalIndex === 0 ? 600 : mainImageDimensions.height}
               sizes="(max-width: 768px) 100vw, 33vw"
-              fetchPriority={safeSelectedIndex === 0 ? "high" : "auto"}
-              loading={safeSelectedIndex === 0 ? "eager" : "lazy"}
-              decoding="async"
+              fetchPriority={currentImage.originalIndex === 0 ? "high" : "auto"}
+              loading={currentImage.originalIndex === 0 ? "eager" : "lazy"}
+              decoding={currentImage.originalIndex === 0 ? "sync" : "async"}
               onError={() => handleImageError(currentImage.originalIndex)}
               onLoad={() => handleImageLoad(currentImage.originalIndex)}
             />
@@ -387,14 +419,15 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
       <div className="flex flex-wrap gap-2 sm:gap-3 mt-2 sm:mt-3 md:mt-4 justify-center sm:justify-start">
         {validImagesWithIndices.map(({ src, originalIndex }, filteredIndex) => {
           // Generate optimized thumbnail URL using product ID directly
+          // Request 2x resolution for retina displays (160px for 80px display)
           const getOptimizedThumbnailUrl = () => {
             if (product._id) {
               return getOptimizedImageUrl(
                 product._id as string,
                 originalIndex,
-                thumbnailDimensions.width,
-                thumbnailDimensions.height,
-                75
+                thumbnailDimensions.width * 2, // 2x for retina displays
+                thumbnailDimensions.height * 2,
+                80
               );
             }
             return src;

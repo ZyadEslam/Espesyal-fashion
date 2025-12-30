@@ -57,7 +57,16 @@ export async function getProductById(
       rating: product.rating,
       brand: product.brand,
       categoryName: product.categoryName,
-      variants: product.variants as ProductCardProps["variants"],
+      variants: Array.isArray(product.variants)
+        ? (product.variants as Array<{ _id?: { toString: () => string } | string; [key: string]: unknown }>).map((variant) => ({
+            ...variant,
+            _id: variant._id
+              ? typeof variant._id === "string"
+                ? variant._id
+                : variant._id.toString()
+              : undefined,
+          })) as ProductCardProps["variants"]
+        : (product.variants as ProductCardProps["variants"]),
       totalStock: product.totalStock,
       // Convert image buffers to API endpoints (return as strings, matching API route format)
       imgSrc: (product.imgSrc || []).map(
@@ -100,7 +109,16 @@ export async function getAllProducts(): Promise<ProductCardProps[]> {
       brand: product.brand,
       category: product.category?.toString(),
       categoryName: product.categoryName,
-      variants: product.variants as ProductCardProps["variants"],
+      variants: Array.isArray(product.variants)
+        ? (product.variants as Array<{ _id?: { toString: () => string } | string; [key: string]: unknown }>).map((variant) => ({
+            ...variant,
+            _id: variant._id
+              ? typeof variant._id === "string"
+                ? variant._id
+                : variant._id.toString()
+              : undefined,
+          })) as ProductCardProps["variants"]
+        : (product.variants as ProductCardProps["variants"]),
       totalStock: product.totalStock,
       // Convert image buffers to API endpoints (return as strings, matching API route format)
       imgSrc: Array.from(
