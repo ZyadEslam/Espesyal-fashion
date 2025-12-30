@@ -91,16 +91,16 @@ export async function POST(req: NextRequest) {
     // Connect to database
     await dbConnect();
 
-    // Find and update order by paymobOrderId or merchantOrderId
+    // Find and update order by merchantOrderId (our MongoDB order ID) or paymobOrderId
     let order = null;
 
+    // merchantOrderId is our actual MongoDB order ID
     if (merchantOrderId) {
-      // Try to find by our internal order ID stored in merchant_order_id
       order = await Order.findById(merchantOrderId);
     }
 
+    // Fallback: try to find by paymobOrderId
     if (!order && paymobOrderId) {
-      // Try to find by paymobOrderId
       order = await Order.findOne({ paymobOrderId: String(paymobOrderId) });
     }
 
@@ -175,8 +175,17 @@ export async function GET(req: NextRequest) {
     try {
       await dbConnect();
       
-      // Try to find order by paymobOrderId
-      const order = await Order.findOne({ paymobOrderId: String(paymobOrderId) });
+      let order = null;
+      
+      // First try to find by merchantOrderId (which is our MongoDB order ID)
+      if (merchantOrderId) {
+        order = await Order.findById(merchantOrderId);
+      }
+      
+      // Fallback: try to find by paymobOrderId
+      if (!order && paymobOrderId) {
+        order = await Order.findOne({ paymobOrderId: String(paymobOrderId) });
+      }
       
       if (order) {
         // Update payment status if not already updated by webhook
@@ -201,6 +210,20 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(redirectUrl.toString());
   } else {
     // Payment failed - redirect back to checkout with error
+    // Also need to handle the failed order - maybe delete it or mark as failed
+    if (merchantOrderId) {
+      try {
+        await dbConnect();
+        const order = await Order.findById(merchantOrderId);
+        if (order && order.paymentStatus === "pending") {
+          order.paymentStatus = "failed";
+          await order.save();
+        }
+      } catch (error) {
+        console.error("Error updating failed order:", error);
+      }
+    }
+    
     const redirectUrl = new URL(`/${locale}/checkout`, baseUrl);
     redirectUrl.searchParams.set("payment_failed", "true");
     if (transactionId) {

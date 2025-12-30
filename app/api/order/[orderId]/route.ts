@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import Order from "@/app/models/order";
 import dbConnect from "@/lib/mongoose";
 
@@ -127,6 +127,55 @@ export async function GET(
     console.error("Error fetching order:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch order" },
+      { status: 500 }
+    );
+  }
+}
+
+// PATCH - Update order (for paymobOrderId, etc.)
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ orderId: string }> }
+) {
+  try {
+    await dbConnect();
+    const { orderId } = await params;
+
+    if (!orderId) {
+      return NextResponse.json(
+        { success: false, message: "Order ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const body = await req.json();
+    const { paymobOrderId, paymobTransactionId, paymentStatus, orderState } = body;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return NextResponse.json(
+        { success: false, message: "Order not found" },
+        { status: 404 }
+      );
+    }
+
+    // Update allowed fields
+    if (paymobOrderId) order.paymobOrderId = paymobOrderId;
+    if (paymobTransactionId) order.paymobTransactionId = paymobTransactionId;
+    if (paymentStatus) order.paymentStatus = paymentStatus;
+    if (orderState) order.orderState = orderState;
+
+    await order.save();
+
+    return NextResponse.json(
+      { success: true, message: "Order updated successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error updating order:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to update order" },
       { status: 500 }
     );
   }

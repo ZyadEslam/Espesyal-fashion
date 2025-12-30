@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import { Loader2, CreditCard } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -13,47 +13,68 @@ interface PaymobPaymentFormProps {
     city: string;
     state: string;
   };
-  orderId?: string;
-  onPaymentSuccess: (transactionId: string, paymobOrderId: string) => void;
+  orderData: {
+    userId?: string;
+    products: unknown[];
+    totalPrice: number;
+    shippingFee: number;
+    promoCode?: string;
+    discountAmount?: number;
+    discountPercentage?: number;
+  };
   onPaymentError: (error: string) => void;
+  onOrderCreating?: () => void;
 }
 
 const PaymobPaymentForm = ({
   amount,
   billingData,
-  orderId,
-  onPaymentSuccess,
+  orderData,
   onPaymentError,
+  onOrderCreating,
 }: PaymobPaymentFormProps) => {
   const t = useTranslations("checkout");
   const tCommon = useTranslations("common");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
-  // Check URL params for payment callback (when user returns from Paymob)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      const success = urlParams.get("success");
-      const transactionId = urlParams.get("id");
-      const paymobOrderId = sessionStorage.getItem("pendingPaymobOrderId");
-
-      if (success === "true" && transactionId) {
-        onPaymentSuccess(transactionId, paymobOrderId || "");
-        sessionStorage.removeItem("pendingPaymobOrderId");
-      } else if (success === "false") {
-        onPaymentError("Payment was not completed");
-      }
-    }
-  }, [onPaymentSuccess, onPaymentError]);
-
-  // Initialize and redirect to Paymob payment page
-  const handlePayment = useCallback(async () => {
+  // Create order and redirect to Paymob payment page
+  const handlePayment = async () => {
     setIsLoading(true);
     setError("");
+    onOrderCreating?.();
 
     try {
-      const response = await fetch("/api/paymob/create-payment", {
+      // Step 1: Create the order first with pending payment status
+      const orderResponse = await fetch("/api/order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...orderData,
+          address: {
+            name: billingData.name,
+            phone: billingData.phone,
+            address: billingData.address,
+            city: billingData.city,
+            state: billingData.state,
+          },
+          paymentMethod: "paymob",
+          // Payment status will be "pending" by default
+        }),
+      });
+
+      const orderResult = await orderResponse.json();
+
+      if (!orderResult.success) {
+        throw new Error(orderResult.message || "Failed to create order");
+      }
+
+      const orderId = orderResult.orderId;
+
+      // Step 2: Create Paymob payment with order ID
+      const paymentResponse = await fetch("/api/paymob/create-payment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,23 +92,35 @@ const PaymobPaymentForm = ({
             city: billingData.city,
             state: billingData.state,
           },
-          merchantOrderId: orderId,
+          merchantOrderId: orderId, // Pass the actual order ID
         }),
       });
 
-      const data = await response.json();
+      const paymentData = await paymentResponse.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to initialize payment");
+      if (!paymentResponse.ok) {
+        throw new Error(paymentData.message || "Failed to initialize payment");
       }
 
-      // Store paymobOrderId for when user returns
+      // Step 3: Update order with paymobOrderId
+      await fetch(`/api/order/${orderId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          paymobOrderId: String(paymentData.orderId),
+        }),
+      });
+
+      // Step 4: Clear cart and checkout data before redirecting
       if (typeof window !== "undefined") {
-        sessionStorage.setItem("pendingPaymobOrderId", String(data.orderId));
+        sessionStorage.removeItem("checkoutData");
+        sessionStorage.setItem("pendingOrderId", orderId);
       }
 
-      // Redirect to Paymob payment page
-      window.location.href = data.iframeUrl;
+      // Step 5: Redirect to Paymob payment page
+      window.location.href = paymentData.iframeUrl;
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Payment initialization failed";
@@ -95,7 +128,7 @@ const PaymobPaymentForm = ({
       onPaymentError(errorMessage);
       setIsLoading(false);
     }
-  }, [amount, billingData, orderId, onPaymentError]);
+  };
 
   return (
     <div className="space-y-4">

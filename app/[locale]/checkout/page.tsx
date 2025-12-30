@@ -317,89 +317,6 @@ const CheckoutPage = () => {
     }
   };
 
-  const handlePaymobPaymentSuccess = async (transactionId: string, paymobOrderId: string) => {
-    if (!checkoutData || !selectedAddress) return;
-
-    setIsProcessing(true);
-    setOrderStatus(null);
-
-    // Validate stock before proceeding
-    const stockValidation = await validateStock(checkoutData.products);
-    if (!stockValidation.valid) {
-      setIsProcessing(false);
-      setOrderStatus({
-        success: false,
-        message: stockValidation.message || "Stock validation failed",
-      });
-      return;
-    }
-
-    // Clear cart immediately when payment succeeds
-    clearCart();
-
-    try {
-      const orderData: OrderData = {
-        // Include userId only if user is authenticated
-        ...(session.status === "authenticated" &&
-          session.data?.user?.id && {
-            userId: session.data.user.id,
-          }),
-        // Always send address data directly (no saved addresses)
-        address: {
-          name: selectedAddress.name,
-          phone: selectedAddress.phone,
-          address: selectedAddress.address,
-          city: selectedAddress.city,
-          state: selectedAddress.state,
-        },
-        products: checkoutData.products,
-        totalPrice: finalTotal,
-        paymentMethod: "paymob",
-        paymobOrderId: paymobOrderId,
-        paymobTransactionId: transactionId,
-        shippingFee: shippingFee,
-        ...(promoCode && { promoCode }),
-        ...(discountAmount > 0 && {
-          discountAmount: discountAmount,
-          discountPercentage: discountPercentage,
-        }),
-      };
-
-      const response = await fetch("/api/order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(orderData),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        setOrderStatus({ success: true, message: t("orderPlaced") });
-        sessionStorage.removeItem("checkoutData");
-        // Clear server cart (only if authenticated)
-        if (session.status === "authenticated" && session.data?.user?.id) {
-          await api.clearCart(session.data.user.id);
-        }
-        clearCart();
-        setTimeout(() => {
-          router.push(`/${locale}/order-confirmation/${result.orderId}`);
-        }, 1500);
-      } else {
-        setOrderStatus({
-          success: false,
-          message: result.message || t("paymentFailed"),
-        });
-      }
-    } catch (error) {
-      console.error("Error placing order:", error);
-      setOrderStatus({ success: false, message: t("paymentFailed") });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   if (!checkoutData || checkoutData.products.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50/50 flex items-center justify-center">
@@ -547,10 +464,31 @@ const CheckoutPage = () => {
                         city: selectedAddress.city,
                         state: selectedAddress.state,
                       }}
-                      onPaymentSuccess={handlePaymobPaymentSuccess}
+                      orderData={{
+                        ...(session.status === "authenticated" &&
+                          session.data?.user?.id && {
+                            userId: session.data.user.id,
+                          }),
+                        products: checkoutData.products,
+                        totalPrice: finalTotal,
+                        shippingFee: shippingFee,
+                        ...(promoCode && { promoCode }),
+                        ...(discountAmount > 0 && {
+                          discountAmount: discountAmount,
+                          discountPercentage: discountPercentage,
+                        }),
+                      }}
                       onPaymentError={(error) => {
                         setOrderStatus({ success: false, message: error });
                         setIsProcessing(false);
+                      }}
+                      onOrderCreating={() => {
+                        setIsProcessing(true);
+                        // Clear cart when order is being created
+                        clearCart();
+                        if (session.status === "authenticated" && session.data?.user?.id) {
+                          api.clearCart(session.data.user.id);
+                        }
                       }}
                     />
                   </div>
