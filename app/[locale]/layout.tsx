@@ -77,15 +77,9 @@ export default async function LocaleLayout({
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
         <link rel="dns-prefetch" href="//www.google-analytics.com" />
-        {/* Stripe preconnects removed - only added on checkout page */}
-        {/* Preload critical fonts */}
-        <link
-          rel="preload"
-          href="/fonts/Tajawal/Tajawal-Regular.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin="anonymous"
-        />
+        {/* Paymob preconnects for payment processing */}
+        <link rel="dns-prefetch" href="//accept.paymob.com" />
+        {/* Note: Font preloading is handled by Next.js localFont automatically */}
         {/* Prefetch critical API routes for faster navigation */}
         <link
           rel="prefetch"

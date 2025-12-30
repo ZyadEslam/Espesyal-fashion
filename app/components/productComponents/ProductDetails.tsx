@@ -174,7 +174,8 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
           t("insufficientStock", {
             available: selectedVariant.quantity,
             requested: quantity,
-          }) || `Insufficient stock. Available: ${selectedVariant.quantity}, Requested: ${quantity}`
+          }) ||
+            `Insufficient stock. Available: ${selectedVariant.quantity}, Requested: ${quantity}`
         );
         return;
       }
@@ -184,7 +185,8 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
         t("insufficientStock", {
           available: data.totalStock,
           requested: quantity,
-        }) || `Insufficient stock. Available: ${data.totalStock}, Requested: ${quantity}`
+        }) ||
+          `Insufficient stock. Available: ${data.totalStock}, Requested: ${quantity}`
       );
       return;
     }
@@ -323,7 +325,11 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
                     selectedSize === option.size
                       ? "bg-secondary text-white border-orange"
                       : "bg-white text-gray-700 border-gray-300 hover:border-orange hover:text-orange"
-                  } ${option.available === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+                  } ${
+                    option.available === 0
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }`}
                   disabled={option.available === 0}
                 >
                   {option.size}
@@ -418,7 +424,7 @@ const ProductDetails = ({ data }: { data: ProductCardProps }) => {
         </div>
       </div>
 
-      <div className="w-full flex sm:flex-col md:flex-row sm:gap-4 mt-4 sm:mt-6">
+      <div className="w-full flex flex-col lg:flex-row gap-3 sm:gap-4 mt-4 sm:mt-6">
         <button
           className={`group relative w-full sm:w-auto flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base font-semibold rounded-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg ${
             isAddToCartDisabled

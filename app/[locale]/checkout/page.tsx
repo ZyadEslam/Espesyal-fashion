@@ -1,14 +1,13 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { CreditCard, Wallet, ArrowLeft } from "lucide-react";
 import LoadingOverlay from "@/app/components/LoadingOverlay";
 import ActionNotification from "@/app/UI/ActionNotification";
-import StripePaymentForm from "@/app/components/checkoutComponents/StripePaymentForm";
-import StripePreconnects from "@/app/components/checkoutComponents/StripePreconnects";
+import PaymobPaymentForm from "@/app/components/checkoutComponents/PaymobPaymentForm";
 import CheckoutAddressSection from "@/app/components/checkoutComponents/CheckoutAddressSection";
 import CheckoutOrderSummary from "@/app/components/checkoutComponents/CheckoutOrderSummary";
 import { api } from "@/app/utils/api";
@@ -37,18 +36,20 @@ interface OrderData {
   };
   products: ProductCardProps[];
   totalPrice: number;
-  paymentMethod: "cash_on_delivery" | "stripe";
+  paymentMethod: "cash_on_delivery" | "paymob";
   shippingFee: number;
   promoCode?: string;
   discountAmount?: number;
   discountPercentage?: number;
-  stripePaymentIntentId?: string;
+  paymobOrderId?: string;
+  paymobTransactionId?: string;
 }
 
 const CheckoutPage = () => {
   const t = useTranslations("checkout");
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const session = useSession();
   const { clearCart, cart, totalPrice } = useCart();
   const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null);
@@ -56,7 +57,7 @@ const CheckoutPage = () => {
     null
   );
   const [paymentMethod, setPaymentMethod] = useState<
-    "cash_on_delivery" | "stripe"
+    "cash_on_delivery" | "paymob"
   >("cash_on_delivery");
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderStatus, setOrderStatus] = useState<{
@@ -69,6 +70,21 @@ const CheckoutPage = () => {
   const [shippingFee, setShippingFee] = useState<number>(0);
   const [finalTotal, setFinalTotal] = useState<number>(0);
   const [cityCategory, setCityCategory] = useState<CityCategory | undefined>(undefined);
+
+  // Check for payment failure from redirect
+  useEffect(() => {
+    const paymentFailed = searchParams.get("payment_failed");
+    const errorMessage = searchParams.get("error");
+    
+    if (paymentFailed === "true") {
+      setOrderStatus({
+        success: false,
+        message: errorMessage ? decodeURIComponent(errorMessage) : t("paymentFailed"),
+      });
+      // Clean up URL params
+      router.replace(`/${locale}/checkout`, { scroll: false });
+    }
+  }, [searchParams, t, locale, router]);
 
   useEffect(() => {
     // Get checkout data from sessionStorage
@@ -301,7 +317,7 @@ const CheckoutPage = () => {
     }
   };
 
-  const handleStripePaymentSuccess = async (paymentIntentId: string) => {
+  const handlePaymobPaymentSuccess = async (transactionId: string, paymobOrderId: string) => {
     if (!checkoutData || !selectedAddress) return;
 
     setIsProcessing(true);
@@ -338,8 +354,9 @@ const CheckoutPage = () => {
         },
         products: checkoutData.products,
         totalPrice: finalTotal,
-        paymentMethod: "stripe",
-        stripePaymentIntentId: paymentIntentId,
+        paymentMethod: "paymob",
+        paymobOrderId: paymobOrderId,
+        paymobTransactionId: transactionId,
         shippingFee: shippingFee,
         ...(promoCode && { promoCode }),
         ...(discountAmount > 0 && {
@@ -404,7 +421,6 @@ const CheckoutPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50/50">
-      <StripePreconnects />
       <LoadingOverlay
         isVisible={isProcessing}
         message={t("processingPayment")}
@@ -482,11 +498,11 @@ const CheckoutPage = () => {
                     </div>
                   </div>
 
-                  {/* Stripe Payment */}
+                  {/* Paymob Card Payment */}
                   <div
-                    onClick={() => setPaymentMethod("stripe")}
+                    onClick={() => setPaymentMethod("paymob")}
                     className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      paymentMethod === "stripe"
+                      paymentMethod === "paymob"
                         ? "border-orange bg-orange/5"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
@@ -494,12 +510,12 @@ const CheckoutPage = () => {
                     <div className="flex items-start gap-4">
                       <div
                         className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mt-0.5 ${
-                          paymentMethod === "stripe"
+                          paymentMethod === "paymob"
                             ? "border-orange bg-orange"
                             : "border-gray-300"
                         }`}
                       >
-                        {paymentMethod === "stripe" && (
+                        {paymentMethod === "paymob" && (
                           <div className="w-3 h-3 rounded-full bg-white" />
                         )}
                       </div>
@@ -518,12 +534,20 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
-                {/* Stripe Payment Form */}
-                {paymentMethod === "stripe" && (
+                {/* Paymob Payment Form */}
+                {paymentMethod === "paymob" && selectedAddress && (
                   <div className="mt-6 pt-6 border-t border-gray-200">
-                    <StripePaymentForm
+                    <PaymobPaymentForm
                       amount={finalTotal}
-                      onPaymentSuccess={handleStripePaymentSuccess}
+                      billingData={{
+                        name: selectedAddress.name,
+                        phone: selectedAddress.phone,
+                        email: session.data?.user?.email || undefined,
+                        address: selectedAddress.address,
+                        city: selectedAddress.city,
+                        state: selectedAddress.state,
+                      }}
+                      onPaymentSuccess={handlePaymobPaymentSuccess}
                       onPaymentError={(error) => {
                         setOrderStatus({ success: false, message: error });
                         setIsProcessing(false);

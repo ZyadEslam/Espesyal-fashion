@@ -11,15 +11,17 @@ const RatingStars = ({ rating }: { rating: number }) => {
             width={12}
             height={12}
             alt="star_icon"
+            style={{ width: 12, height: 'auto' }}
           />
         ))}
         {Array.from({ length: Math.ceil(5 - rating) }).map((_, index) => (
           <Image
-            key={"product star" + index}
+            key={"product star dull" + index}
             src={assets.star_dull_icon}
             width={12}
             height={12}
             alt="star_icon"
+            style={{ width: 12, height: 'auto' }}
           />
         ))}
       </span>

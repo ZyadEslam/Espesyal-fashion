@@ -26,7 +26,7 @@ This document summarizes all security measures implemented in the e-commerce app
 
 #### Protected Routes
 
-- ✅ `/api/stripe/create-payment-intent` - Requires authentication
+- ✅ `/api/paymob/create-payment` - Requires authentication
 - ✅ `/api/order` POST - Requires authentication + ownership verification
 - ✅ `/api/product` POST/PATCH/DELETE - Requires admin authentication
 - ✅ `/api/product/[id]` POST/PATCH/DELETE - Requires admin authentication
@@ -130,8 +130,8 @@ This document summarizes all security measures implemented in the e-commerce app
 
 #### Payment Metadata
 
-- User ID and email stored in Stripe metadata
-- Order ID linked to payment intent
+- User ID and email stored in Paymob order metadata
+- Order ID linked to Paymob transaction
 - All payment events logged for audit
 
 ### 7. Audit Logging
@@ -301,7 +301,10 @@ This document summarizes all security measures implemented in the e-commerce app
 - `NEXTAUTH_URL` - Application URL (required in production)
 - `GOOGLE_CLIENT_ID` - Google OAuth client ID
 - `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
-- `STRIPE_SECRET_KEY` - Stripe secret key
+- `PAYMOB_API_KEY` - Paymob API key
+- `PAYMOB_INTEGRATION_ID` - Paymob integration ID
+- `PAYMOB_IFRAME_ID` - Paymob iframe ID
+- `PAYMOB_HMAC_SECRET` - Paymob HMAC secret for webhook verification
 - `FIRST_ADMIN_EMAIL` - First admin email
 - `espesyal_REDIS_URL` or `REDIS_URL` - Redis connection for rate limiting
 
@@ -309,7 +312,7 @@ This document summarizes all security measures implemented in the e-commerce app
 
 1. **Two-Factor Authentication (2FA)**: Add 2FA for admin accounts
 2. **IP Whitelisting**: Restrict admin access to specific IPs
-3. **Webhook Signature Verification**: Verify Stripe webhook signatures
+3. **Webhook Signature Verification**: Verify Paymob webhook signatures (✅ Implemented via HMAC)
 4. **Request ID Tracking**: Add request IDs for better tracing
 5. **Security Headers Monitoring**: Monitor CSP violations
 6. **Database Query Logging**: Log all database queries for audit

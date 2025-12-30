@@ -214,7 +214,8 @@ export async function POST(req: NextRequest) {
       discountAmount,
       discountPercentage,
       paymentMethod,
-      stripePaymentIntentId,
+      paymobOrderId,
+      paymobTransactionId,
       shippingFee,
     } = validation.data;
 
@@ -333,7 +334,7 @@ export async function POST(req: NextRequest) {
         orderState: "Pending",
         paymentMethod: paymentMethod || "cash_on_delivery",
         paymentStatus:
-          paymentMethod === "stripe" && stripePaymentIntentId
+          paymentMethod === "paymob" && paymobTransactionId
             ? "paid"
             : "pending",
         ...(promoCode && { promoCode }),
@@ -343,7 +344,8 @@ export async function POST(req: NextRequest) {
         ...(discountPercentage !== undefined && {
           discountPercentage: +discountPercentage,
         }),
-        ...(stripePaymentIntentId && { stripePaymentIntentId }),
+        ...(paymobOrderId && { paymobOrderId }),
+        ...(paymobTransactionId && { paymobTransactionId }),
         ...(shippingFee !== undefined && { shippingFee: +shippingFee }),
       });
       await newOrder.save({ session: dbSession });

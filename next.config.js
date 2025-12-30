@@ -11,6 +11,7 @@ const nextConfig = {
     formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    qualities: [75, 80, 85, 90, 100], // Configured quality values used in the app
     minimumCacheTTL: 31536000, // 1 year cache
     // Allow our API routes with any query parameters
     // Note: pathname doesn't include query strings, but ** matches any path
@@ -103,7 +104,7 @@ const nextConfig = {
               // UI libraries
               ui: {
                 name: "ui-libs",
-                test: /[\\/]node_modules[\\/](lucide-react|@stripe)[\\/]/,
+                test: /[\\/]node_modules[\\/](lucide-react)[\\/]/,
                 chunks: "all",
                 priority: 32,
                 minChunks: 1,
@@ -114,7 +115,7 @@ const nextConfig = {
                   return (
                     module.size() > 160000 &&
                     /node_modules[/\\]/.test(module.identifier()) &&
-                    !/[\\/]node_modules[\\/](react|react-dom|next|next-intl|next-auth|lucide-react|@stripe)[\\/]/.test(
+                    !/[\\/]node_modules[\\/](react|react-dom|next|next-intl|next-auth|lucide-react)[\\/]/.test(
                       module.identifier()
                     )
                   );
@@ -266,7 +267,7 @@ const nextConfig = {
                 {
                   key: "Content-Security-Policy",
                   value:
-                    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.stripe.com; frame-src https://js.stripe.com;",
+                    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://accept.paymob.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://accept.paymob.com; frame-src https://accept.paymob.com;",
                 },
               ]
             : []),

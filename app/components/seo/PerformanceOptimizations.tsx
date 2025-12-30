@@ -74,31 +74,8 @@ export function PerformanceMonitor() {
         window.addEventListener("load", measurePerformance);
       }
 
-      // Preload critical resources
-      const preloadCriticalResources = () => {
-        // Preload critical fonts
-        const fontLink = document.createElement("link");
-        fontLink.rel = "preload";
-        fontLink.href = "/fonts/Outfit-VariableFont_wght.ttf";
-        fontLink.as = "font";
-        fontLink.type = "font/ttf";
-        fontLink.crossOrigin = "anonymous";
-        document.head.appendChild(fontLink);
-
-        // Preload critical images (only if they exist)
-        const criticalImages = ["/og-image.jpg"];
-
-        criticalImages.forEach((src) => {
-          const link = document.createElement("link");
-          link.rel = "preload";
-          link.href = src;
-          link.as = "image";
-          // Only add if image exists (check will happen naturally via 404)
-          document.head.appendChild(link);
-        });
-      };
-
-      preloadCriticalResources();
+      // Note: Font preloading is handled by Next.js localFont automatically
+      // No need for manual preload links which cause 404s
 
       // Resource hints for external domains
       const addResourceHints = () => {

@@ -113,7 +113,7 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["cash_on_delivery", "stripe"],
+    enum: ["cash_on_delivery", "paymob"],
     default: "cash_on_delivery",
   },
   paymentStatus: {
@@ -121,7 +121,11 @@ const orderSchema = new mongoose.Schema({
     enum: ["pending", "paid", "failed", "refunded"],
     default: "pending",
   },
-  stripePaymentIntentId: {
+  paymobOrderId: {
+    type: String,
+    required: false,
+  },
+  paymobTransactionId: {
     type: String,
     required: false,
   },

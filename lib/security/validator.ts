@@ -117,8 +117,9 @@ export const orderCreateSchema = z
     promoCode: z.string().max(50).optional(),
     discountAmount: z.number().min(0).optional(),
     discountPercentage: z.number().min(0).max(100).optional(),
-    paymentMethod: z.enum(["cash_on_delivery", "stripe"]).optional(),
-    stripePaymentIntentId: z.string().max(200).optional(),
+    paymentMethod: z.enum(["cash_on_delivery", "paymob"]).optional(),
+    paymobOrderId: z.string().max(200).optional(),
+    paymobTransactionId: z.string().max(200).optional(),
     shippingFee: z.number().min(0).optional(),
   })
   .refine(
@@ -155,15 +156,28 @@ export const addressCreateSchema = z.object({
 
 export const addressUpdateSchema = addressCreateSchema.partial();
 
-// Payment validation schemas
-export const paymentIntentSchema = z.object({
+// Payment validation schemas (Paymob)
+export const paymobPaymentSchema = z.object({
   amount: z
     .number()
-    .int()
-    .min(50, "Minimum amount is $0.50")
-    .max(10000000, "Amount too large"), // $100,000 max
-  orderId: objectIdSchema.optional(),
-  currency: z.string().length(3).default("usd").optional(),
+    .positive("Amount must be positive")
+    .max(1000000, "Amount too large"), // Max 1,000,000 EGP
+  billingData: z.object({
+    name: z.string().min(1).max(100),
+    firstName: z.string().max(100).optional(),
+    lastName: z.string().max(100).optional(),
+    phone: z.string().min(10).max(20),
+    email: z.string().email().optional(),
+    address: z.string().max(500).optional(),
+    street: z.string().max(500).optional(),
+    city: z.string().max(100).optional(),
+    state: z.string().max(100).optional(),
+    building: z.string().max(100).optional(),
+    floor: z.string().max(50).optional(),
+    apartment: z.string().max(50).optional(),
+    postalCode: z.string().max(20).optional(),
+  }),
+  merchantOrderId: z.string().max(200).optional(),
 });
 
 // Category validation schemas

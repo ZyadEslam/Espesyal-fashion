@@ -48,7 +48,8 @@ export async function GET(
       promoCode?: string;
       discountAmount?: number;
       discountPercentage?: number;
-      stripePaymentIntentId?: string;
+      paymobOrderId?: string;
+      paymobTransactionId?: string;
     } | null;
 
     if (!order) {
@@ -116,7 +117,8 @@ export async function GET(
           promoCode: order.promoCode,
           discountAmount: order.discountAmount,
           discountPercentage: order.discountPercentage,
-          stripePaymentIntentId: order.stripePaymentIntentId,
+          paymobOrderId: order.paymobOrderId,
+          paymobTransactionId: order.paymobTransactionId,
         },
       },
       { status: 200 }
