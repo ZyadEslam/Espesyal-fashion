@@ -164,7 +164,7 @@ const ShopLayout = memo(
           </aside>
 
           {/* Products Section */}
-          <main className="col-span-12 lg:col-span-9">
+          <main className="col-span-12 lg:col-span-9 mb-12 lg:mb-16">
             {/* Header */}
             <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>

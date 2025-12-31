@@ -69,17 +69,21 @@ const CheckoutPage = () => {
   const [discountPercentage, setDiscountPercentage] = useState(0);
   const [shippingFee, setShippingFee] = useState<number>(0);
   const [finalTotal, setFinalTotal] = useState<number>(0);
-  const [cityCategory, setCityCategory] = useState<CityCategory | undefined>(undefined);
+  const [cityCategory, setCityCategory] = useState<CityCategory | undefined>(
+    undefined
+  );
 
   // Check for payment failure from redirect
   useEffect(() => {
     const paymentFailed = searchParams.get("payment_failed");
     const errorMessage = searchParams.get("error");
-    
+
     if (paymentFailed === "true") {
       setOrderStatus({
         success: false,
-        message: errorMessage ? decodeURIComponent(errorMessage) : t("paymentFailed"),
+        message: errorMessage
+          ? decodeURIComponent(errorMessage)
+          : t("paymentFailed"),
       });
       // Clean up URL params
       router.replace(`/${locale}/checkout`, { scroll: false });
@@ -156,7 +160,9 @@ const CheckoutPage = () => {
     setDiscountPercentage(percentage);
   };
 
-  const validateStock = async (products: ProductCardProps[]): Promise<{ valid: boolean; message?: string }> => {
+  const validateStock = async (
+    products: ProductCardProps[]
+  ): Promise<{ valid: boolean; message?: string }> => {
     try {
       for (const product of products) {
         // Fetch current product data to get latest stock
@@ -164,7 +170,7 @@ const CheckoutPage = () => {
           cache: "no-store",
         });
         const result = await response.json();
-        
+
         if (!result.success || !result.product) {
           return {
             valid: false,
@@ -173,7 +179,8 @@ const CheckoutPage = () => {
         }
 
         const currentProduct = result.product;
-        const requestedQuantity = product.quantityInCart || product.quantity || 1;
+        const requestedQuantity =
+          product.quantityInCart || product.quantity || 1;
 
         // Check stock for variants
         if (currentProduct.variants && currentProduct.variants.length > 0) {
@@ -189,7 +196,9 @@ const CheckoutPage = () => {
           } else if (variantColor || variantSize) {
             variant = currentProduct.variants.find(
               (v: { color?: string; size?: string }) => {
-                const colorMatch = variantColor ? v.color === variantColor : true;
+                const colorMatch = variantColor
+                  ? v.color === variantColor
+                  : true;
                 const sizeMatch = variantSize ? v.size === variantSize : true;
                 return colorMatch && sizeMatch;
               }
@@ -206,7 +215,11 @@ const CheckoutPage = () => {
           if (variant.quantity < requestedQuantity) {
             return {
               valid: false,
-              message: `Insufficient stock for ${product.name} (${variant.color || ""} ${variant.size || ""}). Available: ${variant.quantity}, Requested: ${requestedQuantity}`,
+              message: `Insufficient stock for ${product.name} (${
+                variant.color || ""
+              } ${variant.size || ""}). Available: ${
+                variant.quantity
+              }, Requested: ${requestedQuantity}`,
             };
           }
         } else {
@@ -363,16 +376,28 @@ const CheckoutPage = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Address and Payment */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Address Section */}
+          {/* Address Section - Order 1 on mobile */}
+          <div className="lg:col-span-2 order-1">
             <CheckoutAddressSection
               onAddressChange={setSelectedAddress}
               onCityCategoryChange={handleCityCategoryChange}
               selectedAddress={selectedAddress}
             />
+          </div>
 
-            {/* Payment Method Selection */}
+          {/* Order Summary - Order 2 on mobile, moves to right column on desktop */}
+          <div className="lg:col-span-1 order-2 lg:order-3 lg:row-span-2">
+            <CheckoutOrderSummary
+              products={checkoutData.products}
+              subtotal={checkoutData.subtotal}
+              cityCategory={cityCategory}
+              onPromoCodeChange={handlePromoCodeChange}
+              onShippingFeeChange={handleShippingFeeChange}
+            />
+          </div>
+
+          {/* Payment Method Selection - Order 3 on mobile */}
+          <div className="lg:col-span-2 order-3 lg:order-2">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6">
@@ -486,7 +511,10 @@ const CheckoutPage = () => {
                         setIsProcessing(true);
                         // Clear cart when order is being created
                         clearCart();
-                        if (session.status === "authenticated" && session.data?.user?.id) {
+                        if (
+                          session.status === "authenticated" &&
+                          session.data?.user?.id
+                        ) {
                           api.clearCart(session.data.user.id);
                         }
                       }}
@@ -506,17 +534,6 @@ const CheckoutPage = () => {
                 )}
               </div>
             </div>
-          </div>
-
-          {/* Right Column: Order Summary */}
-          <div className="lg:col-span-1">
-            <CheckoutOrderSummary
-              products={checkoutData.products}
-              subtotal={checkoutData.subtotal}
-              cityCategory={cityCategory}
-              onPromoCodeChange={handlePromoCodeChange}
-              onShippingFeeChange={handleShippingFeeChange}
-            />
           </div>
         </div>
       </div>
