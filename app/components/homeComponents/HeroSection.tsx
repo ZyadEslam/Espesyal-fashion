@@ -1,14 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-// import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
-import {
-  Copy,
-  Check,
-  // Sparkles
-} from "lucide-react";
+import { Copy, Check } from "lucide-react";
 import { cachedFetchJson } from "../../utils/cachedFetch";
-// import { assets } from "@/public/assets/assets";
 
 interface HeroContent {
   heroBadge: string;
@@ -17,6 +11,165 @@ interface HeroContent {
   forDiscount: string;
   promoCode: string;
 }
+
+// Clothing-related decorative shapes component
+const FashionShapes = () => (
+  <div className="absolute right-0 top-0 w-1/2 h-full overflow-hidden pointer-events-none hidden md:block">
+    {/* Elegant Dress Silhouette */}
+    <svg
+      className="absolute top-[10%] right-[15%] w-32 h-48 opacity-20 animate-float"
+      viewBox="0 0 100 150"
+      fill="none"
+    >
+      <path
+        d="M50 0 L60 20 L70 20 L65 50 L80 140 L70 145 L50 100 L30 145 L20 140 L35 50 L30 20 L40 20 Z"
+        fill="url(#dressGradient)"
+        stroke="#b16e27"
+        strokeWidth="1"
+      />
+      <defs>
+        <linearGradient id="dressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#d9a66d" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#b16e27" stopOpacity="0.3" />
+        </linearGradient>
+      </defs>
+    </svg>
+
+    {/* Hanger Shape */}
+    <svg
+      className="absolute top-[5%] right-[40%] w-24 h-20 opacity-25 animate-float-delayed"
+      viewBox="0 0 100 80"
+      fill="none"
+    >
+      <path
+        d="M50 0 L50 15 M35 15 Q50 25 65 15 L95 45 L90 50 L50 30 L10 50 L5 45 L35 15"
+        stroke="#c88a4a"
+        strokeWidth="3"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <circle
+        cx="50"
+        cy="8"
+        r="6"
+        stroke="#c88a4a"
+        strokeWidth="2"
+        fill="none"
+      />
+    </svg>
+
+    {/* T-Shirt Outline */}
+    <svg
+      className="absolute bottom-[20%] right-[10%] w-28 h-32 opacity-15 animate-float"
+      viewBox="0 0 100 120"
+      fill="none"
+    >
+      <path
+        d="M25 0 L35 0 L40 15 L60 15 L65 0 L75 0 L95 30 L80 40 L75 35 L75 115 L25 115 L25 35 L20 40 L5 30 Z"
+        fill="url(#shirtGradient)"
+        stroke="#ad9452"
+        strokeWidth="1.5"
+      />
+      <defs>
+        <linearGradient id="shirtGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ad9452" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#8a7542" stopOpacity="0.2" />
+        </linearGradient>
+      </defs>
+    </svg>
+
+    {/* Shopping Bag */}
+    <svg
+      className="absolute bottom-[35%] right-[35%] w-20 h-24 opacity-20 animate-float-delayed"
+      viewBox="0 0 80 100"
+      fill="none"
+    >
+      <rect
+        x="5"
+        y="25"
+        width="70"
+        height="70"
+        rx="5"
+        fill="url(#bagGradient)"
+        stroke="#b16e27"
+        strokeWidth="2"
+      />
+      <path
+        d="M25 25 L25 15 Q25 5 40 5 Q55 5 55 15 L55 25"
+        stroke="#b16e27"
+        strokeWidth="3"
+        fill="none"
+        strokeLinecap="round"
+      />
+      <defs>
+        <linearGradient id="bagGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#d9a66d" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#b16e27" stopOpacity="0.15" />
+        </linearGradient>
+      </defs>
+    </svg>
+
+    {/* Decorative circles */}
+    <div className="absolute top-[30%] right-[5%] w-4 h-4 rounded-full bg-primary-400/30 animate-pulse" />
+    <div
+      className="absolute top-[50%] right-[25%] w-3 h-3 rounded-full bg-secondary-400/40 animate-pulse"
+      style={{ animationDelay: "0.5s" }}
+    />
+    <div
+      className="absolute bottom-[40%] right-[8%] w-5 h-5 rounded-full bg-primary-300/25 animate-pulse"
+      style={{ animationDelay: "1s" }}
+    />
+    <div
+      className="absolute top-[15%] right-[8%] w-2 h-2 rounded-full bg-secondary-300/50 animate-pulse"
+      style={{ animationDelay: "1.5s" }}
+    />
+
+    {/* Floating thread/needle */}
+    <svg
+      className="absolute top-[60%] right-[45%] w-16 h-16 opacity-25 animate-float"
+      viewBox="0 0 60 60"
+      fill="none"
+    >
+      <path
+        d="M5 55 Q15 45 25 50 Q35 55 45 45 Q55 35 50 25"
+        stroke="#c88a4a"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeDasharray="4 4"
+        fill="none"
+      />
+      <ellipse
+        cx="52"
+        cy="22"
+        rx="6"
+        ry="3"
+        stroke="#c88a4a"
+        strokeWidth="1.5"
+        fill="none"
+        transform="rotate(-45 52 22)"
+      />
+    </svg>
+
+    {/* Button shapes */}
+    <svg
+      className="absolute bottom-[15%] right-[50%] w-8 h-8 opacity-30"
+      viewBox="0 0 30 30"
+    >
+      <circle
+        cx="15"
+        cy="15"
+        r="12"
+        fill="none"
+        stroke="#ad9452"
+        strokeWidth="2"
+      />
+      <circle cx="10" cy="12" r="2" fill="#ad9452" />
+      <circle cx="20" cy="12" r="2" fill="#ad9452" />
+      <circle cx="10" cy="18" r="2" fill="#ad9452" />
+      <circle cx="20" cy="18" r="2" fill="#ad9452" />
+    </svg>
+  </div>
+);
 
 const HeroSection = () => {
   const t = useTranslations("home");
@@ -92,32 +245,39 @@ const HeroSection = () => {
   const isRTL = locale === "ar";
 
   return (
-    <section className="relative overflow-hidden h-[70vh]  bg-gradient-to-br from-[#0F2027] via-[#203A43] to-[#2c5364] rounded-lg md:rounded-xl shadow-2xl">
-      {/* Pattern Background Image */}
+    <section className="relative overflow-hidden h-full shadow-2xl">
+      {/* Creative Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#1a0f0a] via-[#2d1810] to-[#1f1209]" />
+
+      {/* Warm overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-r from-primary-900/80 via-transparent to-secondary-900/60" />
+
+      {/* Subtle radial glow */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-secondary-400/10 rounded-full blur-3xl" />
+
+      {/* Mesh pattern overlay */}
       <div
-        className="absolute inset-0 opacity-80"
+        className="absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: `url('/espesyal/orange-grunge-twisting-pattern.png')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
+          backgroundImage: `radial-gradient(circle at 2px 2px, #b16e27 1px, transparent 0)`,
+          backgroundSize: "40px 40px",
         }}
       />
 
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/50 to-black/70 z-[1]"></div>
-
+      {/* Fashion Shapes - Right Side */}
+      <FashionShapes />
 
       {/* Content Container */}
       <div className="relative z-10 h-full container mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className={`h-full flex flex-col md:flex-row items-center ${
-            isRTL ? "justify-center" : "justify-between"
+            isRTL ? "justify-center" : "justify-start"
           } gap-8 md:gap-12 py-12 md:py-16`}
         >
           {/* Left Side - Badge & Heading */}
           <div
-            className={`flex-1 flex flex-col justify-center space-y-6 md:space-y-8 animate-fade-in ${
+            className={`flex-1 max-w-2xl flex flex-col justify-center space-y-6 md:space-y-8 animate-fade-in ${
               isRTL ? "items-center text-center" : "items-start"
             }`}
           >
@@ -148,7 +308,7 @@ const HeroSection = () => {
                 }`}
               >
                 <span
-                  className={`block bg-gradient-to-r from-white via-white to-primary-200 bg-clip-text text-transparent ${
+                  className={`block bg-gradient-to-r from-white via-primary-100 to-primary-200 bg-clip-text text-transparent ${
                     isRTL ? "text-center" : ""
                   }`}
                 >
@@ -165,14 +325,15 @@ const HeroSection = () => {
                 <div className="h-1 w-32 bg-gradient-to-r from-transparent via-primary-400/50 to-transparent rounded-full"></div>
               </div>
             </div>
-            {/* Right Side - Promo Code */}
+
+            {/* Promo Code Section */}
             <div
               className={`flex-shrink-0 w-full md:w-auto animate-fade-in-up-delay ${
                 isRTL ? "flex justify-center" : ""
               }`}
             >
               <div
-                className={`inline-flex items-center gap-3 px-4 py-3 backdrop-blur-md rounded-full border border-white/20 shadow-lg ${
+                className={`inline-flex items-center gap-3 px-4 py-3 bg-white/5 backdrop-blur-md rounded-full border border-white/20 shadow-lg ${
                   isRTL ? "flex-wrap justify-center" : ""
                 }`}
               >
@@ -190,7 +351,7 @@ const HeroSection = () => {
                     {useCode}
                   </span>
                   <span
-                    className={`text-white text-xs md:text-sm ${
+                    className={`text-white/80 text-xs md:text-sm ${
                       isRTL ? "whitespace-normal" : "whitespace-nowrap"
                     }`}
                   >
@@ -199,24 +360,24 @@ const HeroSection = () => {
                 </div>
 
                 {/* Divider */}
-                <div className="h-6 w-px bg-white"></div>
+                <div className="h-6 w-px bg-white/30"></div>
 
                 {/* Code */}
-                <code className="px-3 py-1.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-lg md:text-xl font-bold tracking-wider rounded-lg">
+                <code className="px-3 py-1.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-lg md:text-xl font-bold tracking-wider rounded-lg shadow-lg shadow-primary-500/30">
                   {promoCode}
                 </code>
 
                 {/* Copy Button */}
                 <button
                   onClick={handleCopyCode}
-                  className="p-2 hover:bg-white rounded-lg transition-all duration-200 hover:scale-110 active:scale-95"
+                  className="p-2 hover:bg-white/10 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95"
                   aria-label="Copy promo code"
                   title="Copy code"
                 >
                   {copied ? (
-                    <Check className="w-4 h-4 md:w-5 md:h-5 text-green-300" />
+                    <Check className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
                   ) : (
-                    <Copy className="w-4 h-4 md:w-5 md:h-5 text-white  transition-colors" />
+                    <Copy className="w-4 h-4 md:w-5 md:h-5 text-white transition-colors" />
                   )}
                 </button>
               </div>

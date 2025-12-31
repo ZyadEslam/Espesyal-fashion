@@ -20,7 +20,6 @@ const UserNav = memo(() => {
   const t = useTranslations("nav");
   const tOrders = useTranslations("orders");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const originalOverflowRef = useRef<string | null>(null);
   const { data: session } = useSession();
@@ -80,21 +79,9 @@ const UserNav = memo(() => {
   }, [isMenuOpen]);
 
   useEffect(() => {
-    let ticking = false;
-
     const handleResize = () => {
       if (window.innerWidth >= 768) {
         setIsMenuOpen(false);
-      }
-    };
-
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 10);
-          ticking = false;
-        });
-        ticking = true;
       }
     };
 
@@ -108,11 +95,9 @@ const UserNav = memo(() => {
     };
 
     window.addEventListener("resize", throttledResize, { passive: true });
-    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener("resize", throttledResize);
-      window.removeEventListener("scroll", handleScroll);
       if (resizeTimeout) clearTimeout(resizeTimeout);
     };
   }, []);
@@ -137,14 +122,10 @@ const UserNav = memo(() => {
 
   return (
     <nav
-      className={`w-[100%] sticky top-0 transition-all duration-300 ${
+      className={`w-[100%] sticky top-0 ${
         isDashboard
           ? "z-40 bg-background backdrop-blur-md shadow-sm border-b border-black/20"
-          : `z-[100] ${
-              isScrolled
-                ? "bg-background backdrop-blur-md shadow-sm border-b border-black/20"
-                : "bg-background border-b border-black/20"
-            }`
+          : "z-[100] user-nav bg-background"
       }`}
     >
       <div
@@ -178,7 +159,7 @@ const UserNav = memo(() => {
                       alt="Espesyal Shop Logo"
                       width={120}
                       height={45}
-                      className="object-contain h-10 sm:h-12 lg:h-14 w-auto transition-transform duration-300 group-hover:scale-105 filter brightness-110 contrast-110"
+                      className="object-contain h-10 sm:h-12 lg:h-14 w-auto transition-transform duration-300 group-hover:scale-105"
                       priority
                       quality={85}
                       sizes="(max-width: 640px) 80px, (max-width: 1024px) 100px, 120px"
@@ -190,12 +171,12 @@ const UserNav = memo(() => {
                 </Link>
               </div>
 
-              {/* Right Side - Icons + Language Switcher */}
+              {/* Right Side - Icons */}
               <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-end">
                 {/* Cart Icon */}
                 <Link
                   href={getLocalizedPath("/cart")}
-                  className="relative p-2 text-gray-600 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5"
+                  className="relative p-2 text-gray-700 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5"
                   title={t("shoppingCart")}
                 >
                   <ShoppingCart className="w-5 h-5" />
@@ -210,7 +191,7 @@ const UserNav = memo(() => {
                 {session && session.user && session.user.id && (
                   <Link
                     href={getLocalizedPath("/my-orders")}
-                    className="hidden md:block p-2 text-gray-600 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5"
+                    className="hidden md:block p-2 text-gray-700 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5"
                     title={tOrders("myOrders")}
                   >
                     <Package className="w-5 h-5" />
@@ -220,12 +201,12 @@ const UserNav = memo(() => {
                 {/* User Icon with Signout - Hidden on mobile */}
                 {session?.user && (
                   <div className="hidden md:flex items-center gap-2">
-                    <div className="flex items-center justify-center text-gray-600 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5 p-2">
-                      <User className="w-5 h-5 font-semibold text-gray-600" />
+                    <div className="flex items-center justify-center text-gray-700 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5 p-2">
+                      <User className="w-5 h-5 font-semibold" />
                     </div>
                     <button
                       onClick={handleSignout}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 hover:text-primary transition-all duration-300 rounded-lg hover:bg-primary/5"
                       title={t("signOut")}
                     >
                       <LogOut className="w-4 h-4" />

@@ -68,8 +68,8 @@ export default async function Home() {
   return (
     <main className="min-h-screen">
       {/* Black Friday Campaign Hero Section - Render immediately */}
-      <section className="py-6 md:py-6~">
-        <div className="layout-shell">
+      <section className="w-full h-[90vh]">
+        <div className="w-full h-full">
           <HeroSection />
         </div>
       </section>
@@ -80,8 +80,8 @@ export default async function Home() {
       </Suspense>
 
       {/* Subscription Offer */}
-      <section className="section-spacing !border-b-0">
-        <div className="layout-shell">
+      <section className="w-full ">
+        <div className="">
           <Suspense fallback={<LoadingSpinner />}>
             <SubscriptionOffer />
           </Suspense>
