@@ -20,7 +20,7 @@ const FooterShapes = () => (
         cx="50"
         cy="50"
         r="45"
-        stroke="#b16e27"
+        className="stroke-primary-200"
         strokeWidth="1"
         fill="none"
         strokeDasharray="10 5"
@@ -29,7 +29,7 @@ const FooterShapes = () => (
         cx="50"
         cy="50"
         r="30"
-        stroke="#c88a4a"
+        className="stroke-primary-200"
         strokeWidth="1"
         fill="none"
       />
@@ -44,7 +44,7 @@ const FooterShapes = () => (
       <path
         d="M10 25 L40 5 L70 25 L70 90 C70 95 65 100 60 100 L20 100 C15 100 10 95 10 90 Z"
         fill="url(#tagGradient)"
-        stroke="#b16e27"
+        className="stroke-primary-200"
         strokeWidth="1.5"
       />
       <circle
@@ -52,13 +52,21 @@ const FooterShapes = () => (
         cy="35"
         r="8"
         fill="none"
-        stroke="#c88a4a"
+        className="stroke-primary-200"
         strokeWidth="2"
       />
       <defs>
         <linearGradient id="tagGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#d9a66d" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#b16e27" stopOpacity="0.15" />
+          <stop
+            offset="0%"
+            className="[stop-color:var(--color-primary-200)]"
+            stopOpacity="0.3"
+          />
+          <stop
+            offset="100%"
+            className="[stop-color:var(--color-primary-400)]"
+            stopOpacity="0.15"
+          />
         </linearGradient>
       </defs>
     </svg>
@@ -112,20 +120,20 @@ const Footer = () => {
   return (
     <footer className="footer-section relative overflow-hidden w-full">
       {/* Creative Gradient Background - Matching Hero Section */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1a0f0a] via-[#2d1810] to-[#1f1209]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-700 via-primary-600 to-primary-700" />
 
       {/* Warm overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-primary-900/40" />
+      <div className="absolute inset-0 bg-gradient-to-t from-primary-800/40 via-transparent to-primary-700/40" />
 
       {/* Subtle radial glow */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-secondary-400/10 rounded-full blur-3xl" />
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-400/20 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-secondary-300/20 rounded-full blur-3xl" />
 
       {/* Mesh pattern overlay */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.05]"
         style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, #b16e27 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 2px 2px, var(--color-primary-300) 1px, transparent 0)`,
           backgroundSize: "40px 40px",
         }}
       />
@@ -236,7 +244,7 @@ const Footer = () => {
                 className="group flex items-center gap-3 text-white/70 hover:text-[var(--text-light)] transition-all duration-300"
               >
                 <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/10 group-hover:bg-primary-500/20 group-hover:border-primary-400/30 transition-all duration-300">
-                  <Phone className="w-4 h-4 text-primary-400" />
+                  <Phone className="w-4 h-4 white" />
                 </div>
                 <span className="text-sm">+201080972324</span>
               </a>
@@ -247,7 +255,7 @@ const Footer = () => {
                 className="group flex items-center gap-3 text-white/70 hover:text-[var(--text-light)] transition-all duration-300"
               >
                 <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/10 group-hover:bg-primary-500/20 group-hover:border-primary-400/30 transition-all duration-300">
-                  <Mail className="w-4 h-4 text-primary-400" />
+                  <Mail className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-sm break-all">espesyaleg@gmail.com</span>
               </a>
@@ -265,11 +273,11 @@ const Footer = () => {
             </h3>
             <div className="flex gap-3">
               {/* Visa */}
-              <div className="flex items-center justify-center w-16 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300">
+              <div className="flex items-center justify-center w-16 h-10 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 ">
                 <span className="text-sm font-bold text-white">VISA</span>
               </div>
               {/* Cash */}
-              <div className="flex items-center justify-center w-16 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300">
+              <div className="flex items-center justify-center w-16 h-10 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 ">
                 <span className="text-sm font-bold text-white">CASH</span>
               </div>
             </div>

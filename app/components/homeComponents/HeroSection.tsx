@@ -24,13 +24,21 @@ const FashionShapes = () => (
       <path
         d="M50 0 L60 20 L70 20 L65 50 L80 140 L70 145 L50 100 L30 145 L20 140 L35 50 L30 20 L40 20 Z"
         fill="url(#dressGradient)"
-        stroke="#b16e27"
+        className="stroke-primary-200"
         strokeWidth="1"
       />
       <defs>
         <linearGradient id="dressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#d9a66d" stopOpacity="0.6" />
-          <stop offset="100%" stopColor="#b16e27" stopOpacity="0.3" />
+          <stop
+            offset="0%"
+            className="[stop-color:var(--color-primary-200)]"
+            stopOpacity="0.6"
+          />
+          <stop
+            offset="100%"
+            className="[stop-color:var(--color-primary-400)]"
+            stopOpacity="0.3"
+          />
         </linearGradient>
       </defs>
     </svg>
@@ -43,7 +51,7 @@ const FashionShapes = () => (
     >
       <path
         d="M50 0 L50 15 M35 15 Q50 25 65 15 L95 45 L90 50 L50 30 L10 50 L5 45 L35 15"
-        stroke="#c88a4a"
+        className="stroke-primary-200"
         strokeWidth="3"
         strokeLinecap="round"
         fill="none"
@@ -52,7 +60,7 @@ const FashionShapes = () => (
         cx="50"
         cy="8"
         r="6"
-        stroke="#c88a4a"
+        className="stroke-primary-200"
         strokeWidth="2"
         fill="none"
       />
@@ -67,13 +75,21 @@ const FashionShapes = () => (
       <path
         d="M25 0 L35 0 L40 15 L60 15 L65 0 L75 0 L95 30 L80 40 L75 35 L75 115 L25 115 L25 35 L20 40 L5 30 Z"
         fill="url(#shirtGradient)"
-        stroke="#ad9452"
+        className="stroke-secondary-300"
         strokeWidth="1.5"
       />
       <defs>
         <linearGradient id="shirtGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ad9452" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="#8a7542" stopOpacity="0.2" />
+          <stop
+            offset="0%"
+            className="[stop-color:var(--color-secondary-400)]"
+            stopOpacity="0.4"
+          />
+          <stop
+            offset="100%"
+            className="[stop-color:var(--color-secondary-500)]"
+            stopOpacity="0.2"
+          />
         </linearGradient>
       </defs>
     </svg>
@@ -91,20 +107,28 @@ const FashionShapes = () => (
         height="70"
         rx="5"
         fill="url(#bagGradient)"
-        stroke="#b16e27"
+        className="stroke-primary-200"
         strokeWidth="2"
       />
       <path
         d="M25 25 L25 15 Q25 5 40 5 Q55 5 55 15 L55 25"
-        stroke="#b16e27"
+        className="stroke-primary-200"
         strokeWidth="3"
         fill="none"
         strokeLinecap="round"
       />
       <defs>
         <linearGradient id="bagGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#d9a66d" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#b16e27" stopOpacity="0.15" />
+          <stop
+            offset="0%"
+            className="[stop-color:var(--color-primary-200)]"
+            stopOpacity="0.3"
+          />
+          <stop
+            offset="100%"
+            className="[stop-color:var(--color-primary-400)]"
+            stopOpacity="0.15"
+          />
         </linearGradient>
       </defs>
     </svg>
@@ -132,7 +156,7 @@ const FashionShapes = () => (
     >
       <path
         d="M5 55 Q15 45 25 50 Q35 55 45 45 Q55 35 50 25"
-        stroke="#c88a4a"
+        className="stroke-primary-200"
         strokeWidth="2"
         strokeLinecap="round"
         strokeDasharray="4 4"
@@ -143,7 +167,7 @@ const FashionShapes = () => (
         cy="22"
         rx="6"
         ry="3"
-        stroke="#c88a4a"
+        className="stroke-primary-200"
         strokeWidth="1.5"
         fill="none"
         transform="rotate(-45 52 22)"
@@ -160,13 +184,13 @@ const FashionShapes = () => (
         cy="15"
         r="12"
         fill="none"
-        stroke="#ad9452"
+        className="stroke-secondary-300"
         strokeWidth="2"
       />
-      <circle cx="10" cy="12" r="2" fill="#ad9452" />
-      <circle cx="20" cy="12" r="2" fill="#ad9452" />
-      <circle cx="10" cy="18" r="2" fill="#ad9452" />
-      <circle cx="20" cy="18" r="2" fill="#ad9452" />
+      <circle cx="10" cy="12" r="2" className="fill-secondary-400" />
+      <circle cx="20" cy="12" r="2" className="fill-secondary-400" />
+      <circle cx="10" cy="18" r="2" className="fill-secondary-400" />
+      <circle cx="20" cy="18" r="2" className="fill-secondary-400" />
     </svg>
   </div>
 );
@@ -247,20 +271,20 @@ const HeroSection = () => {
   return (
     <section className="relative overflow-hidden h-full shadow-2xl">
       {/* Creative Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1a0f0a] via-[#2d1810] to-[#1f1209]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-700 via-primary-600 to-primary-700" />
 
       {/* Warm overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-r from-primary-900/80 via-transparent to-secondary-900/60" />
+      <div className="absolute inset-0 bg-gradient-to-r from-primary-700/60 via-transparent to-secondary-600/40" />
 
       {/* Subtle radial glow */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-secondary-400/10 rounded-full blur-3xl" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-400/20 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-secondary-300/20 rounded-full blur-3xl" />
 
       {/* Mesh pattern overlay */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.05]"
         style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, #b16e27 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 2px 2px, var(--color-primary-300) 1px, transparent 0)`,
           backgroundSize: "40px 40px",
         }}
       />

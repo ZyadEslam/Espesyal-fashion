@@ -17,13 +17,21 @@ const SocialShapes = () => (
       <path
         d="M30 50 C15 35 5 25 5 15 C5 8 10 3 17 3 C22 3 27 7 30 12 C33 7 38 3 43 3 C50 3 55 8 55 15 C55 25 45 35 30 50Z"
         fill="url(#heartGradient)"
-        stroke="#b16e27"
+        className="stroke-primary-200"
         strokeWidth="1"
       />
       <defs>
         <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#d9a66d" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#b16e27" stopOpacity="0.25" />
+          <stop
+            offset="0%"
+            className="[stop-color:var(--color-primary-200)]"
+            stopOpacity="0.5"
+          />
+          <stop
+            offset="100%"
+            className="[stop-color:var(--color-primary-400)]"
+            stopOpacity="0.25"
+          />
         </linearGradient>
       </defs>
     </svg>
@@ -37,13 +45,21 @@ const SocialShapes = () => (
       <path
         d="M40 5 L47 30 L73 30 L52 48 L60 73 L40 57 L20 73 L28 48 L7 30 L33 30 Z"
         fill="url(#starGradient)"
-        stroke="#c88a4a"
+        className="stroke-primary-200"
         strokeWidth="1.5"
       />
       <defs>
         <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ad9452" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="#8a7542" stopOpacity="0.2" />
+          <stop
+            offset="0%"
+            className="[stop-color:var(--color-secondary-400)]"
+            stopOpacity="0.4"
+          />
+          <stop
+            offset="100%"
+            className="[stop-color:var(--color-secondary-500)]"
+            stopOpacity="0.2"
+          />
         </linearGradient>
       </defs>
     </svg>
@@ -61,7 +77,7 @@ const SocialShapes = () => (
         height="65"
         rx="4"
         fill="url(#giftGradient)"
-        stroke="#b16e27"
+        className="stroke-primary-200"
         strokeWidth="2"
       />
       <rect
@@ -71,21 +87,29 @@ const SocialShapes = () => (
         height="15"
         rx="3"
         fill="url(#giftLidGradient)"
-        stroke="#b16e27"
+        className="stroke-primary-200"
         strokeWidth="2"
       />
-      <path d="M45 20 L45 95" stroke="#c88a4a" strokeWidth="3" />
+      <path d="M45 20 L45 95" className="stroke-primary-300" strokeWidth="3" />
       <path
         d="M45 20 C35 10 25 15 25 20 M45 20 C55 10 65 15 65 20"
-        stroke="#c88a4a"
+        className="stroke-primary-200"
         strokeWidth="3"
         fill="none"
         strokeLinecap="round"
       />
       <defs>
         <linearGradient id="giftGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#d9a66d" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#b16e27" stopOpacity="0.15" />
+          <stop
+            offset="0%"
+            className="[stop-color:var(--color-primary-200)]"
+            stopOpacity="0.3"
+          />
+          <stop
+            offset="100%"
+            className="[stop-color:var(--color-primary-400)]"
+            stopOpacity="0.15"
+          />
         </linearGradient>
         <linearGradient
           id="giftLidGradient"
@@ -94,8 +118,16 @@ const SocialShapes = () => (
           x2="100%"
           y2="100%"
         >
-          <stop offset="0%" stopColor="#d9a66d" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="#b16e27" stopOpacity="0.2" />
+          <stop
+            offset="0%"
+            className="[stop-color:var(--color-primary-200)]"
+            stopOpacity="0.4"
+          />
+          <stop
+            offset="100%"
+            className="[stop-color:var(--color-primary-400)]"
+            stopOpacity="0.2"
+          />
         </linearGradient>
       </defs>
     </svg>
@@ -113,7 +145,7 @@ const SocialShapes = () => (
         height="90"
         rx="10"
         fill="none"
-        stroke="#ad9452"
+        className="stroke-secondary-300"
         strokeWidth="2"
       />
       <circle
@@ -121,7 +153,7 @@ const SocialShapes = () => (
         cy="85"
         r="6"
         fill="none"
-        stroke="#ad9452"
+        className="stroke-secondary-300"
         strokeWidth="2"
       />
       <rect
@@ -131,13 +163,21 @@ const SocialShapes = () => (
         height="55"
         rx="3"
         fill="url(#phoneGradient)"
-        stroke="#ad9452"
+        className="stroke-secondary-300"
         strokeWidth="1"
       />
       <defs>
         <linearGradient id="phoneGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#ad9452" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#8a7542" stopOpacity="0.15" />
+          <stop
+            offset="0%"
+            className="[stop-color:var(--color-secondary-400)]"
+            stopOpacity="0.3"
+          />
+          <stop
+            offset="100%"
+            className="[stop-color:var(--color-secondary-500)]"
+            stopOpacity="0.15"
+          />
         </linearGradient>
       </defs>
     </svg>
@@ -165,7 +205,7 @@ const SocialShapes = () => (
     >
       <path
         d="M30 5 L30 15 M30 45 L30 55 M5 30 L15 30 M45 30 L55 30 M12 12 L20 20 M40 40 L48 48 M12 48 L20 40 M40 20 L48 12"
-        stroke="#c88a4a"
+        className="stroke-primary-200"
         strokeWidth="2"
         strokeLinecap="round"
       />
@@ -205,21 +245,21 @@ const SubscriptionOffer = () => {
       className="relative overflow-hidden w-full shadow-2xl"
     >
       {/* Creative Gradient Background - Matching Hero Section */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1a0f0a] via-[#2d1810] to-[#1f1209]" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-700 via-primary-600 to-primary-700" />
 
       {/* Warm overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-l from-primary-900/80 via-transparent to-secondary-900/60" />
+      <div className="absolute inset-0 bg-gradient-to-l from-primary-700/60 via-transparent to-secondary-600/40" />
 
       {/* Subtle radial glow */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-secondary-400/10 rounded-full blur-3xl" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-600/5 rounded-full blur-3xl" />
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary-400/20 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-secondary-300/20 rounded-full blur-3xl" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-500/15 rounded-full blur-3xl" />
 
       {/* Mesh pattern overlay */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.05]"
         style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, #b16e27 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 2px 2px, var(--color-primary-300) 1px, transparent 0)`,
           backgroundSize: "40px 40px",
         }}
       />
@@ -231,7 +271,7 @@ const SubscriptionOffer = () => {
       <div className="relative z-10 w-full container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 lg:gap-24 min-h-[80vh]">
           {/* Text Side */}
-          <div className="max-w-xl flex flex-col justify-center space-y-6 md:space-y-8 animate-fade-in items-center text-center md:items-start md:text-start">
+          <div className="max-w-xl flex flex-col justify-around space-y-6 md:space-y-8 animate-fade-in items-center text-center md:items-start md:text-start">
             {/* Badge */}
             <div
               className={`inline-flex items-center gap-3 px-5 py-2.5 bg-gradient-to-r from-primary-500/20 to-primary-600/20 backdrop-blur-md rounded-full border border-primary-400/30 shadow-xl`}
