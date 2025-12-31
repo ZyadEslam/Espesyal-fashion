@@ -191,11 +191,11 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
     // Load first image IMMEDIATELY with no delay
     preloadImage(0, true);
 
-    // Preload other images in background with delay to not compete with first image
+    // Preload other images in background with small delay to not compete with first image
     product.imgSrc.forEach((_, index) => {
       if (index > 0) {
-        // Delay other images to let first image load first
-        setTimeout(() => preloadImage(index, false), 500 + index * 150);
+        // Small delay to let first image load first
+        setTimeout(() => preloadImage(index, false), 200 + index * 100);
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -361,16 +361,14 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   };
 
   // Generate srcset for main image to support retina displays
-  // First image uses smaller sizes for faster initial load
+  // Simplified srcset for faster loading
   const getMainImageSrcSet = (originalIndex: number) => {
     if (product._id) {
-      const isFirstImage = originalIndex === 0;
-      // First image: prioritize speed with smaller sizes
-      // Other images: full quality range for when user is already viewing the page
+      // Simpler srcset - fewer sizes = faster loading decision
       return getImageSrcSet(
         product._id as string,
         originalIndex,
-        isFirstImage ? [400, 600, 800] : [400, 600, 800, 1200]
+        [400, 800] // Just 2 sizes: mobile and desktop/retina
       );
     }
     return undefined;

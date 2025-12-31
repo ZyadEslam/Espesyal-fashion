@@ -1,9 +1,5 @@
 import React, { useState, useCallback } from "react";
-import {
-  getImageSizes,
-  getImageSrcSet,
-  getBlurPlaceholder,
-} from "../../utils/imageUtils";
+import { getImageSizes, getImageSrcSet } from "../../utils/imageUtils";
 
 interface ProductImageProps {
   imageSrc: string;
@@ -35,15 +31,15 @@ const ProductImage = ({
   const sizes = getImageSizes(context);
 
   // Generate srcset for responsive images if productId is provided
-  // Sizes account for retina/high-DPI displays (2x-3x) to ensure sharp images on all devices
+  // Simplified srcset with fewer sizes for faster loading
   const srcset =
     productId && context !== "thumbnail"
       ? getImageSrcSet(
           productId,
           0,
           context === "product-card"
-            ? [320, 480, 640, 800] // 320 for 1x, 480-640 for 2x, 800 for 3x retina
-            : [400, 600, 800, 1200]
+            ? [320, 640] // Simplified: 320 for mobile, 640 for retina/desktop
+            : [400, 800]
         )
       : undefined;
 
@@ -56,24 +52,14 @@ const ProductImage = ({
     handleImageError?.();
   }, [handleImageError]);
 
-  // Static blur placeholder (tiny SVG)
-  const blurPlaceholder = getBlurPlaceholder();
-
   // Use regular img tag for our custom API routes to bypass Next.js Image validation
   // Our API route handles all optimization (resizing, format conversion, etc.)
   return (
     <div className="relative w-full h-full">
-      {/* Blur placeholder - shows while image is loading */}
+      {/* Simple placeholder - shows while image is loading */}
       {showPlaceholder && !isLoaded && !hasError && (
         <div
-          className="absolute inset-0 animate-pulse"
-          style={{
-            backgroundImage: `url("${blurPlaceholder}")`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            filter: "blur(8px)",
-            transform: "scale(1.1)", // Prevent blur edges from showing
-          }}
+          className="absolute inset-0 bg-gradient-to-br from-primary-50 to-secondary-50"
         />
       )}
 
@@ -88,7 +74,7 @@ const ProductImage = ({
         sizes={sizes}
         fetchPriority={fetchPriority}
         loading={loading}
-        className={`block h-full w-full max-h-full max-w-full object-contain object-center mx-auto transition-all duration-300 hover:scale-[1.02] ${
+        className={`block h-full w-full max-h-full max-w-full object-contain object-center mx-auto transition-opacity duration-200 hover:scale-[1.02] ${
           isLoaded ? "opacity-100" : "opacity-0"
         }`}
         onLoad={handleLoad}

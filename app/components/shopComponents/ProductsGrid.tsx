@@ -48,7 +48,7 @@ const ProductsGrid = memo(
             key={product._id}
             product={product}
             isLCP={index === 0} // First product is LCP candidate
-            isAboveFold={index < 3} // First 3 products are above the fold
+            isAboveFold={index < 8} // First 8 products are above the fold (covers 2 rows on desktop)
           />
         ))}
       </div>

@@ -93,9 +93,9 @@ const ShopPage = async ({ params, searchParams }: ShopPageProps) => {
     });
   }
 
-  // Preload critical images for above-fold products (first 3)
+  // Preload critical images for above-fold products (first 4)
   const criticalImageUrls = initialData.products
-    .slice(0, 3)
+    .slice(0, 4)
     .map((product) => {
       if (product._id && product.imgSrc && product.imgSrc.length > 0) {
         return `/api/product/image/${product._id}?index=0&w=320&h=320&q=80`;

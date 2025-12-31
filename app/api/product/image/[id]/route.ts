@@ -99,7 +99,8 @@ class ImageCache {
 }
 
 // Singleton cache instance - persists across requests in serverless environment
-const imageCache = new ImageCache(200, 60); // 200 images, 60 minutes TTL
+// Increased cache size and TTL for better performance
+const imageCache = new ImageCache(500, 120); // 500 images, 120 minutes TTL
 
 export async function GET(
   request: NextRequest,
@@ -341,23 +342,23 @@ export async function GET(
       let finalContentType: string;
 
       if (preservePNG) {
-        // Preserve PNG format for PNG originals with optimized compression
+        // Preserve PNG format for PNG originals with fast compression
         optimizedBuffer = await sharpInstance
           .png({
             quality: Math.min(quality, 100),
-            compressionLevel: 9,
-            effort: 10, // Maximum compression effort
+            compressionLevel: 6, // Reduced for faster processing
+            effort: 4, // Reduced effort for speed
           })
           .toBuffer();
         finalContentType = "image/png";
       } else {
-        // Use preferred format or convert to JPEG with optimized compression
+        // Use preferred format or convert to JPEG with fast compression
         switch (outputFormat) {
           case "avif":
             optimizedBuffer = await sharpInstance
               .avif({
-                quality: Math.min(quality, 85), // AVIF works well at lower quality
-                effort: 6, // Balance between compression and speed
+                quality: Math.min(quality, 80), // Slightly lower for faster encode
+                effort: 3, // Reduced effort for faster processing
               })
               .toBuffer();
             finalContentType = "image/avif";
@@ -365,8 +366,8 @@ export async function GET(
           case "webp":
             optimizedBuffer = await sharpInstance
               .webp({
-                quality: Math.min(quality, 85), // WebP works well at lower quality
-                effort: 6, // Balance between compression and speed
+                quality: Math.min(quality, 80), // Slightly lower for faster encode
+                effort: 3, // Reduced effort for faster processing
               })
               .toBuffer();
             finalContentType = "image/webp";
@@ -374,8 +375,8 @@ export async function GET(
           default: // jpeg
             optimizedBuffer = await sharpInstance
               .jpeg({
-                quality: Math.min(quality, 85), // Optimized quality for better compression
-                mozjpeg: true, // Use mozjpeg for better compression
+                quality: Math.min(quality, 80), // Slightly lower for faster encode
+                mozjpeg: false, // Disable mozjpeg for much faster encoding
                 progressive: true, // Progressive JPEG for better perceived performance
               })
               .toBuffer();
