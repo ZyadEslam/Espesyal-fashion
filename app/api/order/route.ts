@@ -270,58 +270,110 @@ export async function POST(req: NextRequest) {
       dbSession.startTransaction();
 
       for (const item of normalizedProducts) {
-        const productDoc = await Product.findById(item.product).session(
-          dbSession
-        );
+        // First, verify product exists and identify the variant
+        const productDoc = await Product.findById(item.product)
+          .select("name variants")
+          .session(dbSession);
 
         if (!productDoc) {
           throw new Error("One of the products in the order no longer exists.");
         }
 
         if (productDoc.variants?.length) {
-          let variantSubdoc = null;
+          // Identify the variant - either by ID or by size/color combination
+          let targetVariantId: mongoose.Types.ObjectId | null = null;
+          let variantInfo = "";
 
-          // First, try to find variant by variantId if provided
-          if (item.variantId) {
-            variantSubdoc = productDoc.variants.id(item.variantId);
-          }
-
-          // If variantId not found or not provided, try to find by size and color
-          if (!variantSubdoc && (item.size || item.color)) {
-            variantSubdoc = productDoc.variants.find(
-              (v: { size: string; color: string }) => {
+          if (item.variantId && mongoose.Types.ObjectId.isValid(item.variantId)) {
+            const variant = productDoc.variants.id(item.variantId);
+            if (variant) {
+              targetVariantId = variant._id as mongoose.Types.ObjectId;
+              variantInfo = `${variant.color || ""} ${variant.size || ""}`.trim();
+            }
+          } else if (item.size || item.color) {
+            const variant = productDoc.variants.find(
+              (v: { size?: string; color?: string }) => {
                 const sizeMatch = item.size ? v.size === item.size : true;
                 const colorMatch = item.color ? v.color === item.color : true;
                 return sizeMatch && colorMatch;
               }
             );
+            if (variant) {
+              targetVariantId = variant._id as mongoose.Types.ObjectId;
+              variantInfo = `${variant.color || ""} ${variant.size || ""}`.trim();
+            }
           }
 
-          // If still not found, throw error
-          if (!variantSubdoc) {
+          if (!targetVariantId) {
             throw new Error(
               `Missing or invalid variant selection for product "${productDoc.name}". Please ensure you've selected a valid size and color combination.`
             );
           }
 
-          // Check stock availability
-          if (variantSubdoc.quantity < item.quantity) {
-            throw new Error(
-              `Insufficient stock for ${productDoc.name} (${variantSubdoc.color} ${variantSubdoc.size}). Available: ${variantSubdoc.quantity}, Requested: ${item.quantity}`
-            );
+          // Use atomic operation to check stock and decrement in one step
+          // This prevents race conditions when multiple users try to buy the same product
+          // The filter ensures the variant has sufficient stock BEFORE decrementing
+          const updateResult = await Product.findOneAndUpdate(
+            {
+              _id: item.product,
+              // Use $elemMatch to ensure the specific variant has sufficient quantity
+              variants: {
+                $elemMatch: {
+                  _id: targetVariantId,
+                  quantity: { $gte: item.quantity },
+                },
+              },
+            },
+            {
+              // Atomically decrement the variant quantity using arrayFilters
+              $inc: {
+                "variants.$[variant].quantity": -item.quantity,
+              },
+            },
+            {
+              session: dbSession,
+              arrayFilters: [
+                {
+                  "variant._id": targetVariantId,
+                },
+              ],
+              new: false, // Return the original document before update
+            }
+          );
+
+          if (!updateResult) {
+            // Fetch product again to get current stock for error message
+            const currentProduct = await Product.findById(item.product)
+              .select("name variants")
+              .session(dbSession);
+
+            if (!currentProduct) {
+              throw new Error(
+                `Product "${productDoc.name}" no longer exists.`
+              );
+            }
+
+            const variant = currentProduct.variants.id(targetVariantId);
+            if (variant) {
+              throw new Error(
+                `Insufficient stock for ${currentProduct.name}${variantInfo ? ` (${variantInfo})` : ""}. Available: ${variant.quantity}, Requested: ${item.quantity}`
+              );
+            } else {
+              throw new Error(
+                `Variant no longer exists for product "${currentProduct.name}".`
+              );
+            }
           }
 
-          // Update the item with the found variantId for consistency
-          item.variantId = variantSubdoc._id;
-
-          // Deduct stock
-          variantSubdoc.quantity -= item.quantity;
+          // Update the item with the variantId for consistency
+          item.variantId = targetVariantId;
         } else {
           // If no variants exist, we currently allow the order without stock checks.
-          // This can be extended to handle global stock if needed.
+          // NOTE: To add stock management for products without variants, you would need to:
+          // 1. Add a 'stock' field to the product schema (not just the virtual totalStock)
+          // 2. Use an atomic findOneAndUpdate similar to the variant logic above
+          // 3. Ensure the filter checks stock >= requested quantity before decrementing
         }
-
-        await productDoc.save({ session: dbSession });
       }
 
       newOrder = new Order({

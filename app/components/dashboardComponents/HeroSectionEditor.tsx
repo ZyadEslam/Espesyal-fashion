@@ -40,12 +40,15 @@ const HeroSectionEditor = React.memo(() => {
   });
 
   // Fetch hero content
-  const fetchHeroContent = useCallback(async (locale: "en" | "ar") => {
+  const fetchHeroContent = useCallback(async (locale: "en" | "ar", bypassCache = false) => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/hero-section?locale=${locale}`);
+      // Add cache-busting timestamp parameter when bypassing cache (e.g., after saving)
+      // This ensures we get fresh data from the server by bypassing browser cache
+      const cacheBuster = bypassCache ? `&_t=${Date.now()}` : "";
+      const response = await fetch(`/api/hero-section?locale=${locale}${cacheBuster}`);
       const result = await response.json();
 
       if (result.success && result.data) {
@@ -58,7 +61,7 @@ const HeroSectionEditor = React.memo(() => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchHeroContent(activeLocale);
@@ -122,7 +125,8 @@ const HeroSectionEditor = React.memo(() => {
         }
 
         setSuccess(t("updateSuccess"));
-        await fetchHeroContent(activeLocale);
+        // Refetch with cache bypass to ensure we get the latest data
+        await fetchHeroContent(activeLocale, true);
       } catch (err) {
         setError(err instanceof Error ? err.message : t("updateError"));
       } finally {

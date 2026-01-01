@@ -156,7 +156,7 @@ const FashionShapes = () => (
     >
       <path
         d="M5 55 Q15 45 25 50 Q35 55 45 45 Q55 35 50 25"
-        className="stroke-primary-200"
+        className="stroke-white"
         strokeWidth="2"
         strokeLinecap="round"
         strokeDasharray="4 4"
@@ -282,9 +282,10 @@ const HeroSection = () => {
 
       {/* Mesh pattern overlay */}
       <div
-        className="absolute inset-0 opacity-[0.05]"
+        className="absolute inset-0 opacity-[0.1]"
         style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, var(--color-primary-300) 1px, transparent 0)`,
+          // backgroundImage: `radial-gradient(circle at 2px 2px, var(--color-primary-300) 1px, transparent 0)`,
+          backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
           backgroundSize: "40px 40px",
         }}
       />
@@ -325,7 +326,7 @@ const HeroSection = () => {
             </div>
 
             {/* Main Heading */}
-            <div className={`space-y-4 ${isRTL ? "w-full" : ""}`}>
+            <div className={`space-y-6 ${isRTL ? "w-full" : ""}`}>
               <h1
                 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] ${
                   isRTL ? "max-w-full text-center" : "max-w-2xl"
@@ -358,7 +359,9 @@ const HeroSection = () => {
             >
               <div
                 className={`inline-flex items-center gap-3 px-4 py-3 bg-white/5 backdrop-blur-md rounded-full border border-white/20 shadow-lg ${
-                  isRTL ? "flex-wrap justify-center" : ""
+                  isRTL
+                    ? " w-full md:w-auto flex-col md:flex-row justify-center"
+                    : ""
                 }`}
               >
                 {/* Text */}
@@ -381,29 +384,30 @@ const HeroSection = () => {
                   >
                     {forDiscount}
                   </span>
+                  {/* Divider */}
+                  <div className="h-6 w-px bg-white/30"></div>
                 </div>
 
-                {/* Divider */}
-                <div className="h-6 w-px bg-white/30"></div>
+                <div className="flex items-center gap-3">
+                  {/* Code */}
+                  <code className="px-3 py-1.5 block md:inline-block bg-gradient-to-r from-primary-500 to-primary-600 text-white text-lg md:text-xl font-bold tracking-wider rounded-lg shadow-lg shadow-primary-500/30">
+                    {promoCode}
+                  </code>
 
-                {/* Code */}
-                <code className="px-3 py-1.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white text-lg md:text-xl font-bold tracking-wider rounded-lg shadow-lg shadow-primary-500/30">
-                  {promoCode}
-                </code>
-
-                {/* Copy Button */}
-                <button
-                  onClick={handleCopyCode}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95"
-                  aria-label="Copy promo code"
-                  title="Copy code"
-                >
-                  {copied ? (
-                    <Check className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
-                  ) : (
-                    <Copy className="w-4 h-4 md:w-5 md:h-5 text-white transition-colors" />
-                  )}
-                </button>
+                  {/* Copy Button */}
+                  <button
+                    onClick={handleCopyCode}
+                    className="p-2 hover:bg-white/10 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95"
+                    aria-label="Copy promo code"
+                    title="Copy code"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
+                    ) : (
+                      <Copy className="w-4 h-4 md:w-5 md:h-5 text-white transition-colors" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
