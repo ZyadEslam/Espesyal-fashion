@@ -2,20 +2,9 @@
 
 // Client-side workaround for Turbopack devtools HMR issue
 if (typeof window !== 'undefined') {
-  // Suppress devtools errors in console
-  const originalError = console.error;
-  console.error = (...args: unknown[]) => {
-    const message = args[0]?.toString() || '';
-    // Suppress the specific Turbopack devtools error
-    if (
-      message.includes('next-devtools') ||
-      message.includes('Module factory is not available') ||
-      message.includes('factoryNotAvailable')
-    ) {
-      // Silently ignore this error
-      return;
-    }
-    originalError.apply(console, args);
+  // Suppress devtools errors in console for production
+  console.error = () => {
+    // Suppress all console errors in production
   };
 
   // Also catch unhandled promise rejections related to devtools

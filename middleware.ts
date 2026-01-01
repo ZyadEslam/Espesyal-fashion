@@ -112,7 +112,6 @@ export default async function middleware(request: NextRequest) {
       }
     } catch (error) {
       // If rate limiting fails, continue (fail open)
-      console.error("Rate limiting error in middleware:", error);
     }
   }
 

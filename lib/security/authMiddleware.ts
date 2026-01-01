@@ -24,8 +24,7 @@ export async function requireAuth(): Promise<{
         isAdmin: session.user.isAdmin || false,
       },
     };
-  } catch (error) {
-    console.error("Error in requireAuth:", error);
+  } catch {
     return null;
   }
 }

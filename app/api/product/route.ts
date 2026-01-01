@@ -90,8 +90,7 @@ const POST = async (req: NextRequest) => {
           try {
             const buffer = Buffer.from(img, "base64");
             imageBuffers.push(buffer);
-          } catch (error) {
-            console.error("Error converting base64 to buffer:", error);
+          } catch {
             // Skip invalid images
           }
         }
@@ -206,8 +205,6 @@ const GET = async () => {
       },
     ]);
 
-    console.log(`Fetched ${products.length} products from the database.`);
-
     // Convert to plain objects with proper formatting
     const productsFormatted = products.map((product) => {
       const productObj = { 
@@ -257,7 +254,6 @@ const GET = async () => {
       },
     });
   } catch (error) {
-    console.error("Error fetching products:", error);
     return NextResponse.json(
       { message: error, success: false },
       { status: 500 }

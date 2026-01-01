@@ -63,28 +63,9 @@ export async function logSecurityEvent(
       options.userId || "anonymous"
     }`;
     await redisSet(logKey, logEntry, 90 * 24 * 60 * 60); // 90 days
-
-    // Also log to console in development
-    if (process.env.NODE_ENV === "development") {
-      console.log("[AUDIT]", logEntry);
-    }
-
-    // For critical events, also log to console in production
-    if (
-      eventType === AuditEventType.UNAUTHORIZED_ACCESS ||
-      eventType === AuditEventType.PAYMENT_FAILED ||
-      eventType === AuditEventType.ADMIN_ACTION
-    ) {
-      console.warn("[SECURITY EVENT]", {
-        type: eventType,
-        user: options.userEmail || options.userId || "unknown",
-        result: options.result,
-        timestamp: logEntry.timestamp,
-      });
-    }
-  } catch (error) {
+  } catch {
     // Don't throw - logging failures shouldn't break the application
-    console.error("Failed to log security event:", error);
+    // Error handled silently for production
   }
 }
 

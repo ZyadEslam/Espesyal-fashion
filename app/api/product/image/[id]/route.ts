@@ -139,7 +139,6 @@ export async function GET(
 
     // Validate ObjectId format
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      console.error(`Invalid product ID format: ${id}`);
       return new NextResponse("Invalid product ID", { status: 400 });
     }
 
@@ -193,19 +192,14 @@ export async function GET(
     const product = result[0];
 
     if (!product) {
-      console.error(`Product not found with ID: ${id}`);
       return new NextResponse("Product not found", { status: 404 });
     }
 
     if (product.imageCount === 0) {
-      console.error(`No images found for product ${id}`);
       return new NextResponse("No images found", { status: 404 });
     }
 
     if (imageIndex >= product.imageCount || imageIndex < 0) {
-      console.error(
-        `Image index ${imageIndex} out of bounds for product ${id} (has ${product.imageCount} images)`
-      );
       return new NextResponse("Image index out of bounds", { status: 404 });
     }
 
@@ -213,7 +207,6 @@ export async function GET(
 
     // Check if the image data is valid (not empty)
     if (!imageData || imageData === "") {
-      console.error(`Empty image data for product ${id}, index ${imageIndex}`);
       return new NextResponse("Empty image data", { status: 404 });
     }
 
@@ -291,8 +284,7 @@ export async function GET(
       ) {
         originalContentType = "image/gif";
       }
-    } catch (error) {
-      console.error(`Error processing image data for product ${id}:`, error);
+    } catch {
       return new NextResponse("Invalid image format", { status: 500 });
     }
 
@@ -449,12 +441,7 @@ export async function GET(
         },
       });
     }
-  } catch (error) {
-    console.error("Error serving image:", error);
-    console.error(
-      "Stack trace:",
-      error instanceof Error ? error.stack : "No stack trace"
-    );
+  } catch {
     return new NextResponse("Error serving image", { status: 500 });
   }
 }

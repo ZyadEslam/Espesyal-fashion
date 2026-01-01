@@ -60,7 +60,6 @@ export async function POST(req: NextRequest) {
 
     // Verify HMAC signature
     if (!process.env.PAYMOB_HMAC_SECRET) {
-      console.error("PAYMOB_HMAC_SECRET not configured");
       return NextResponse.json(
         { error: "Server configuration error" },
         { status: 500 }
@@ -68,7 +67,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (hmac && !verifyHMAC(body.obj, hmac, process.env.PAYMOB_HMAC_SECRET)) {
-      console.error("Invalid HMAC signature");
       return NextResponse.json(
         { error: "Invalid signature" },
         { status: 401 }
@@ -80,13 +78,6 @@ export async function POST(req: NextRequest) {
     const paymobOrderId = transactionData.order?.id;
     const transactionId = transactionData.id;
     const merchantOrderId = transactionData.order?.merchant_order_id;
-
-    console.log("Paymob webhook received:", {
-      success,
-      paymobOrderId,
-      transactionId,
-      merchantOrderId,
-    });
 
     // Connect to database
     await dbConnect();
@@ -114,16 +105,11 @@ export async function POST(req: NextRequest) {
       }
 
       await order.save();
-
-      console.log(`Order ${order._id} payment status updated to ${order.paymentStatus}`);
-    } else {
-      console.log("Order not found for webhook:", { paymobOrderId, merchantOrderId });
     }
 
     // Always return 200 to acknowledge webhook
     return NextResponse.json({ received: true });
-  } catch (error) {
-    console.error("Error processing Paymob webhook:", error);
+  } catch {
     // Still return 200 to prevent Paymob from retrying
     return NextResponse.json({ received: true, error: "Processing error" });
   }
@@ -160,16 +146,6 @@ export async function GET(req: NextRequest) {
   // Default locale
   const locale = "en";
 
-  console.log("Paymob redirect callback:", {
-    success,
-    successParam,
-    merchantOrderId,
-    transactionId,
-    paymobOrderId,
-    errorMessage,
-    fullUrl: req.url,
-  });
-
   if (success) {
     // Payment successful - try to find the order
     try {
@@ -200,8 +176,8 @@ export async function GET(req: NextRequest) {
         const redirectUrl = new URL(`/${locale}/order-confirmation/${order._id}`, baseUrl);
         return NextResponse.redirect(redirectUrl.toString());
       }
-    } catch (error) {
-      console.error("Error finding order for redirect:", error);
+    } catch {
+      // Error handled silently for production
     }
     
     // Fallback - redirect to homepage with success message
@@ -219,8 +195,8 @@ export async function GET(req: NextRequest) {
           order.paymentStatus = "failed";
           await order.save();
         }
-      } catch (error) {
-        console.error("Error updating failed order:", error);
+      } catch {
+        // Error handled silently for production
       }
     }
     

@@ -105,7 +105,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching categories:", error);
     return NextResponse.json(
       {
         success: false,
@@ -228,8 +227,6 @@ export async function POST(request: NextRequest) {
       }
     );
   } catch (error) {
-    console.error("Error creating category:", error);
-
     if (error instanceof Error && error.message.includes("duplicate key")) {
       return NextResponse.json(
         {
@@ -405,7 +402,6 @@ export async function PATCH(request: NextRequest) {
       }
     );
   } catch (error) {
-    console.error("Error updating category:", error);
     return createErrorResponse(error, "Failed to update category");
   }
 }

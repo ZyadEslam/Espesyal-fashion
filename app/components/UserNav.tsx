@@ -35,8 +35,8 @@ const UserNav = memo(() => {
     try {
       await syncCart();
       await signOut({ callbackUrl: "/" });
-    } catch (error) {
-      console.error("❌ SignOut error:", error);
+    } catch {
+      // Error handled silently for production
     }
   };
 

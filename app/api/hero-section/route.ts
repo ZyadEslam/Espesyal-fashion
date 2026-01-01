@@ -82,8 +82,7 @@ export async function GET(req: NextRequest) {
         },
       }
     );
-  } catch (error) {
-    console.error("Error fetching hero section:", error);
+  } catch {
     const { searchParams } = new URL(req.url);
     const locale = (searchParams.get("locale") || "en") as "en" | "ar";
 
@@ -178,8 +177,7 @@ export async function PUT(req: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Error updating hero section:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to update hero section" },
       { status: 500 }

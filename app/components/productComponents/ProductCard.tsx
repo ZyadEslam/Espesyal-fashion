@@ -51,7 +51,6 @@ const ProductCard = memo(
     }, [product._id]);
 
     const handleImageError = useCallback(() => {
-      console.error("Image failed to load");
       setImageError(true);
     }, []);
 

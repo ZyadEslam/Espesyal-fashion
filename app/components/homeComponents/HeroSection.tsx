@@ -222,10 +222,8 @@ const HeroSection = () => {
         if (isMounted && result?.success && result.data) {
           setHeroContent(result.data);
         }
-      } catch (error) {
-        if (isMounted) {
-          console.error("Error fetching hero section:", error);
-        }
+      } catch {
+        // Error handled silently for production
       }
     };
 

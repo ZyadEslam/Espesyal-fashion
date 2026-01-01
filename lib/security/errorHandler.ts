@@ -69,14 +69,7 @@ export function createErrorResponse(
     }
   }
 
-  // Log detailed error server-side (never expose to client)
-  if (!isDevelopment && error instanceof Error) {
-    console.error("Server error:", {
-      message: error.message,
-      stack: error.stack,
-      timestamp: new Date().toISOString(),
-    });
-  }
+  // Error handled silently for production
 
   const response: {
     error: string;

@@ -5,10 +5,6 @@ import dbConnect from "./mongoose"; // Adjust import path
 import User from "@/app/models/user";
 // Note: Login logging can be added in the NextAuth callbacks if needed
 
-console.log("🔧 Loading auth configuration...");
-console.log("Environment:", process.env.NODE_ENV);
-console.log("VERCEL:", !!process.env.VERCEL);
-
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -22,7 +18,6 @@ export const authOptions: NextAuthOptions = {
         try {
           // Validate required user data
           if (!user.email) {
-            console.error("❌ User email is missing");
             return false;
           }
 
@@ -52,12 +47,6 @@ export const authOptions: NextAuthOptions = {
                 addresses: [],
               });
 
-              if (shouldBeAdmin) {
-                console.log(
-                  `✅ Admin access automatically granted to ${user.email}`
-                );
-              }
-              console.log(`✅ New user created: ${user.email}`);
             } catch (createError: unknown) {
               // Handle duplicate email error (race condition)
               // MongoDB duplicate key error code is 11000
@@ -68,16 +57,11 @@ export const authOptions: NextAuthOptions = {
                 (createError as { code: number }).code === 11000;
 
               if (isDuplicateError) {
-                console.log(
-                  `⚠️ User already exists (race condition), fetching existing user: ${user.email}`
-                );
                 dbUser = await User.findOne({ email: user.email });
                 if (!dbUser) {
-                  console.error("❌ Failed to find user after duplicate error");
                   return false;
                 }
               } else {
-                console.error("❌ Error creating user:", createError);
                 throw createError;
               }
             }
@@ -88,7 +72,6 @@ export const authOptions: NextAuthOptions = {
             user.id = dbUser._id.toString();
             user.isAdmin = dbUser.isAdmin || false;
           } else {
-            console.error("❌ User object is missing _id after creation/fetch");
             return false;
           }
         } catch (error: unknown) {
@@ -106,7 +89,6 @@ export const authOptions: NextAuthOptions = {
             errorDetails.errorCode = error.code;
           }
 
-          console.error("❌ Error in signIn callback:", errorDetails);
           // Only deny access for critical errors, not transient issues
           // Return false to trigger AccessDenied error page
           return false;
@@ -143,8 +125,6 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      console.log("🔄 Redirect callback:", { url, baseUrl });
-
       // Allows relative callback URLs
       if (url.startsWith("/")) return `${baseUrl}${url}`;
 

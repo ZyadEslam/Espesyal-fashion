@@ -86,7 +86,6 @@ export async function getProductById(
 
     return productObj;
   } catch (error) {
-    console.error("Error fetching product from database:", error);
     throw error;
   }
 }
@@ -157,8 +156,7 @@ export async function getAllProducts(): Promise<ProductCardProps[]> {
     }));
 
     return formattedProducts;
-  } catch (error) {
-    console.error("Error fetching products from database:", error);
+  } catch {
     return [];
   }
 }
@@ -202,8 +200,7 @@ export async function getActiveCategories(): Promise<ServerCategory[]> {
         ? new Date(cat.createdAt).toISOString()
         : new Date().toISOString(),
     }));
-  } catch (error) {
-    console.error("Error fetching categories from database:", error);
+  } catch {
     return [];
   }
 }
@@ -285,8 +282,7 @@ export async function getProductsByCategory(
         (_, i) => `/api/product/image/${product._id}?index=${i}`
       ) as unknown as ProductCardProps["imgSrc"],
     }));
-  } catch (error) {
-    console.error("Error fetching products by category from database:", error);
+  } catch {
     return [];
   }
 }
@@ -315,8 +311,7 @@ export async function getProductsForCategories(
     });
 
     return productsMap;
-  } catch (error) {
-    console.error("Error batch fetching products:", error);
+  } catch {
     return new Map();
   }
 }

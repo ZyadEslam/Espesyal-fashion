@@ -89,10 +89,8 @@ export async function checkRateLimit(
       remaining: config.maxRequests - count,
       reset: now + config.windowMs,
     };
-  } catch (error) {
+  } catch {
     // If rate limiting fails, allow the request (fail open)
-    // Log the error for monitoring
-    console.error("Rate limiting error:", error);
     return {
       success: true,
       limit: config.maxRequests,

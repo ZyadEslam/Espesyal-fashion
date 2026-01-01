@@ -35,8 +35,7 @@ export const addProduct = async (formData: FormData) => {
         }
         const buffer = Buffer.from(arrayBuffer);
         return buffer.toString("base64");
-      } catch (error) {
-        console.error("Error converting image to base64:", error);
+      } catch {
         return null;
       }
     };
@@ -68,8 +67,8 @@ export const addProduct = async (formData: FormData) => {
     if (variantsField) {
       try {
         variantsPayload = JSON.parse(variantsField as string);
-      } catch (error) {
-        console.error("Failed to parse variants payload:", error);
+      } catch {
+        // Error handled silently for production
       }
     }
 
@@ -103,7 +102,6 @@ export const addProduct = async (formData: FormData) => {
     }
     return res.json();
   } catch (error) {
-    console.error("Error adding product:", error);
     throw error;
   }
 };
@@ -151,8 +149,7 @@ export const shippingFormAction = async (
         message: result.message || "Failed to create address.",
       };
     }
-  } catch (error) {
-    console.error("Error creating address:", error);
+  } catch {
     return {
       success: false,
       message: "Failed to create address. Please try again.",
@@ -219,8 +216,7 @@ export const placeOrderAction = async (
         message: result.message || "Failed to place order",
       };
     }
-  } catch (error) {
-    console.error("Error placing order:", error);
+  } catch {
     return {
       success: false,
       message: "Failed to place order. Please try again.",

@@ -172,22 +172,9 @@ export async function POST(req: NextRequest) {
         : body.products,
     };
 
-    // Log the incoming data for debugging (only in development)
-    if (process.env.NODE_ENV === "development") {
-      console.log(
-        "📦 Incoming order data:",
-        JSON.stringify(processedBody, null, 2)
-      );
-    }
-
     const validation = safeParseInput(orderCreateSchema, processedBody);
 
     if (!validation.success) {
-      // Log detailed validation errors
-      console.error(
-        "❌ Order validation failed:",
-        JSON.stringify(validation.errors.errors, null, 2)
-      );
 
       return NextResponse.json(
         {
@@ -480,7 +467,6 @@ export async function POST(req: NextRequest) {
       }
     );
   } catch (error) {
-    console.error("Error placing order:", error);
     return createErrorResponse(error, "Failed to place order");
   }
 }

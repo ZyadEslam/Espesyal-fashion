@@ -71,14 +71,8 @@ export const getCachedData = async <T = unknown>(
 
   try {
     const data = await redisGet<T>(key);
-    if (data) {
-      console.log(`[Cache HIT] Key: ${key}`);
-    } else {
-      console.log(`[Cache MISS] Key: ${key}`);
-    }
     return data;
-  } catch (error) {
-    console.error(`Error getting cached data for key "${key}":`, error);
+  } catch {
     return null;
   }
 };
@@ -95,12 +89,8 @@ export const setCachedData = async (
 
   try {
     const success = await redisSet(key, data, ttl);
-    if (success) {
-      console.log(`[Cache SET] Key: ${key}, TTL: ${ttl || "none"}`);
-    }
     return success;
-  } catch (error) {
-    console.error(`Error setting cached data for key "${key}":`, error);
+  } catch {
     return false;
   }
 };
@@ -113,12 +103,8 @@ export const invalidateCache = async (key: string): Promise<boolean> => {
 
   try {
     const success = await redisDelete(key);
-    if (success) {
-      console.log(`[Cache INVALIDATED] Key: ${key}`);
-    }
     return success;
-  } catch (error) {
-    console.error(`Error invalidating cache for key "${key}":`, error);
+  } catch {
     return false;
   }
 };

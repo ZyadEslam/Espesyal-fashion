@@ -58,10 +58,6 @@ const getRedisClient = async (): Promise<any> => {
       redisClient = createClient({ url: redisUrl });
       await redisClient.connect();
 
-      if (process.env.NODE_ENV === "development") {
-        console.log("✅ Connected to Redis using direct connection");
-      }
-
       return redisClient;
     }
 
@@ -78,28 +74,9 @@ const getRedisClient = async (): Promise<any> => {
       const kvModule = await dynamicImport("@vercel/kv");
       redisClient = kvModule.kv;
 
-      if (process.env.NODE_ENV === "development") {
-        console.log("✅ Connected to Vercel KV");
-      }
-
       return redisClient;
     }
-  } catch (err: unknown) {
-    if (process.env.NODE_ENV === "development") {
-      const error = err as Error;
-      const errorMessage = error?.message || String(err);
-
-      if (errorMessage.includes("Cannot find module")) {
-        console.warn(
-          "⚠️  Redis package not found. Install with: npm install redis"
-        );
-      } else {
-        console.warn(
-          "⚠️  Redis connection error. Caching will be disabled:",
-          errorMessage
-        );
-      }
-    }
+  } catch {
     return null;
   }
 
@@ -134,8 +111,7 @@ export const redisGet = async <T = unknown>(key: string): Promise<T | null> => {
       }
     }
     return value as T;
-  } catch (error) {
-    console.error(`Redis GET error for key "${key}":`, error);
+  } catch {
     return null;
   }
 };
@@ -162,8 +138,7 @@ export const redisSet = async (
     }
 
     return true;
-  } catch (error) {
-    console.error(`Redis SET error for key "${key}":`, error);
+  } catch {
     return false;
   }
 };
@@ -177,8 +152,7 @@ export const redisDelete = async (key: string): Promise<boolean> => {
 
     await client.del(key);
     return true;
-  } catch (error) {
-    console.error(`Redis DELETE error for key "${key}":`, error);
+  } catch {
     return false;
   }
 };
@@ -213,12 +187,7 @@ export const redisDeletePattern = async (pattern: string): Promise<number> => {
 
     return deletedCount;
   } catch {
-    // If SCAN is not available (e.g., Vercel KV), fall back to warning
-    if (process.env.NODE_ENV === "development") {
-      console.warn(
-        `Pattern deletion not fully supported for pattern: ${pattern}. Using manual key tracking.`
-      );
-    }
+    // If SCAN is not available (e.g., Vercel KV), fall back silently
     return 0;
   }
 };

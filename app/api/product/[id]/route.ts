@@ -55,7 +55,6 @@ export async function GET(request: NextRequest, { params }: Params) {
     try {
       await connectDB();
     } catch (dbError) {
-      console.error("Database connection error:", dbError);
       return NextResponse.json(
         {
           message: "Database connection failed",
@@ -143,7 +142,6 @@ export async function GET(request: NextRequest, { params }: Params) {
       },
     });
   } catch (error) {
-    console.error("Error fetching product:", error);
     const errorMessage =
       error instanceof Error
         ? error.message
@@ -257,7 +255,6 @@ export async function POST(request: NextRequest, { params }: Params) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error updating product:", error);
     return NextResponse.json(
       { message: error, success: false },
       { status: 500 }
@@ -344,7 +341,6 @@ export async function DELETE(request: NextRequest, { params }: Params) {
       }
     );
   } catch (error) {
-    console.error("Error deleting product:", error);
     return createErrorResponse(error, "Failed to delete product");
   }
 }
@@ -444,7 +440,6 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error updating product:", error);
     return NextResponse.json(
       { message: error, success: false },
       { status: 500 }

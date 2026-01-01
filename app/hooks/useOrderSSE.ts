@@ -34,7 +34,6 @@ export const useOrderSSE = ({
 
         eventSource.onopen = () => {
           setIsConnected(true);
-          console.log("SSE connected");
         };
 
         eventSource.addEventListener("connected", () => {
@@ -47,7 +46,6 @@ export const useOrderSSE = ({
 
         eventSource.addEventListener("new-order", (event) => {
           const data = JSON.parse(event.data);
-          console.log("New order received:", data);
 
           // Only add if it matches current status filter
           if (statusFilter === "all" || data.orderState === statusFilter) {
@@ -69,12 +67,10 @@ export const useOrderSSE = ({
 
         eventSource.addEventListener("order-updated", (event) => {
           const data = JSON.parse(event.data);
-          console.log("Order updated:", data);
           onOrderUpdate(data.orderId, data.orderState);
         });
 
         eventSource.onerror = () => {
-          console.error("SSE error");
           setIsConnected(false);
           eventSource.close();
 
@@ -83,8 +79,7 @@ export const useOrderSSE = ({
             connectSSE();
           }, 3000);
         };
-      } catch (err) {
-        console.error("Error connecting to SSE:", err);
+      } catch {
         setIsConnected(false);
       }
     };

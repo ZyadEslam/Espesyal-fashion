@@ -144,7 +144,6 @@ export async function POST(req: NextRequest) {
 
     // Validate environment variables
     if (!process.env.PAYMOB_API_KEY || !process.env.PAYMOB_INTEGRATION_ID) {
-      console.error("Missing Paymob configuration");
       return NextResponse.json(
         { error: "Service Error", message: "Payment service unavailable" },
         { status: 500 }
@@ -231,7 +230,6 @@ export async function POST(req: NextRequest) {
       iframeUrl,
     });
   } catch (error) {
-    console.error("Error creating Paymob payment:", error);
     return NextResponse.json(
       {
         error: "Payment Error",

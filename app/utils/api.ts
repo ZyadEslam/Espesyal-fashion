@@ -32,8 +32,7 @@ export const api = {
       );
 
       return data.products || [];
-    } catch (error) {
-      console.log("Error fetching products:", error);
+    } catch {
       // Return empty array on error instead of the error object
       return [];
     }
@@ -53,7 +52,6 @@ export const api = {
     // Client-side: use HTTP request with relative URL
     try {
       const url = `${API_BASE_URL}/product/${id}`;
-      console.log("Fetching product from URL:", url);
 
       const data = await cachedFetchJson<{ product: ProductCardProps }>(
         url,
@@ -66,8 +64,6 @@ export const api = {
 
       return data.product;
     } catch (error) {
-      console.error("Error fetching product:", error);
-      console.error("Product ID:", id);
 
       // Provide more detailed error message
       const errorMessage =
@@ -87,8 +83,7 @@ export const api = {
         cacheStrategies.userData()
       );
       return user;
-    } catch (err) {
-      console.log(err);
+    } catch {
       return null;
     }
   },
@@ -98,10 +93,8 @@ export const api = {
         `${API_BASE_URL}/user/${userId}/cart`,
         cacheStrategies.userData()
       );
-      console.log("Cart response:", res);
       return res;
-    } catch (err) {
-      console.error("Error fetching cart:", err);
+    } catch {
       // Return empty cart on error instead of NextResponse
       return { cart: [] };
     }
@@ -120,8 +113,7 @@ export const api = {
           cartToAdd,
         }),
       });
-      const res = await response.json();
-      console.log("mergeCart response:", res);
+      await response.json();
       return response.json();
     } catch (err) {
       return NextResponse.json(err, { status: 401 });

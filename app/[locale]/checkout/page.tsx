@@ -107,8 +107,8 @@ const CheckoutPage = () => {
               subtotal: totalPrice,
             });
           }
-        } catch (error) {
-          console.error("Error parsing checkout data:", error);
+        } catch {
+          // Error handled silently for production
         }
       } else {
         // Fallback to cart if no sessionStorage data
@@ -234,8 +234,7 @@ const CheckoutPage = () => {
         }
       }
       return { valid: true };
-    } catch (error) {
-      console.error("Error validating stock:", error);
+    } catch {
       return {
         valid: false,
         message: "Error checking stock availability. Please try again.",
@@ -322,8 +321,7 @@ const CheckoutPage = () => {
           message: result.message || t("paymentFailed"),
         });
       }
-    } catch (error) {
-      console.error("Error placing order:", error);
+    } catch {
       setOrderStatus({ success: false, message: t("paymentFailed") });
     } finally {
       setIsProcessing(false);

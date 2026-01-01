@@ -84,8 +84,8 @@ const CartProvider = ({ children }: CartProviderProps) => {
           }
         }
       }
-    } catch (error) {
-      console.error("Error loading cart from localStorage:", error);
+    } catch {
+      // Error handled silently for production
     } finally {
       setIsCartHydrated(true);
     }
@@ -98,8 +98,8 @@ const CartProvider = ({ children }: CartProviderProps) => {
     try {
       const storageKey = getCartStorageKey(session?.user?.id);
       localStorage.setItem(storageKey, JSON.stringify(cart));
-    } catch (error) {
-      console.error("Error saving cart to localStorage:", error);
+    } catch {
+      // Error handled silently for production
     }
   }, [cart, session?.user?.id, isCartHydrated]);
 
@@ -137,8 +137,8 @@ const CartProvider = ({ children }: CartProviderProps) => {
         const storedCart = localStorage.getItem(storageKey);
         const localCart = storedCart ? JSON.parse(storedCart) : [];
         await api.mergeCart(localCart, session.user.id);
-      } catch (error) {
-        console.error("Error syncing cart with server:", error);
+      } catch {
+        // Error handled silently for production
       }
     }
   }, [session?.user?.id]);
@@ -146,12 +146,10 @@ const CartProvider = ({ children }: CartProviderProps) => {
   const addToCart = useCallback(
     (product: ProductCardProps) => {
       if (!product?._id) {
-        console.warn("Cannot add product without id to cart");
         return;
       }
 
       if (product.variants?.length && !product.selectedVariantId) {
-        console.warn("Variant selection required for this product");
         return;
       }
 
@@ -320,14 +318,8 @@ const CartProvider = ({ children }: CartProviderProps) => {
           try {
             const cartResponse = await api.getCart(session.user.id as string);
             serverCart = cartResponse.cart || [];
-          } catch (fetchError) {
-            // If fetch fails, log but don't show error to user
-            // Use local cart as fallback
-            console.warn(
-              "Failed to fetch cart from server, using local cart:",
-              fetchError
-            );
-
+          } catch {
+            // If fetch fails, use local cart as fallback
             // If we have a local cart, use it
             if (userCart) {
               const parsedUserCart = JSON.parse(userCart);
@@ -376,8 +368,7 @@ const CartProvider = ({ children }: CartProviderProps) => {
 
             // Sync to server (don't await - fire and forget)
             if (mergedCart.length > 0) {
-              api.mergeCart(mergedCart, session.user.id).catch((err) => {
-                console.warn("Failed to sync cart to server:", err);
+              api.mergeCart(mergedCart, session.user.id).catch(() => {
                 // Don't show error - cart is saved locally
               });
             }
@@ -413,9 +404,7 @@ const CartProvider = ({ children }: CartProviderProps) => {
             setCart(serverCart);
             localStorage.setItem(userKey, JSON.stringify(serverCart));
           }
-        } catch (err) {
-          // Only show error for unexpected errors, not network/auth issues
-          console.error("Unexpected error syncing cart:", err);
+        } catch {
           // Don't set error state - let user continue with local cart
           hasSyncedRef.current = false; // Allow retry on error
         }
