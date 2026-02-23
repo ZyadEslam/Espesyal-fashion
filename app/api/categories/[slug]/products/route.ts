@@ -141,10 +141,7 @@ export async function GET(request: NextRequest, { params }: Params) {
         rating: productTyped.rating,
         brand: productTyped.brand,
         categoryName: productTyped.categoryName,
-        imgSrc: (productTyped.imgSrc || []).map(
-          (_: unknown, index: number) =>
-            `/api/product/image/${productTyped._id}?index=${index}`
-        ) as unknown as Array<unknown>,
+        imgSrc: (productTyped.imgSrc || []) as unknown as Array<unknown>,
       };
     });
 

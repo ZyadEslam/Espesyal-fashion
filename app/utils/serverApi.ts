@@ -23,8 +23,6 @@ export async function getProductById(
       throw new Error("Product ID is required");
     }
 
-    // Use aggregation to get image count without loading the actual image buffers
-    // This is a MAJOR optimization - avoids loading MB of image data into memory
     const result = await Product.aggregate([
       { $match: { _id: new mongoose.Types.ObjectId(id) } },
       {
@@ -40,8 +38,7 @@ export async function getProductById(
           variants: 1,
           createdAt: 1,
           updatedAt: 1,
-          // Get image count without loading actual buffer data
-          imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+          imgSrc: 1,
         },
       },
     ]);
@@ -52,7 +49,6 @@ export async function getProductById(
       return null;
     }
 
-    // Convert to ProductCardProps format
     const productObj: ProductCardProps = {
       _id: product._id.toString(),
       name: product.name,
@@ -77,11 +73,7 @@ export async function getProductById(
         (sum: number, v: { quantity?: number }) => sum + (v?.quantity || 0),
         0
       ) || 0,
-      // Generate API endpoints based on image count (not actual buffer data)
-      imgSrc: Array.from(
-        { length: product.imageCount || 0 },
-        (_, i) => `/api/product/image/${id}?index=${i}`
-      ) as unknown as ProductCardProps["imgSrc"],
+      imgSrc: (product.imgSrc || []) as ProductCardProps["imgSrc"],
     };
 
     return productObj;
@@ -98,8 +90,6 @@ export async function getAllProducts(): Promise<ProductCardProps[]> {
   try {
     await connectDB();
 
-    // Use aggregation to get image count without loading the actual image buffers
-    // This is a MAJOR optimization - avoids loading MB of image data into memory
     const products = await Product.aggregate([
       {
         $project: {
@@ -116,13 +106,11 @@ export async function getAllProducts(): Promise<ProductCardProps[]> {
           variants: 1,
           createdAt: 1,
           updatedAt: 1,
-          // Get image count without loading actual buffer data
-          imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+          imgSrc: 1,
         },
       },
     ]);
 
-    // Convert to ProductCardProps format
     const formattedProducts: ProductCardProps[] = products.map((product) => ({
       _id: product._id.toString(),
       name: product.name,
@@ -148,11 +136,7 @@ export async function getAllProducts(): Promise<ProductCardProps[]> {
         (sum: number, v: { quantity?: number }) => sum + (v?.quantity || 0),
         0
       ) || 0,
-      // Generate API endpoints based on image count (not actual buffer data)
-      imgSrc: Array.from(
-        { length: product.imageCount || 0 },
-        (_, i) => `/api/product/image/${product._id}?index=${i}`
-      ) as unknown as ProductCardProps["imgSrc"],
+      imgSrc: (product.imgSrc || []) as ProductCardProps["imgSrc"],
     }));
 
     return formattedProducts;
@@ -238,8 +222,6 @@ export async function getProductsByCategory(
       return [];
     }
 
-    // Use aggregation to get image count without loading the actual image buffers
-    // This is a MAJOR optimization - avoids loading MB of image data into memory
     const products = await Product.aggregate([
       {
         $match: {
@@ -260,8 +242,7 @@ export async function getProductsByCategory(
           brand: 1,
           categoryName: 1,
           createdAt: 1,
-          // Get image count without loading actual buffer data
-          imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+          imgSrc: 1,
         },
       },
     ]);
@@ -276,11 +257,7 @@ export async function getProductsByCategory(
       rating: product.rating,
       brand: product.brand,
       categoryName: product.categoryName,
-      // Generate API endpoints based on image count (not actual buffer data)
-      imgSrc: Array.from(
-        { length: product.imageCount || 0 },
-        (_, i) => `/api/product/image/${product._id}?index=${i}`
-      ) as unknown as ProductCardProps["imgSrc"],
+      imgSrc: (product.imgSrc || []) as ProductCardProps["imgSrc"],
     }));
   } catch {
     return [];

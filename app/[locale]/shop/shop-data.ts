@@ -51,10 +51,7 @@ export async function fetchInitialProducts(
       // Calculate pagination
       const skip = (page - 1) * limit;
 
-      // OPTIMIZED: Use aggregation to get image count without loading full buffer data
-      // This is a MAJOR performance improvement - avoids loading MB of image data
       const [productsRaw, totalProducts, brands] = await Promise.all([
-        // Get products with pagination using aggregation (excludes imgSrc buffer data)
         Product.aggregate([
           { $sort: sort },
           { $skip: skip },
@@ -69,8 +66,7 @@ export async function fetchInitialProducts(
               rating: 1,
               brand: 1,
               categoryName: 1,
-              // Get image count without loading actual buffer data
-              imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+              imgSrc: 1,
             },
           },
         ]),
@@ -80,7 +76,6 @@ export async function fetchInitialProducts(
         Product.distinct("brand"),
       ]);
 
-      // Convert to proper format - generate API endpoints based on image count
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const products: ProductCardProps[] = productsRaw.map((p: any) => ({
         _id: p._id.toString(),
@@ -92,10 +87,7 @@ export async function fetchInitialProducts(
         rating: p.rating,
         brand: p.brand,
         categoryName: p.categoryName,
-        imgSrc: Array.from(
-          { length: p.imageCount || 0 },
-          (_, i) => `/api/product/image/${p._id}?index=${i}`
-        ) as unknown as ProductCardProps["imgSrc"],
+        imgSrc: (p.imgSrc || []) as ProductCardProps["imgSrc"],
       }));
 
       const totalPages = Math.ceil(totalProducts / limit);
@@ -133,10 +125,7 @@ export async function fetchInitialProducts(
     // Calculate pagination
     const skip = (page - 1) * limit;
 
-    // OPTIMIZED: Use aggregation to get image count without loading full buffer data
-    // This is a MAJOR performance improvement - avoids loading MB of image data
     const [productsRaw, totalProducts, brands] = await Promise.all([
-      // Get products with pagination using aggregation (excludes imgSrc buffer data)
       Product.aggregate([
         { $match: { category: new mongoose.Types.ObjectId(category._id.toString()) } },
         { $sort: sort },
@@ -152,8 +141,7 @@ export async function fetchInitialProducts(
             rating: 1,
             brand: 1,
             categoryName: 1,
-            // Get image count without loading actual buffer data
-            imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+            imgSrc: 1,
           },
         },
       ]),
@@ -163,7 +151,6 @@ export async function fetchInitialProducts(
       Product.distinct("brand", { category: category._id }),
     ]);
 
-    // Convert to proper format - generate API endpoints based on image count
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const products: ProductCardProps[] = productsRaw.map((p: any) => ({
       _id: p._id.toString(),
@@ -175,10 +162,7 @@ export async function fetchInitialProducts(
       rating: p.rating,
       brand: p.brand,
       categoryName: p.categoryName,
-      imgSrc: Array.from(
-        { length: p.imageCount || 0 },
-        (_, i) => `/api/product/image/${p._id}?index=${i}`
-      ) as unknown as ProductCardProps["imgSrc"],
+      imgSrc: (p.imgSrc || []) as ProductCardProps["imgSrc"],
     }));
 
     const totalPages = Math.ceil(totalProducts / limit);

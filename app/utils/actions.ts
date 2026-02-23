@@ -7,58 +7,19 @@ function getBaseUrl(): string {
 
 export const addProduct = async (formData: FormData) => {
   try {
-    const image1: File | null = formData.get("image1") as File | null;
-    const image2: File | null = formData.get("image2") as File | null;
-    const image3: File | null = formData.get("image3") as File | null;
-    const image4: File | null = formData.get("image4") as File | null;
+    const image1 = (formData.get("image1") as string | null)?.trim();
+    const image2 = (formData.get("image2") as string | null)?.trim();
+    const image3 = (formData.get("image3") as string | null)?.trim();
+    const image4 = (formData.get("image4") as string | null)?.trim();
 
-    // Convert image files to base64 strings for JSON serialization
-    // Only process files that exist and have content
-    const convertImageToBase64 = async (
-      file: File | null
-    ): Promise<string | null> => {
-      // Check if file exists, has content, and is a valid file
-      if (
-        !file ||
-        file.size === 0 ||
-        file.name === "" ||
-        file.type === "" ||
-        !file.type.startsWith("image/")
-      ) {
-        return null;
-      }
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        // Additional check: ensure arrayBuffer has content
-        if (arrayBuffer.byteLength === 0) {
-          return null;
-        }
-        const buffer = Buffer.from(arrayBuffer);
-        return buffer.toString("base64");
-      } catch {
-        return null;
-      }
-    };
+    // Collect non-empty image URL values
+    const imgFiles = [image1, image2, image3, image4].filter(
+      (img): img is string => !!img && img.length > 0
+    );
 
-    const [base64Image1, base64Image2, base64Image3, base64Image4] =
-      await Promise.all([
-        convertImageToBase64(image1),
-        convertImageToBase64(image2),
-        convertImageToBase64(image3),
-        convertImageToBase64(image4),
-      ]);
-
-    // Filter out null values and create array of base64 strings
-    const imgFiles = [
-      base64Image1,
-      base64Image2,
-      base64Image3,
-      base64Image4,
-    ].filter((img): img is string => img !== null && img !== undefined);
-
-    // Validate that at least one image is provided
+    // Validate that at least one image URL is provided
     if (imgFiles.length === 0) {
-      throw new Error("At least one product image is required");
+      throw new Error("At least one product image URL is required");
     }
 
     let variantsPayload: unknown = [];

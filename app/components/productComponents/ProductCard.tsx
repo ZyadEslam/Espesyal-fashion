@@ -11,7 +11,6 @@ import React, {
 // import { assets } from "@/public/assets/assets";
 import Link from "next/link";
 import { ProductCardProps } from "../../types/types";
-import { getOptimizedImageUrl } from "../../utils/imageUtils";
 import { useTranslations } from "next-intl";
 // Import ProductImage directly for LCP candidates to avoid lazy loading delay
 import ProductImage from "./ProductImage";
@@ -32,23 +31,14 @@ const ProductCard = memo(
     const t = useTranslations("common");
     const [imageError, setImageError] = useState(false);
 
-    // Compute image URL synchronously during render instead of useEffect
-    // This eliminates delay in image src assignment and improves LCP significantly
+    // Use first image URL from product.imgSrc if available
     const imageSrc = useMemo(() => {
-      if (product._id) {
-        const displayWidth = 320; // Max display size for product cards
-        const displayHeight = 320;
-        // Use optimized quality (80) for better compression while maintaining visual quality
-        return getOptimizedImageUrl(
-          product._id as string,
-          0,
-          displayWidth,
-          displayHeight,
-          80
-        );
+      if (product.imgSrc && product.imgSrc.length > 0) {
+        const first = product.imgSrc[0] as string | { src?: string };
+        return typeof first === "string" ? first : first?.src || "";
       }
       return "";
-    }, [product._id]);
+    }, [product.imgSrc]);
 
     const handleImageError = useCallback(() => {
       setImageError(true);
@@ -121,7 +111,6 @@ const ProductCard = memo(
                   context="product-card"
                   width={320}
                   height={320}
-                  productId={product._id as string}
                 />
               ) : (
                 <Suspense
@@ -142,7 +131,6 @@ const ProductCard = memo(
                     context="product-card"
                     width={320}
                     height={320}
-                    productId={product._id as string}
                   />
                 </Suspense>
               )

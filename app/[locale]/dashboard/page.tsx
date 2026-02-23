@@ -43,14 +43,11 @@ const DashboardPage = memo(() => {
 
   const handleImageChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, imageKey: string) => {
-      if (e.target.files && e.target.files[0]) {
-        const file = e.target.files[0];
-        const imageUrl = URL.createObjectURL(file);
-        setImages((prev) => ({
-          ...prev,
-          [imageKey]: imageUrl,
-        }));
-      }
+      const url = e.target.value;
+      setImages((prev) => ({
+        ...prev,
+        [imageKey]: url || assets.upload_area,
+      }));
     },
     []
   );
@@ -84,19 +81,11 @@ const DashboardPage = memo(() => {
   );
 
   const handleFormReset = useCallback(() => {
-    // Clean up any blob URLs before resetting
-    setImages((prev) => {
-      Object.values(prev).forEach((image) => {
-        if (typeof image === "string" && image.startsWith("blob:")) {
-          URL.revokeObjectURL(image);
-        }
-      });
-      return {
-        image1: assets.upload_area,
-        image2: assets.upload_area,
-        image3: assets.upload_area,
-        image4: assets.upload_area,
-      };
+    setImages({
+      image1: assets.upload_area,
+      image2: assets.upload_area,
+      image3: assets.upload_area,
+      image4: assets.upload_area,
     });
     // Reset variants to one empty row
     setVariants([createVariantRow()]);

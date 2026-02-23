@@ -68,8 +68,6 @@ export async function GET(request: NextRequest, { params }: Params) {
       );
     }
 
-    // OPTIMIZED: Use aggregation to get image count without loading full buffer data
-    // This is a MAJOR performance improvement - avoids loading MB of image data
     const result = await Product.aggregate([
       { $match: { _id: new mongoose.Types.ObjectId(id) } },
       {
@@ -86,8 +84,7 @@ export async function GET(request: NextRequest, { params }: Params) {
           hideFromHome: 1,
           createdAt: 1,
           updatedAt: 1,
-          // Get image count without loading actual buffer data
-          imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
+          imgSrc: 1,
         },
       },
     ]);
@@ -105,11 +102,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     const productObj = {
       ...product,
       _id: product._id.toString(),
-      // Generate API endpoints based on image count (not actual buffer data)
-      imgSrc: Array.from(
-        { length: product.imageCount || 0 },
-        (_, i) => `/api/product/image/${id}?index=${i}`
-      ),
+      imgSrc: product.imgSrc || [],
       // Convert variant _id fields to strings
       variants: Array.isArray(product.variants)
         ? product.variants.map((variant: { _id?: { toString: () => string } | string; [key: string]: unknown }) => ({

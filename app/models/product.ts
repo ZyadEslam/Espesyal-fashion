@@ -71,7 +71,7 @@ const productSchema = new mongoose.Schema(
   },
 
   imgSrc: {
-    type: [Buffer],
+    type: [String],
     required: [true, "Product images are required"],
   },
   quantityInCart: {

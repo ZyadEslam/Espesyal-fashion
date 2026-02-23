@@ -82,36 +82,27 @@ const POST = async (req: NextRequest) => {
       productData.variants = sanitizeVariants(productData.variants);
     }
 
-    // Convert base64 image strings back to Buffer objects for storage
-    const imageBuffers: Buffer[] = [];
-    if (productData.imgSrc && Array.isArray(productData.imgSrc)) {
-      for (const img of productData.imgSrc) {
-        if (typeof img === "string" && img.length > 0) {
-          try {
-            const buffer = Buffer.from(img, "base64");
-            imageBuffers.push(buffer);
-          } catch {
-            // Skip invalid images
-          }
-        }
-      }
-    }
+    // Ensure we have at least one valid image URL
+    const imageUrls =
+      Array.isArray(productData.imgSrc) && productData.imgSrc.length > 0
+        ? productData.imgSrc
+            .map((url) => (typeof url === "string" ? url.trim() : ""))
+            .filter((url) => url.length > 0)
+        : [];
 
-    // Validate that at least one image is provided
-    if (imageBuffers.length === 0) {
+    if (imageUrls.length === 0) {
       return NextResponse.json(
         {
           message: "Validation failed",
           success: false,
-          error: "At least one product image is required",
+          error: "At least one product image URL is required",
         },
         { status: 400 }
       );
     }
 
-    // Assign converted buffers to productData
-    // Cast through unknown first to allow type conversion
-    (productData as unknown as { imgSrc: Buffer[] }).imgSrc = imageBuffers;
+    // Normalize image URLs back onto productData
+    (productData as unknown as { imgSrc: string[] }).imgSrc = imageUrls;
 
     // If category is provided but categoryName is not, fetch it from the category
     if (productData.category && !productData.categoryName) {
@@ -181,8 +172,6 @@ const GET = async () => {
     // Cache miss - fetch from database
     await connectDB();
     
-    // OPTIMIZED: Use aggregation to get image count without loading full buffer data
-    // This is a MAJOR performance improvement - avoids loading MB of image data into memory
     const products = await Product.aggregate([
       {
         $project: {
@@ -197,10 +186,9 @@ const GET = async () => {
           categoryName: 1,
           hideFromHome: 1,
           variants: 1,
+          imgSrc: 1,
           createdAt: 1,
           updatedAt: 1,
-          // Get image count without loading actual buffer data
-          imageCount: { $size: { $ifNull: ["$imgSrc", []] } },
         },
       },
     ]);
@@ -225,7 +213,14 @@ const GET = async () => {
                 : variant._id.toString()
               : undefined,
           })
-        );
+      );
+      
+      // Derive imageCount from imgSrc array for admin views
+      (productObj as { imageCount?: number }).imageCount = Array.isArray(
+        productObj.imgSrc
+      )
+        ? productObj.imgSrc.length
+        : 0;
       }
       
       // Calculate totalStock from variants

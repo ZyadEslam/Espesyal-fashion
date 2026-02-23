@@ -29,7 +29,7 @@ export interface ProductCardProps {
   selectedSize?: string;
   maxAvailable?: number;
   variantSku?: string;
-  imgSrc: StaticImageData[];
+  imgSrc: (StaticImageData | string)[];
 }
 
 export interface CategoryProps {

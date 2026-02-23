@@ -1,6 +1,6 @@
 import { assets } from "@/public/assets/assets";
 import Image, { StaticImageData } from "next/image";
-import React, { useCallback, useRef, useEffect } from "react";
+import React, { useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 
 export interface ImageState {
@@ -42,17 +42,6 @@ const ImageUploaderComponent: React.FC<ImageUploaderProps> = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [resetKey]);
 
-    // Cleanup blob URLs on unmount to prevent memory leaks
-    useEffect(() => {
-      return () => {
-        Object.values(images).forEach((image) => {
-          if (typeof image === "string" && image.startsWith("blob:")) {
-            URL.revokeObjectURL(image);
-          }
-        });
-      };
-    }, [images]);
-
     const handleImageClick = useCallback(
       (inputRef: React.RefObject<HTMLInputElement | null>) => {
         inputRef.current?.click();
@@ -85,7 +74,6 @@ const ImageUploaderComponent: React.FC<ImageUploaderProps> = React.memo(
                 )}
 
                 {isBlobUrl(images[imageKey as keyof ImageState]) ? (
-                  // Use regular img tag for blob URLs (works in production)
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={images[imageKey as keyof ImageState] as string}
@@ -100,7 +88,6 @@ const ImageUploaderComponent: React.FC<ImageUploaderProps> = React.memo(
                     }
                   />
                 ) : (
-                  // Use Next.js Image for StaticImageData (like upload_area)
                   <Image
                     src={images[imageKey as keyof ImageState] as StaticImageData}
                     alt={`Product image ${index + 1}`}
@@ -116,13 +103,13 @@ const ImageUploaderComponent: React.FC<ImageUploaderProps> = React.memo(
                 )}
               </div>
               <input
-                type="file"
-                className="hidden"
+                type="text"
+                className="mt-2 block w-full rounded-md border border-gray-300 px-2 py-1 text-sm"
                 id={`p-image${index + 1}`}
                 name={`image${index + 1}`}
                 ref={fileInputRefs[imageKey as keyof typeof fileInputRefs]}
                 onChange={(e) => onImageChange(e, imageKey)}
-                accept="image/*"
+                placeholder="https://example.com/image.jpg"
               />
             </div>
           ))}

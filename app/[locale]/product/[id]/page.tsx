@@ -10,7 +10,6 @@ import {
 import { ProductSchema, Breadcrumb } from "@/app/components/seo/SEOComponents";
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
-import { getOptimizedImageUrl } from "@/app/utils/imageUtils";
 
 const ProductImagesSlider = lazy(
   () => import("../../../components/productComponents/ProductImagesSlider")
@@ -40,13 +39,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     const productImages =
-      product.imgSrc?.map(
-        (img: { src: string }) =>
-          `${
-            process.env.NEXT_PUBLIC_SITE_URL ||
-            "https://espesyal-shop.vercel.app"
-          }/api/product/image/${product._id}/${img.src}`
-      ) || [];
+      product.imgSrc?.map((img: { src?: string } | string) => {
+        const url = typeof img === "string" ? img : img.src;
+        if (!url) return null;
+        return `${
+          process.env.NEXT_PUBLIC_SITE_URL ||
+          "https://espesyal-shop.vercel.app"
+        }${url.startsWith("http") ? "" : ""}${url}`;
+      }).filter((u): u is string => !!u) || [];
 
     return generateSEOMetadata({
       title: product.name,
@@ -125,12 +125,13 @@ export default async function ProductPage({ params }: Props) {
   }
 
   const productImages =
-    product.imgSrc?.map(
-      (img: { src: string }) =>
-        `${
-          process.env.NEXT_PUBLIC_SITE_URL || "https://espesyal-shop.vercel.app"
-        }/api/product/image/${product._id}/${img.src}`
-    ) || [];
+    product.imgSrc?.map((img: { src?: string } | string) => {
+      const url = typeof img === "string" ? img : img.src;
+      if (!url) return null;
+      return `${
+        process.env.NEXT_PUBLIC_SITE_URL || "https://espesyal-shop.vercel.app"
+      }${url.startsWith("http") ? "" : ""}${url}`;
+    }).filter((u): u is string => !!u) || [];
 
   const breadcrumbItems = [
     { name: tNav("home"), url: `/${locale}` },
@@ -160,10 +161,8 @@ export default async function ProductPage({ params }: Props) {
     sku: product._id,
   };
 
-  // Generate preload URL for first image - matches the URL used in ProductImagesSlider
-  const firstImagePreloadUrl = product._id
-    ? getOptimizedImageUrl(product._id as string, 0, 600, 600, 85)
-    : null;
+  const firstImagePreloadUrl =
+    productImages && productImages.length > 0 ? productImages[0] : null;
 
   return (
     <div className="w-full px-4 sm:px-[5%] md:px-[8.5%] py-4 sm:py-6 md:py-8">
