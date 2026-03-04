@@ -248,7 +248,7 @@ const Footer = () => {
                 <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/10 group-hover:bg-primary-500/20 group-hover:border-primary-400/30 transition-all duration-300">
                   <Phone className="w-4 h-4 white" />
                 </div>
-                <span className="text-sm">+201080972324</span>
+                <span className="text-sm">+201007226706</span>
               </a>
 
               {/* Email */}
@@ -259,7 +259,7 @@ const Footer = () => {
                 <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/10 group-hover:bg-primary-500/20 group-hover:border-primary-400/30 transition-all duration-300">
                   <Mail className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-sm break-all">espesyaleg@gmail.com</span>
+                <span className="text-sm break-all">espesyalbrand@gmail.com</span>
               </a>
             </div>
           </div>
