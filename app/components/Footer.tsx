@@ -214,7 +214,6 @@ const Footer = () => {
                 { href: "/", label: tNav("home") },
                 { href: "/about", label: tNav("about") },
                 { href: "/shop", label: tNav("shop") },
-                { href: "/contact", label: tNav("contact") },
                 { href: "/privacy-policy", label: t("privacy") },
               ].map((link, index) => (
                 <li key={index}>

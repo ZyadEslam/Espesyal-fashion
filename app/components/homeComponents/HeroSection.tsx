@@ -10,6 +10,7 @@ interface HeroContent {
   useCode: string;
   forDiscount: string;
   promoCode: string;
+  showPromoSection?: boolean;
 }
 
 // Clothing-related decorative shapes component
@@ -257,6 +258,10 @@ const HeroSection = () => {
   const useCode = heroContent?.useCode || t("useCode");
   const forDiscount = heroContent?.forDiscount || t("forDiscount");
   const promoCode = heroContent?.promoCode || "BFRIDAY";
+  const showPromoSection =
+    heroContent?.showPromoSection === undefined
+      ? true
+      : heroContent.showPromoSection;
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(promoCode);
@@ -349,65 +354,67 @@ const HeroSection = () => {
               </div>
             </div>
 
-            {/* Promo Code Section */}
-            <div
-              className={`flex-shrink-0 w-full md:w-auto animate-fade-in-up-delay ${
-                isRTL ? "flex justify-center" : ""
-              }`}
-            >
+            {/* Promo Code Section (optional) */}
+            {showPromoSection && (
               <div
-                className={`inline-flex items-center gap-3 px-4 py-3 bg-white/5 backdrop-blur-md rounded-full border border-white/20 shadow-lg ${
-                  isRTL
-                    ? " w-full md:w-auto flex-col md:flex-row justify-center"
-                    : ""
+                className={`flex-shrink-0 w-full md:w-auto animate-fade-in-up-delay ${
+                  isRTL ? "flex justify-center" : ""
                 }`}
               >
-                {/* Text */}
                 <div
-                  className={`flex items-center gap-2 ${
-                    isRTL ? "flex-wrap justify-center" : ""
+                  className={`inline-flex items-center gap-3 px-4 py-3 bg-white/5 backdrop-blur-md rounded-full border border-white/20 shadow-lg ${
+                    isRTL
+                      ? " w-full md:w-auto flex-col md:flex-row justify-center"
+                      : ""
                   }`}
                 >
-                  <span
-                    className={`text-white text-sm md:text-base font-medium ${
-                      isRTL ? "whitespace-normal" : "whitespace-nowrap"
+                  {/* Text */}
+                  <div
+                    className={`flex items-center gap-2 ${
+                      isRTL ? "flex-wrap justify-center" : ""
                     }`}
                   >
-                    {useCode}
-                  </span>
-                  <span
-                    className={`text-white/80 text-xs md:text-sm ${
-                      isRTL ? "whitespace-normal" : "whitespace-nowrap"
-                    }`}
-                  >
-                    {forDiscount}
-                  </span>
-                  {/* Divider */}
-                  <div className="h-6 w-px bg-white/30"></div>
-                </div>
+                    <span
+                      className={`text-white text-sm md:text-base font-medium ${
+                        isRTL ? "whitespace-normal" : "whitespace-nowrap"
+                      }`}
+                    >
+                      {useCode}
+                    </span>
+                    <span
+                      className={`text-white/80 text-xs md:text-sm ${
+                        isRTL ? "whitespace-normal" : "whitespace-nowrap"
+                      }`}
+                    >
+                      {forDiscount}
+                    </span>
+                    {/* Divider */}
+                    <div className="h-6 w-px bg-white/30"></div>
+                  </div>
 
-                <div className="flex items-center gap-3">
-                  {/* Code */}
-                  <code className="px-3 py-1.5 block md:inline-block bg-gradient-to-r from-primary-500 to-primary-600 text-white text-lg md:text-xl font-bold tracking-wider rounded-lg shadow-lg shadow-primary-500/30">
-                    {promoCode}
-                  </code>
+                  <div className="flex items-center gap-3">
+                    {/* Code */}
+                    <code className="px-3 py-1.5 block md:inline-block bg-gradient-to-r from-primary-500 to-primary-600 text-white text-lg md:text-xl font-bold tracking-wider rounded-lg shadow-lg shadow-primary-500/30">
+                      {promoCode}
+                    </code>
 
-                  {/* Copy Button */}
-                  <button
-                    onClick={handleCopyCode}
-                    className="p-2 hover:bg-white/10 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95"
-                    aria-label="Copy promo code"
-                    title="Copy code"
-                  >
-                    {copied ? (
-                      <Check className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
-                    ) : (
-                      <Copy className="w-4 h-4 md:w-5 md:h-5 text-white transition-colors" />
-                    )}
-                  </button>
+                    {/* Copy Button */}
+                    <button
+                      onClick={handleCopyCode}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95"
+                      aria-label="Copy promo code"
+                      title="Copy code"
+                    >
+                      {copied ? (
+                        <Check className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
+                      ) : (
+                        <Copy className="w-4 h-4 md:w-5 md:h-5 text-white transition-colors" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

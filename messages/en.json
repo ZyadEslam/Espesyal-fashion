@@ -866,6 +866,8 @@
       "promoCodePlaceholder": "e.g., BFRIDAY",
       "discountText": "Discount Text",
       "discountTextPlaceholder": "e.g., for 25% OFF",
+      "showPromoSectionLabel": "Show promo code section on home page",
+      "showPromoSectionDescription": "When disabled, the promo text, code and copy button will be completely hidden from the hero section.",
       "saveChanges": "Save Changes",
       "saving": "Saving...",
       "allFieldsRequired": "All fields are required",

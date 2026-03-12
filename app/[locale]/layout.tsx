@@ -12,6 +12,7 @@ import { authOptions } from "../../lib/auth";
 import { Footer, UserNav, TopNav } from "../components";
 import CtxProviders from "../components/providers/CtxProvider";
 import { PerformanceMonitor } from "../components/seo/PerformanceOptimizations";
+import MetaPixel from "../components/MetaPixel";
 import { DashboardMenuProvider } from "../context/dashboardMenuCtx";
 import { routing } from "../../routing";
 
@@ -101,6 +102,7 @@ export default async function LocaleLayout({
             <CtxProviders>
               <DashboardMenuProvider>
                 <PerformanceMonitor />
+                <MetaPixel />
                 <TopNav />
                 <UserNav />
                 <main>{children}</main>

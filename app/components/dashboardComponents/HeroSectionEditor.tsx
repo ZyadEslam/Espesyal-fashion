@@ -17,6 +17,7 @@ interface HeroContent {
   forDiscount: string;
   promoCode: string;
   locale: "en" | "ar";
+  showPromoSection?: boolean;
 }
 
 const HeroSectionEditor = React.memo(() => {
@@ -37,6 +38,7 @@ const HeroSectionEditor = React.memo(() => {
     forDiscount: "",
     promoCode: "",
     locale: activeLocale,
+    showPromoSection: true,
   });
 
   // Fetch hero content
@@ -91,12 +93,17 @@ const HeroSectionEditor = React.memo(() => {
       e.preventDefault();
 
       // Validation
+      if (!formData.heroBadge.trim() || !formData.largestSale.trim()) {
+        setError(t("allFieldsRequired"));
+        return;
+      }
+
       if (
-        !formData.heroBadge.trim() ||
-        !formData.largestSale.trim() ||
-        !formData.useCode.trim() ||
-        !formData.forDiscount.trim() ||
-        !formData.promoCode.trim()
+        (formData.showPromoSection === undefined ||
+          formData.showPromoSection === true) &&
+        (!formData.useCode.trim() ||
+          !formData.forDiscount.trim() ||
+          !formData.promoCode.trim())
       ) {
         setError(t("allFieldsRequired"));
         return;
@@ -279,7 +286,7 @@ const HeroSectionEditor = React.memo(() => {
                   onChange={handleInputChange}
                   className="dashboard-input w-full"
                   placeholder={t("useCodePlaceholder")}
-                  required
+                  required={formData.showPromoSection !== false}
                 />
               </div>
 
@@ -299,7 +306,7 @@ const HeroSectionEditor = React.memo(() => {
                   onChange={handleInputChange}
                   className="dashboard-input w-full uppercase"
                   placeholder={t("promoCodePlaceholder")}
-                  required
+                  required={formData.showPromoSection !== false}
                   style={{ textTransform: "uppercase" }}
                 />
               </div>
@@ -320,8 +327,46 @@ const HeroSectionEditor = React.memo(() => {
                   onChange={handleInputChange}
                   className="dashboard-input w-full"
                   placeholder={t("discountTextPlaceholder")}
-                  required
+                  required={formData.showPromoSection !== false}
                 />
+              </div>
+
+              {/* Toggle: Show Promo Section */}
+              <div className="pt-2 border-t border-gray-100">
+                <div className="flex items-start gap-3">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        showPromoSection: !(prev.showPromoSection ?? true),
+                      }))
+                    }
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange focus:ring-offset-2 ${
+                      formData.showPromoSection ?? true
+                        ? "bg-orange"
+                        : "bg-gray-200"
+                    }`}
+                    role="switch"
+                    aria-checked={formData.showPromoSection ?? true}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        formData.showPromoSection ?? true
+                          ? "translate-x-5"
+                          : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {t("showPromoSectionLabel")}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t("showPromoSectionDescription")}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Submit Button */}

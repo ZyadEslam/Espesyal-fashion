@@ -14,19 +14,20 @@ const heroSectionSchema = new mongoose.Schema(
     },
     useCode: {
       type: String,
-      required: [true, "Use code text is required"],
       trim: true,
     },
     forDiscount: {
       type: String,
-      required: [true, "Discount text is required"],
       trim: true,
     },
     promoCode: {
       type: String,
-      required: [true, "Promo code is required"],
       trim: true,
       uppercase: true,
+    },
+    showPromoSection: {
+      type: Boolean,
+      default: true,
     },
     locale: {
       type: String,

@@ -11,6 +11,7 @@ const defaultValues = {
     useCode: "Use code:",
     forDiscount: "for 25% OFF",
     promoCode: "BFRIDAY",
+    showPromoSection: true,
   },
   ar: {
     heroBadge: "قسم العروض",
@@ -18,6 +19,7 @@ const defaultValues = {
     useCode: "استخدم الكود:",
     forDiscount: "للحصول على خصم 25%",
     promoCode: "BFRIDAY",
+    showPromoSection: true,
   },
 };
 
@@ -50,6 +52,10 @@ export async function GET(req: NextRequest) {
             useCode: heroSection.useCode,
             forDiscount: heroSection.forDiscount,
             promoCode: heroSection.promoCode,
+            showPromoSection:
+              typeof (heroSection as any).showPromoSection === "boolean"
+                ? (heroSection as any).showPromoSection
+                : true,
             locale: heroSection.locale,
           },
         },
@@ -121,8 +127,15 @@ export async function PUT(req: NextRequest) {
     await dbConnect();
 
     const body = await req.json();
-    const { heroBadge, largestSale, useCode, forDiscount, promoCode, locale } =
-      body;
+    const {
+      heroBadge,
+      largestSale,
+      useCode,
+      forDiscount,
+      promoCode,
+      showPromoSection,
+      locale,
+    } = body;
 
     // Validate locale
     if (!locale || (locale !== "en" && locale !== "ar")) {
@@ -133,11 +146,24 @@ export async function PUT(req: NextRequest) {
     }
 
     // Validate required fields
-    if (!heroBadge || !largestSale || !useCode || !forDiscount || !promoCode) {
+    if (!heroBadge || !largestSale) {
       return NextResponse.json(
         {
           error:
-            "All fields are required: heroBadge, largestSale, useCode, forDiscount, promoCode",
+            "Required fields: heroBadge and largestSale. Promo section fields are required only when promo section is visible.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (
+      (showPromoSection === undefined || showPromoSection === true) &&
+      (!useCode || !forDiscount || !promoCode)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "When the promo section is visible, useCode, forDiscount, and promoCode are required.",
         },
         { status: 400 }
       );
@@ -149,9 +175,11 @@ export async function PUT(req: NextRequest) {
       {
         heroBadge: heroBadge.trim(),
         largestSale: largestSale.trim(),
-        useCode: useCode.trim(),
-        forDiscount: forDiscount.trim(),
-        promoCode: promoCode.trim().toUpperCase(),
+        useCode: useCode?.trim() ?? "",
+        forDiscount: forDiscount?.trim() ?? "",
+        promoCode: promoCode ? promoCode.trim().toUpperCase() : "",
+        showPromoSection:
+          typeof showPromoSection === "boolean" ? showPromoSection : true,
         locale,
         isActive: true,
       },
@@ -172,6 +200,7 @@ export async function PUT(req: NextRequest) {
           useCode: heroSection.useCode,
           forDiscount: heroSection.forDiscount,
           promoCode: heroSection.promoCode,
+          showPromoSection: heroSection.showPromoSection,
           locale: heroSection.locale,
         },
       },

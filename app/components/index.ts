@@ -30,9 +30,7 @@ export { default as TeamSection } from "./aboutComponents/TeamSection";
 export { default as ContactUsSection } from "./aboutComponents/ContactUsSection";
 
 //Contact Components //////////////////
-export { default as ContactHeroSection } from "./contactComponents/ContactHeroSection";
-export { default as ContactForm } from "./contactComponents/ContactForm";
-export { default as ContactInfo } from "./contactComponents/ContactInfo";
+// Contact page components removed from public API (contact page deleted)
 
 
 // Cart Components ///////////////////

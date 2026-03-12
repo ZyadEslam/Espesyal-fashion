@@ -863,6 +863,8 @@
       "promoCodePlaceholder": "مثال: BFRIDAY",
       "discountText": "نص الخصم",
       "discountTextPlaceholder": "مثال: خصم 25%",
+      "showPromoSectionLabel": "إظهار قسم كود الخصم في الصفحة الرئيسية",
+      "showPromoSectionDescription": "عند الإيقاف، سيتم إخفاء نص العرض وكود الخصم وزر النسخ بالكامل من قسم الهيرو.",
       "saveChanges": "حفظ التغييرات",
       "saving": "جاري الحفظ...",
       "allFieldsRequired": "جميع الحقول مطلوبة",

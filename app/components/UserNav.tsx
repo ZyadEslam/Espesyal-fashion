@@ -293,13 +293,6 @@ const UserNav = memo(() => {
                             {t("about")}
                           </Link>
                           <Link
-                            href={getLocalizedPath("/contact")}
-                            className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
-                            onClick={closeMenu}
-                          >
-                            {t("contact")}
-                          </Link>
-                          <Link
                             href={getLocalizedPath("/privacy-policy")}
                             className="block text-lg font-medium text-gray-700 hover:text-primary transition-colors duration-300 py-2"
                             onClick={closeMenu}
