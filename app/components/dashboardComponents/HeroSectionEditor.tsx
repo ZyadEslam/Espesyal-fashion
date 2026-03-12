@@ -42,28 +42,40 @@ const HeroSectionEditor = React.memo(() => {
   });
 
   // Fetch hero content
-  const fetchHeroContent = useCallback(async (locale: "en" | "ar", bypassCache = false) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchHeroContent = useCallback(
+    async (locale: "en" | "ar", bypassCache = false) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Add cache-busting timestamp parameter when bypassing cache (e.g., after saving)
-      // This ensures we get fresh data from the server by bypassing browser cache
-      const cacheBuster = bypassCache ? `&_t=${Date.now()}` : "";
-      const response = await fetch(`/api/hero-section?locale=${locale}${cacheBuster}`);
-      const result = await response.json();
+        // Add cache-busting timestamp parameter when bypassing cache (e.g., after saving)
+        // This ensures we get fresh data from the server by bypassing browser cache
+        const cacheBuster = bypassCache ? `&_t=${Date.now()}` : "";
+        const response = await fetch(
+          `/api/hero-section?locale=${locale}${cacheBuster}`
+        );
+        const result = await response.json();
 
-      if (result.success && result.data) {
-        setFormData(result.data);
-      } else {
-        throw new Error(result.error || t("loadError"));
+        if (result.success && result.data) {
+          const data = result.data as HeroContent;
+          setFormData({
+            ...data,
+            showPromoSection:
+              typeof data.showPromoSection === "boolean"
+                ? data.showPromoSection
+                : true,
+          });
+        } else {
+          throw new Error(result.error || t("loadError"));
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t("loadError"));
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("loadError"));
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
+    },
+    [t]
+  );
 
   useEffect(() => {
     fetchHeroContent(activeLocale);

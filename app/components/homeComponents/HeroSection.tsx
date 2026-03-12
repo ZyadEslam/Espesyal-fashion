@@ -215,8 +215,7 @@ const HeroSection = () => {
           success: boolean;
           data: HeroContent;
         }>(`/api/hero-section?locale=${locale}`, {
-          cache: "default",
-          revalidate: 300, // Cache for 5 minutes
+          cache: "no-store",
         });
 
         // Only update state if component is still mounted
