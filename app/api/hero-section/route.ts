@@ -43,20 +43,30 @@ export async function GET(req: NextRequest) {
     const heroSection = await HeroSection.findOne({ locale, isActive: true });
 
     if (heroSection) {
+      const doc = heroSection as {
+        heroBadge: string;
+        largestSale: string;
+        useCode?: string;
+        forDiscount?: string;
+        promoCode?: string;
+        showPromoSection?: boolean;
+        locale: string;
+      };
+
       return NextResponse.json(
         {
           success: true,
           data: {
-            heroBadge: heroSection.heroBadge,
-            largestSale: heroSection.largestSale,
-            useCode: heroSection.useCode,
-            forDiscount: heroSection.forDiscount,
-            promoCode: heroSection.promoCode,
+            heroBadge: doc.heroBadge,
+            largestSale: doc.largestSale,
+            useCode: doc.useCode ?? "",
+            forDiscount: doc.forDiscount ?? "",
+            promoCode: doc.promoCode ?? "",
             showPromoSection:
-              typeof (heroSection as any).showPromoSection === "boolean"
-                ? (heroSection as any).showPromoSection
+              typeof doc.showPromoSection === "boolean"
+                ? doc.showPromoSection
                 : true,
-            locale: heroSection.locale,
+            locale: doc.locale as "en" | "ar",
           },
         },
         {
