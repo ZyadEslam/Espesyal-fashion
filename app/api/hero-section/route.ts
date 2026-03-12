@@ -53,73 +53,43 @@ export async function GET(req: NextRequest) {
         locale: string;
       };
 
-      return NextResponse.json(
-        {
-          success: true,
-          data: {
-            heroBadge: doc.heroBadge,
-            largestSale: doc.largestSale,
-            useCode: doc.useCode ?? "",
-            forDiscount: doc.forDiscount ?? "",
-            promoCode: doc.promoCode ?? "",
-            showPromoSection:
-              typeof doc.showPromoSection === "boolean"
-                ? doc.showPromoSection
-                : true,
-            locale: doc.locale as "en" | "ar",
-          },
+      return NextResponse.json({
+        success: true,
+        data: {
+          heroBadge: doc.heroBadge,
+          largestSale: doc.largestSale,
+          useCode: doc.useCode ?? "",
+          forDiscount: doc.forDiscount ?? "",
+          promoCode: doc.promoCode ?? "",
+          showPromoSection:
+            typeof doc.showPromoSection === "boolean"
+              ? doc.showPromoSection
+              : true,
+          locale: doc.locale as "en" | "ar",
         },
-        {
-          status: 200,
-          headers: {
-            "Cache-Control":
-              "public, s-maxage=300, stale-while-revalidate=600, max-age=60",
-            Vary: "Accept-Encoding, Accept-Language",
-          },
-        }
-      );
+      });
     }
 
     // Return default values if not found in database
-    return NextResponse.json(
-      {
-        success: true,
-        data: {
-          ...defaultValues[locale],
-          locale,
-        },
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...defaultValues[locale],
+        locale,
       },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control":
-            "public, s-maxage=300, stale-while-revalidate=600, max-age=60",
-          Vary: "Accept-Encoding, Accept-Language",
-        },
-      }
-    );
+    });
   } catch {
     const { searchParams } = new URL(req.url);
     const locale = (searchParams.get("locale") || "en") as "en" | "ar";
 
     // Fallback to default values on error
-    return NextResponse.json(
-      {
-        success: true,
-        data: {
-          ...defaultValues[locale],
-          locale,
-        },
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...defaultValues[locale],
+        locale,
       },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control":
-            "public, s-maxage=300, stale-while-revalidate=600, max-age=60",
-          Vary: "Accept-Encoding, Accept-Language",
-        },
-      }
-    );
+    });
   }
 }
 
