@@ -45,9 +45,6 @@ const heroSectionSchema = new mongoose.Schema(
   }
 );
 
-// Ensure only one document per locale
-heroSectionSchema.index({ locale: 1 }, { unique: true });
-
 const HeroSection =
   mongoose.models.HeroSection ||
   mongoose.model("HeroSection", heroSectionSchema);

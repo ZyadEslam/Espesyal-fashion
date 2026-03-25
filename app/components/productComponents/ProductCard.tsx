@@ -1,7 +1,5 @@
 "use client";
 import React, {
-  lazy,
-  Suspense,
   useState,
   memo,
   useCallback,
@@ -12,9 +10,7 @@ import React, {
 import Link from "next/link";
 import { ProductCardProps } from "../../types/types";
 import { useTranslations } from "next-intl";
-// Import ProductImage directly for LCP candidates to avoid lazy loading delay
 import ProductImage from "./ProductImage";
-const ProductImageLazy = lazy(() => import("./ProductImage"));
 
 interface ProductCardComponentProps {
   product: ProductCardProps;
@@ -100,40 +96,16 @@ const ProductCard = memo(
               </div>
             )}
             {imageSrc && !imageError ? (
-              isLCP || isAboveFold ? (
-                // Render LCP and above-fold images directly without lazy loading
-                <ProductImage
-                  productName={product.name}
-                  imageSrc={imageSrc}
-                  handleImageError={handleImageError}
-                  fetchPriority={isLCP ? "high" : "auto"}
-                  loading="eager"
-                  context="product-card"
-                  width={320}
-                  height={320}
-                />
-              ) : (
-                <Suspense
-                  fallback={
-                    <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">
-                      <span className="text-gray-400 text-sm">
-                        {t("loading")}
-                      </span>
-                    </div>
-                  }
-                >
-                  <ProductImageLazy
-                    productName={product.name}
-                    imageSrc={imageSrc}
-                    handleImageError={handleImageError}
-                    fetchPriority="auto"
-                    loading="lazy"
-                    context="product-card"
-                    width={320}
-                    height={320}
-                  />
-                </Suspense>
-              )
+              <ProductImage
+                productName={product.name}
+                imageSrc={imageSrc}
+                handleImageError={handleImageError}
+                fetchPriority={isLCP ? "high" : "auto"}
+                loading={isLCP || isAboveFold ? "eager" : "lazy"}
+                context="product-card"
+                width={320}
+                height={320}
+              />
             ) : (
               <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                 <span className="text-gray-400 text-sm">No image</span>

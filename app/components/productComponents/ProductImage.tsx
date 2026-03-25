@@ -13,6 +13,36 @@ interface ProductImageProps {
   showPlaceholder?: boolean;
 }
 
+function buildOptimizedProductImageUrl(
+  src: string,
+  width: number,
+  height: number
+): string {
+  if (!src) return src;
+
+  // DB imageSrc values are already Cloudinary links.
+  // For maximum visual quality (restore previous behavior), do not modify Cloudinary URLs.
+  if (src.includes("res.cloudinary.com") && src.includes("/image/upload/")) {
+    return src;
+  }
+
+  // If it’s our Sharp-powered API route, add sizing params to avoid serving huge images.
+  if (src.startsWith("/api/product/image/")) {
+    try {
+      const url = new URL(src, "http://local");
+      const sp = url.searchParams;
+      if (!sp.has("w")) sp.set("w", String(width));
+      if (!sp.has("h")) sp.set("h", String(height));
+      if (!sp.has("q")) sp.set("q", "80");
+      return `${url.pathname}?${sp.toString()}`;
+    } catch {
+      return src;
+    }
+  }
+
+  return src;
+}
+
 const ProductImage = ({
   imageSrc,
   productName,
@@ -27,6 +57,7 @@ const ProductImage = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const sizes = getImageSizes(context);
+  const optimizedSrc = buildOptimizedProductImageUrl(imageSrc, width, height);
 
   const handleLoad = useCallback(() => {
     setIsLoaded(true);
@@ -51,7 +82,7 @@ const ProductImage = ({
       {/* Main image */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={imageSrc}
+        src={optimizedSrc}
         alt={productName || "Product Image"}
         width={width}
         height={height}

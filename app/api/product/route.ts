@@ -215,7 +215,6 @@ const GET = async () => {
           })
       );
       
-      // Derive imageCount from imgSrc array for admin views
       (productObj as { imageCount?: number }).imageCount = Array.isArray(
         productObj.imgSrc
       )

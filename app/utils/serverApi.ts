@@ -200,32 +200,29 @@ export async function getProductsByCategory(
   limit: number = 20
 ): Promise<ProductCardProps[]> {
   try {
-    await connectDB();
     const mongoose = await import("mongoose");
 
     // Check if categoryId is an ObjectId or slug
     const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(categoryId);
-    let category: CategoryDoc | null = null;
+    let categoryObjectId: import("mongoose").Types.ObjectId | null = null;
 
     if (isValidObjectId) {
-      category = (await Category.findById(
-        categoryId
-      ).lean()) as unknown as CategoryDoc | null;
+      // When we already have the Mongo ObjectId, avoid the extra Category lookup.
+      categoryObjectId = new mongoose.Types.ObjectId(categoryId);
     } else {
-      category = (await Category.findOne({
+      const category = (await Category.findOne({
         slug: categoryId,
         isActive: true,
       }).lean()) as unknown as CategoryDoc | null;
-    }
 
-    if (!category) {
-      return [];
+      if (!category) return [];
+      categoryObjectId = new mongoose.Types.ObjectId(category._id.toString());
     }
 
     const products = await Product.aggregate([
       {
         $match: {
-          category: new mongoose.Types.ObjectId(category._id.toString()),
+          category: categoryObjectId,
           hideFromHome: { $ne: true },
         },
       },

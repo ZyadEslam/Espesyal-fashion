@@ -1,6 +1,7 @@
 'use client';
 
 import Script from 'next/script';
+import Image from 'next/image';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -38,11 +39,12 @@ export default function MetaPixel() {
         onLoad={handleScriptLoad}
       />
       <noscript>
-        <img
+        <Image
           height={1}
           width={1}
           style={{ display: 'none' }}
           alt=""
+          unoptimized
           src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
         />
       </noscript>

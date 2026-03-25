@@ -26,9 +26,6 @@ const settingsSchema = new mongoose.Schema(
   }
 );
 
-// Ensure only one settings document exists
-settingsSchema.index({ _id: 1 }, { unique: true });
-
 const Settings =
   mongoose.models.Settings || mongoose.model("Settings", settingsSchema);
 

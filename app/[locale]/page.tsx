@@ -8,6 +8,7 @@ import {
   getActiveCategories,
   getProductsForCategories,
 } from "../utils/serverApi";
+import AdditionalCategorySections from "../components/homeComponents/AdditionalCategorySections";
 
 // Add ISR revalidation
 export const revalidate = 60; // Revalidate every 60 seconds
@@ -17,8 +18,18 @@ async function CategoriesContent() {
   // Fetch categories server-side
   const categories = await getActiveCategories();
 
-  // Fetch products for all categories in parallel
-  const productsMap = await getProductsForCategories(categories, 20);
+  // Shopify-like: render only the first few category sections on the server
+  // and lazy-load the rest on the client to reduce TTFB.
+  const INITIAL_SECTIONS = 3;
+  const INITIAL_PRODUCTS_LIMIT = 12;
+
+  const initialCategories = categories.slice(0, INITIAL_SECTIONS);
+  const remainingCategories = categories.slice(INITIAL_SECTIONS);
+
+  const productsMap = await getProductsForCategories(
+    initialCategories,
+    INITIAL_PRODUCTS_LIMIT
+  );
 
   if (categories.length === 0) {
     return <CategoriesLoadingSection />;
@@ -26,40 +37,25 @@ async function CategoriesContent() {
 
   return (
     <>
-      {categories.map((category) => {
+      {initialCategories.map((category, idx) => {
         const products = productsMap.get(category._id) || [];
         return (
-          <Suspense
+          <CategorySection
             key={category._id}
-            fallback={
-              <section className="section-spacing">
-                <div className="layout-shell">
-                  <div className="mb-8 text-left">
-                    <h2 className="text-2xl uppercase lg:text-3xl font-bold text-foreground mb-4">
-                      {category.name}
-                    </h2>
-                  </div>
-                  <div className="flex gap-6 overflow-hidden pb-4">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className="flex-shrink-0 w-64 h-80 bg-gray-200 animate-pulse rounded-2xl"
-                      />
-                    ))}
-                  </div>
-                </div>
-              </section>
-            }
-          >
-            <CategorySection
-              categoryName={category.name}
-              categorySlug={category.slug}
-              products={products}
-              isFirstCategory={categories.indexOf(category) === 0}
-            />
-          </Suspense>
+            categoryName={category.name}
+            categorySlug={category.slug}
+            products={products}
+            isFirstCategory={idx === 0}
+          />
         );
       })}
+
+      {remainingCategories.length > 0 && (
+        <AdditionalCategorySections
+          categories={remainingCategories}
+          productsLimit={20}
+        />
+      )}
     </>
   );
 }

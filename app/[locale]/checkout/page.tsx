@@ -90,6 +90,13 @@ const CheckoutPage = () => {
     }
   }, [searchParams, t, locale, router]);
 
+  // In production, keep Paymob option disabled
+  useEffect(() => {
+    if (paymentMethod === "paymob") {
+      setPaymentMethod("cash_on_delivery");
+    }
+  }, [paymentMethod]);
+
   useEffect(() => {
     // Get checkout data from sessionStorage
     if (typeof window !== "undefined") {
@@ -440,12 +447,8 @@ const CheckoutPage = () => {
 
                   {/* Paymob Card Payment */}
                   <div
-                    onClick={() => setPaymentMethod("paymob")}
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      paymentMethod === "paymob"
-                        ? "border-orange bg-orange/5"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className="relative p-4 border-2 rounded-lg transition-all border-gray-200 bg-gray-50 opacity-70 cursor-not-allowed"
+                    aria-disabled="true"
                   >
                     <div className="flex items-start gap-4">
                       <div
@@ -465,6 +468,9 @@ const CheckoutPage = () => {
                           <h3 className="font-semibold text-gray-900">
                             {t("cardPayment")}
                           </h3>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-orange/10 text-orange border border-orange/20">
+                            {t("comingSoon")}
+                          </span>
                         </div>
                         <p className="text-sm text-gray-600">
                           {t("cardPaymentDesc")}

@@ -27,19 +27,22 @@ const ShopLayout = memo(
     const t = useTranslations("shop");
     const router = useRouter();
     const pathname = usePathname();
+
+    const normalizedInitialCategory = initialCategory ?? null;
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
-      initialCategory || null
+      normalizedInitialCategory
     );
+
+    const [currentPage, setCurrentPage] = useState(1);
 
     // Update selectedCategory when initialCategory changes
     React.useEffect(() => {
-      if (initialCategory !== selectedCategory) {
-        setSelectedCategory(initialCategory || null);
+      if (normalizedInitialCategory !== selectedCategory) {
+        setSelectedCategory(normalizedInitialCategory);
         setCurrentPage(1);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [initialCategory]); // Removed selectedCategory from deps to prevent unnecessary re-runs
-    const [currentPage, setCurrentPage] = useState(1);
+    }, [normalizedInitialCategory]); // Treat `undefined` and `null` as the same category absence
 
     // Only fetch categories client-side if not provided server-side
     // This eliminates unnecessary API call and reduces TBT significantly
@@ -85,7 +88,7 @@ const ShopLayout = memo(
 
     // Check if we need to fetch (if category or page changed from initial state)
     const needsFetch =
-      currentPage !== 1 || selectedCategory !== initialCategory;
+      currentPage !== 1 || selectedCategory !== normalizedInitialCategory;
 
     // Use conditional fetching hook
     const {

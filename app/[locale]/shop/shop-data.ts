@@ -53,6 +53,8 @@ export async function fetchInitialProducts(
 
       const [productsRaw, totalProducts, brands] = await Promise.all([
         Product.aggregate([
+          // Keep the shop consistent with other endpoints (exclude hidden products)
+          { $match: { hideFromHome: { $ne: true } } },
           { $sort: sort },
           { $skip: skip },
           { $limit: limit },
@@ -71,13 +73,12 @@ export async function fetchInitialProducts(
           },
         ]),
         // Get total count for pagination
-        Product.countDocuments({}),
+        Product.countDocuments({ hideFromHome: { $ne: true } }),
         // Get unique brands
-        Product.distinct("brand"),
+        Product.distinct("brand", { hideFromHome: { $ne: true } }),
       ]);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const products: ProductCardProps[] = productsRaw.map((p: any) => ({
+      const products: ProductCardProps[] = productsRaw.map((p) => ({
         _id: p._id.toString(),
         name: p.name,
         description: p.description,
@@ -127,7 +128,12 @@ export async function fetchInitialProducts(
 
     const [productsRaw, totalProducts, brands] = await Promise.all([
       Product.aggregate([
-        { $match: { category: new mongoose.Types.ObjectId(category._id.toString()) } },
+        {
+          $match: {
+            category: new mongoose.Types.ObjectId(category._id.toString()),
+            hideFromHome: { $ne: true },
+          },
+        },
         { $sort: sort },
         { $skip: skip },
         { $limit: limit },
@@ -146,13 +152,18 @@ export async function fetchInitialProducts(
         },
       ]),
       // Get total count for pagination
-      Product.countDocuments({ category: category._id }),
+      Product.countDocuments({
+        category: category._id,
+        hideFromHome: { $ne: true },
+      }),
       // Get unique brands for this category
-      Product.distinct("brand", { category: category._id }),
+      Product.distinct("brand", {
+        category: category._id,
+        hideFromHome: { $ne: true },
+      }),
     ]);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const products: ProductCardProps[] = productsRaw.map((p: any) => ({
+    const products: ProductCardProps[] = productsRaw.map((p) => ({
       _id: p._id.toString(),
       name: p.name,
       description: p.description,

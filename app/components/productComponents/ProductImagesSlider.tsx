@@ -325,6 +325,19 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
   );
 
   const getOptimizedMainImageUrl = () => {
+    if (currentImage.src.startsWith("/api/product/image/")) {
+      try {
+        const url = new URL(currentImage.src, "http://local");
+        if (!url.searchParams.has("w"))
+          url.searchParams.set("w", String(mainImageDimensions.width));
+        if (!url.searchParams.has("h"))
+          url.searchParams.set("h", String(mainImageDimensions.height));
+        if (!url.searchParams.has("q")) url.searchParams.set("q", "80");
+        return `${url.pathname}?${url.searchParams.toString()}`;
+      } catch {
+        return currentImage.src;
+      }
+    }
     return currentImage.src;
   };
 
@@ -375,6 +388,17 @@ const ProductImagesSlider = ({ product }: { product: ProductCardProps }) => {
       <div className="flex flex-wrap gap-2 sm:gap-3 mt-2 sm:mt-3 md:mt-4 justify-center sm:justify-start">
         {validImagesWithIndices.map(({ src, originalIndex }, filteredIndex) => {
           const getOptimizedThumbnailUrl = () => {
+            if (src.startsWith("/api/product/image/")) {
+              try {
+                const url = new URL(src, "http://local");
+                url.searchParams.set("w", String(thumbnailDimensions.width));
+                url.searchParams.set("h", String(thumbnailDimensions.height));
+                if (!url.searchParams.has("q")) url.searchParams.set("q", "80");
+                return `${url.pathname}?${url.searchParams.toString()}`;
+              } catch {
+                return src;
+              }
+            }
             return src;
           };
 

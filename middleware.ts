@@ -116,7 +116,20 @@ export default async function middleware(request: NextRequest) {
   }
 
   // Apply internationalization middleware for non-API routes
-  return intlMiddleware(request);
+  try {
+    return intlMiddleware(request);
+  } catch (error) {
+    // Guard against malformed non-ASCII URLs that can trigger ByteString conversion errors.
+    if (
+      error instanceof TypeError &&
+      error.message.includes("Cannot convert argument to a ByteString")
+    ) {
+      const safeUrl = request.nextUrl.clone();
+      safeUrl.pathname = encodeURI(safeUrl.pathname);
+      return NextResponse.redirect(safeUrl);
+    }
+    throw error;
+  }
 }
 
 export const config = {

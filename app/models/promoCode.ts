@@ -63,7 +63,6 @@ const promoCodeSchema = new mongoose.Schema<IPromoCode, IPromoCodeModel>({
 });
 
 // Index for faster queries
-promoCodeSchema.index({ code: 1 });
 promoCodeSchema.index({ state: 1 });
 promoCodeSchema.index({ endDate: 1 });
 

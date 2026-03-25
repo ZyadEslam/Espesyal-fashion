@@ -98,7 +98,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     console.log("Category found:", category.name);
 
     // Fetch products for this category with limit, excluding hidden products, sorted by createdAt
-    // Use lean() for faster queries - returns plain objects instead of Mongoose documents
+    // In this project, product.imgSrc contains Cloudinary URLs, so we keep it.
     const products = await Product.find({
       category: category._id,
       hideFromHome: { $ne: true }, // Exclude products hidden from home
@@ -111,7 +111,6 @@ export async function GET(request: NextRequest, { params }: Params) {
       .lean()
       .exec();
 
-    // Type definition for product from lean query
     interface ProductDoc {
       _id: { toString: () => string };
       name: string;
@@ -123,25 +122,22 @@ export async function GET(request: NextRequest, { params }: Params) {
       brand: string;
       categoryName: string;
       imgSrc?: unknown[];
-      hideFromHome?: boolean;
-      createdAt?: Date | string;
       [key: string]: unknown;
     }
 
-    // Convert products to format compatible with ProductCardProps
     const formattedProducts = products.map((product) => {
-      const productTyped = product as unknown as ProductDoc;
+      const p = product as unknown as ProductDoc;
       return {
-        _id: productTyped._id.toString(),
-        name: productTyped.name,
-        description: productTyped.description,
-        price: productTyped.price,
-        oldPrice: productTyped.oldPrice,
-        discount: productTyped.discount,
-        rating: productTyped.rating,
-        brand: productTyped.brand,
-        categoryName: productTyped.categoryName,
-        imgSrc: (productTyped.imgSrc || []) as unknown as Array<unknown>,
+        _id: p._id.toString(),
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        oldPrice: p.oldPrice,
+        discount: p.discount,
+        rating: p.rating,
+        brand: p.brand,
+        categoryName: p.categoryName,
+        imgSrc: (p.imgSrc || []) as unknown as Array<unknown>,
       };
     });
 
