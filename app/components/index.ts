@@ -13,14 +13,14 @@ export { default as UserNav } from "./UserNav";
 export { default as DashboardSideNav } from "./dashboardComponents/DashboardSideNav";
 
 // Home Components ///////////////
-export { default as FeaturedProductCard } from "./homeComponents/FeaturedProductCard";
+// export { default as FeaturedProductCard } from "./homeComponents/FeaturedProductCard";
 export { default as SubscriptionOffer } from "./homeComponents/SubscriptionOffer";
-export { default as NewCollectionsSection } from "./homeComponents/NewCollectionsSection";
-export const FeaturedProductsList = lazy(() =>
-  import("./homeComponents/FeaturedProductsList")
-);
+// export { default as NewCollectionsSection } from "./homeComponents/NewCollectionsSection";
+// export const FeaturedProductsList = lazy(() =>
+//   import("./homeComponents/FeaturedProductsList")
+// );
 export const AdvSlider = lazy(() => import("./homeComponents/HeroSection"));
-export const AdvBar = lazy(() => import("./homeComponents/AdvBar"));
+// export const AdvBar = lazy(() => import("./homeComponents/AdvBar"));
 
 // About Components //////////////
 export { default as HeroSection } from "./aboutComponents/HeroSection";

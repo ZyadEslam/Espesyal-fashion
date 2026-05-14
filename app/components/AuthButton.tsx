@@ -1,10 +1,10 @@
 "use client";
-import { assets } from "@/public/assets/assets";
-import Image from "next/image";
+// import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 import { useCart } from "../hooks/useCart";
+import { User } from "lucide-react";
 
 export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
   const { data: session } = useSession();
@@ -66,7 +66,8 @@ export default function AuthButtons(screen: { screen: "mobile" | "desktop" }) {
   return (
     <>
       <div className="flex items-center gap-2 cursor-pointer sm:order-2 md:order-auto">
-        <Image src={assets.user_icon} alt="User" />
+        {/* <Image src={assets.user_icon} alt="User" /> */}
+        <User/>
         <p onClick={handleSignIn}>{t("myAccount")}</p>
       </div>
     </>

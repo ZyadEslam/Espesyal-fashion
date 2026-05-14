@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback, memo, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { assets } from "@/public/assets/assets";
 import { AuthButtons, ToggleMenuBtn } from "./";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
@@ -155,7 +154,7 @@ const UserNav = memo(() => {
                 >
                   <div className="relative">
                     <Image
-                      src={assets.espesialLogo}
+                      src={"https://res.cloudinary.com/dsycxjfs9/image/upload/v1771861119/%D9%85%D8%AA%D9%81%D8%B1%D8%BA_2_%D8%AA%D8%B9%D8%AF%D9%8A%D9%84_um9efi.png"}
                       alt="Espesyal Shop Logo"
                       width={120}
                       height={45}

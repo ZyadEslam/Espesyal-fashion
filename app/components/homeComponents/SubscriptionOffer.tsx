@@ -364,7 +364,7 @@ const SubscriptionOffer = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-secondary-500/20 rounded-full blur-3xl scale-110"></div>
 
               <Image
-                src="/espesyal/متفرغ 1 تعديل.png"
+                src="https://res.cloudinary.com/dsycxjfs9/image/upload/v1771861119/%D9%85%D8%AA%D9%81%D8%B1%D8%BA_1_%D8%AA%D8%B9%D8%AF%D9%8A%D9%84_vhvx57.png"
                 alt="Subscription Offer"
                 width={500}
                 height={500}

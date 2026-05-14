@@ -28,7 +28,7 @@ async function CategoriesContent() {
 
   const productsMap = await getProductsForCategories(
     initialCategories,
-    INITIAL_PRODUCTS_LIMIT
+    INITIAL_PRODUCTS_LIMIT,
   );
 
   if (categories.length === 0) {
