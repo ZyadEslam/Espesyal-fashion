@@ -35,6 +35,14 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
 CATEGORY_SYSTEM_README.md
 FINDING_KV_CREDENTIALS.md
 LOCALIZATION_PATHS.md
@@ -43,10 +51,3 @@ PAYMOB_SETUP.md
 SECURITY_IMPLEMENTATION.md
 SETUP_COMPLETE.md
 VERCEL_KV_SETUP.md
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
